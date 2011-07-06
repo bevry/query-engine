@@ -30,7 +30,7 @@ Query-Engine supports the exact same queries as [MongoDb](http://www.mongodb.org
 
 	1. [Download this file to your web-server](https://raw.github.com/balupton/query-engine.npm/master/test/query-engine.coffee)
 
-	2. Create a script element pointing to where you put that file on your webserver
+	2. Create a script element pointing that file on your webserver
 
 
 ## Using
