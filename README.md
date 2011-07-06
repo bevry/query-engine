@@ -52,7 +52,7 @@ Query-Engine supports the exact same queries as [MongoDb](http://www.mongodb.org
 
 - With JavaScript
 	
-	Do yourself a favour and learn CoffeeScript.
+	> Do yourself a favour and learn CoffeeScript.
 
 
 ## History
