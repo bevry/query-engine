@@ -1,16 +1,18 @@
 # http://www.mongodb.org/display/DOCS/Advanced+Queries
 
-# Array
+# Has In
 Array::hasIn = (options) ->
 	for value in @
 		if value in options
 			return true
 	return false
+
+# Has All
 Array::hasAll = (options) ->
 	@.sort().join() is options.sort().join()
 
-# Create
-Object::find = (query) ->
+# Find
+Object::find = (query={},next) ->
 	# Matches
 	matches = {}
 
@@ -18,9 +20,11 @@ Object::find = (query) ->
 	for own id,record of @
 		# Match
 		match = false
+		empty = true
 
 		# Selectors
 		for own field, selector of query
+			empty = false
 			selectorType = typeof selector
 			exists = record[field]?
 			value = if exists then record[field] else false
@@ -116,8 +120,76 @@ Object::find = (query) ->
 						match = true
 
 		# Append
-		if match
+		if match or empty
 			matches[id] = record
 	
-	# Return matches
-	matches
+	# Async
+	if next?
+		next false, matches
+	# Sync
+	else
+		matches
+
+# For Each
+Object::forEach ?= (callback) ->
+	# Prepare
+	for own id,record of @
+		callback record, id
+
+# To Array
+Object::toArray = (next) ->
+	# Prepare
+	arr = []
+
+	# Cycle
+	for own key,value of @
+		arr.push value
+
+	# Async
+	if next?
+		next false, arr
+	# Sync
+	else
+		arr
+
+# Sort
+Object::sort = (comparison,next) ->
+	# Prepare
+	arr = @toArray()
+	arr.sort(comparison)
+
+	# Async
+	if next?
+		next false, arr
+	# Sync
+	else
+		arr
+
+# Find One
+Object::findOne = (query={},next) ->
+	# Cycle
+	matches = @find(query).toArray()
+	match = if matches.length >= 1 then matches[0] else undefined
+
+	# Async
+	if next?
+		next false, match
+	# Sync
+	else
+		match
+
+# Remove
+Object::remove = (query={},next) ->
+	# Prepare
+	matches = @find(query)
+
+	# Delete
+	for own id,record of @
+		delete @[id]
+	
+	# Async
+	if next?
+		next false, @
+	# Sync
+	else
+		@

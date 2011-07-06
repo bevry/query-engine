@@ -63,6 +63,9 @@ Query-Engine supports the exact same queries as [MongoDb](http://www.mongodb.org
 
 ## History
 
+- v0.2 July 6, 2011
+	- Added toArray, sort, findOne, remove, forEach
+
 - v0.1 July 6, 2011
 	- Initial commit
 

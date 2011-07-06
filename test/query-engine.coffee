@@ -93,5 +93,27 @@ tests =
 		expected = 'index': data.documents.index, 'jquery': data.documents.jquery
 		assert.deepEqual actual, expected
 
+	'all': ->
+		actual = data.documents.find({})
+		expected = data.documents
+		assert.deepEqual actual, expected
+
+	'sort': ->
+		actual = data.documents.find({}).sort (a,b) ->
+			return b.position - a.position
+		expected = [data.documents.history,data.documents.jquery,data.documents.index]
+		assert.deepEqual actual, expected
+
+	'findOne': ->
+		actual = data.documents.findOne()
+		expected = data.documents.index
+		assert.deepEqual actual, expected
+
+	'remove': ->
+		actual = data.documents.remove()
+		expected = {}
+		assert.deepEqual actual, expected
+		assert.deepEqual data.documents, expected
+
 # Export
 module.exports = tests
