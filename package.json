@@ -1,0 +1,56 @@
+{
+	"name": "query-engine",
+	"version": "0.1.0",
+	"description": "A NoSQL Query Engine coded in CoffeeScript for ServerSide Node.js and ClientSide Browser Usage",
+	"homepage": "https://github.com/balupton/query-engine.npm",
+	"keywords": [
+		"javascript",
+		"builder",
+		"package",
+		"compile",
+		"compress",
+		"minify",
+		"bundle",
+		"merge",
+		"lint"
+	],
+	"author": {
+		"name": "Benjamin Lupton",
+		"email": "b@lupton.cc",
+		"web": "http://balupton.com"
+	},
+	"maintainers": [
+		{
+			"name": "Benjamin Lupton",
+			"email": "b@lupton.cc",
+			"web": "http://balupton.com"
+		}
+	],
+	"contributors": [
+		{
+			"name": "Benjamin Lupton",
+			"email": "b@lupton.cc",
+			"web": "http://balupton.com"
+		}
+	],
+	"bugs": {
+		"web": "https://github.com/balupton/query-engine.npm/issues"
+	},
+	"licenses": [
+		{
+			"type": "MIT",
+			"url": "http://creativecommons.org/licenses/MIT/"
+		}
+	],
+	"repository" : {
+		"type" : "git",
+		"url" : "http://github.com/balupton/query-engine.npm.git"
+	},
+	"engines" : {
+		"node": ">=0.4.0"
+	},
+	"directories": {
+		"lib": "lib"
+	},
+	"main": "./lib/query-engine.coffee"
+}
