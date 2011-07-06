@@ -52,30 +52,8 @@ Query-Engine supports the exact same queries as [MongoDb](http://www.mongodb.org
 
 - With JavaScript
 	
-	``` javascript
-	// Dataset
-	var documents;
-	documents = {
-	  0: {
-	    tags: ['a', 'b']
-	  },
-	  1: {
-	    tags: ['a', 'b', 'c']
-	  }
-	};
+	Do yourself a favour and learn CoffeeScript.
 
-	// Query
-	documents.find({
-	  tags: {
-	    $in: ['a']
-	  }
-	}); // {0: documents.0, 1: documents.1}
-	documents.find({
-	  tags: {
-	    $in: ['c']
-	  }
-	}); // {1: documents.1}
-	```
 
 ## History
 
