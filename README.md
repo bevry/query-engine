@@ -5,9 +5,9 @@ A NoSQL (and MongoDB compliant) Query Engine coded in CoffeeScript for Server-Si
 
 ## Supported Queries
 
-Query-Engine supports the exact same queries as [MongoDb](http://www.mongodb.org/). [Find the full listing here](http://www.mongodb.org/display/DOCS/Advanced+Queries)
+Query-Engine supports the exact same queries as [MongoDb](http://www.mongodb.org/). [Find the full listing of supported queries here.](http://www.mongodb.org/display/DOCS/Advanced+Queries)
 
-[You can find the test suite which showcases how to use the supported queries here](https://raw.github.com/balupton/query-engine.npm/master/test/query-engine.coffee)
+[You can find the test suite which showcases how to use the supported queries here.](https://raw.github.com/balupton/query-engine.npm/master/test/query-engine.coffee)
 
 
 ## Installation
