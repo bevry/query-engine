@@ -47,13 +47,15 @@ Query-Engine supports the exact same queries as [MongoDb](http://www.mongodb.org
 	# Dataset
 	documents =
 		0:
+			title: 'abc'
 			tags: ['a','b']
 		1:
+			title: 'blah'
 			tags: ['a','b','c']
 
 	# Query
 	documents.find tags: $in: ['a'] # {0: documents.0, 1: documents.1}
-	documents.find tags: $in: ['npc'] # {1: documents.1}
+	documents.find title: 'blah' # {1: documents.1}
 	```
 
 - With JavaScript
