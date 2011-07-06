@@ -16,11 +16,11 @@ Query-Engine supports the exact same queries as [MongoDb](http://www.mongodb.org
 
 	1. [Install Node.js](https://github.com/balupton/node/wiki/Installing-Node.js)
 
-	2. Install It
+	2. Install
 
 			npm install query-engine
 	
-	3. Require It
+	3. Require
 
 		``` coffeescript
 		require 'query-engine'
@@ -30,7 +30,7 @@ Query-Engine supports the exact same queries as [MongoDb](http://www.mongodb.org
 
 	1. [Download this file to your web-server](https://raw.github.com/balupton/query-engine.npm/master/test/query-engine.coffee)
 
-	2. Create a script element pointing to that file's location on your webserver
+	2. Create a script element pointing to where you put that file on your webserver
 
 
 ## Using
