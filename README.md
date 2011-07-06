@@ -28,9 +28,15 @@ Query-Engine supports the exact same queries as [MongoDb](http://www.mongodb.org
 
 - Client-Side with Web Browsers
 
-	1. [Download this file to your web-server](https://raw.github.com/balupton/query-engine.npm/master/lib/query-engine.coffee)
+	1. [Copy the contents of this file into your clipboard](https://raw.github.com/balupton/query-engine.npm/master/lib/query-engine.coffee)
 
-	2. Create a script element pointing that file on your webserver
+	2. [Paste the contents of the file into the "Try Coffeescript" area here](http://jashkenas.github.com/coffee-script/)
+
+	3. Copy the result into your clipboard
+
+	4. Save the result as a javascript file on your webserver
+
+	5. Create a script tag pointing to the file on your webserver
 
 
 ## Using
