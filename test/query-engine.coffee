@@ -48,6 +48,12 @@ tests =
 		expected = 'jquery': data.documents.jquery, 'history': data.documents.history
 		assert.deepEqual actual, expected
 	
+	'async': ->
+		data.documents.find id: /^[hj]/, (err, actual, length) ->
+			expected = 'jquery': data.documents.jquery, 'history': data.documents.history
+			assert.deepEqual actual, expected
+			assert.equal length, 2
+	
 	'$ne': ->
 		actual = data.documents.find id: $ne: 'index'
 		expected = 'jquery': data.documents.jquery, 'history': data.documents.history

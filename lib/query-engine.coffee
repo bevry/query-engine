@@ -15,6 +15,7 @@ Array::hasAll = (options) ->
 Object::find = (query={},next) ->
 	# Matches
 	matches = {}
+	length = 0
 
 	# Start with entire set
 	for own id,record of @
@@ -121,14 +122,28 @@ Object::find = (query={},next) ->
 
 		# Append
 		if match or empty
+			++length
 			matches[id] = record
 	
 	# Async
 	if next?
-		next false, matches
+		next false, matches, length
 	# Sync
 	else
 		matches
+
+# Find One
+Object::findOne = (query={},next) ->
+	# Cycle
+	matches = @find(query).toArray()
+	match = if matches.length >= 1 then matches[0] else undefined
+
+	# Async
+	if next?
+		next false, match
+	# Sync
+	else
+		match
 
 # For Each
 Object::forEach ?= (callback) ->
@@ -173,19 +188,6 @@ Object::sort = (comparison,next) ->
 	# Sync
 	else
 		arr
-
-# Find One
-Object::findOne = (query={},next) ->
-	# Cycle
-	matches = @find(query).toArray()
-	match = if matches.length >= 1 then matches[0] else undefined
-
-	# Async
-	if next?
-		next false, match
-	# Sync
-	else
-		match
 
 # Remove
 Object::remove = (query={},next) ->
