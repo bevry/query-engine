@@ -156,7 +156,16 @@ Object::toArray = (next) ->
 Object::sort = (comparison,next) ->
 	# Prepare
 	arr = @toArray()
-	arr.sort(comparison)
+	if comparison instanceof Function
+		arr.sort(comparison)
+	else
+		for own key,value of comparison
+			if value is -1
+				arr.sort (a,b) ->
+					b[key] - a[key]
+			else if value is 1
+				arr.sort (a,b) ->
+					a[key] - b[key]
 
 	# Async
 	if next?

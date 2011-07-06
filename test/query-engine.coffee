@@ -98,9 +98,14 @@ tests =
 		expected = data.documents
 		assert.deepEqual actual, expected
 
-	'sort': ->
+	'sort-function': ->
 		actual = data.documents.find({}).sort (a,b) ->
 			return b.position - a.position
+		expected = [data.documents.history,data.documents.jquery,data.documents.index]
+		assert.deepEqual actual, expected
+
+	'sort-object': ->
+		actual = data.documents.find({}).sort position: -1
 		expected = [data.documents.history,data.documents.jquery,data.documents.index]
 		assert.deepEqual actual, expected
 

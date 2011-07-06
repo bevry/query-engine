@@ -53,7 +53,7 @@ Query-Engine supports the exact same queries as [MongoDb](http://www.mongodb.org
 
 	# Query
 	documents.find tags: $in: ['a'] # {0: documents.0, 1: documents.1}
-	documents.find tags: $in: ['c'] # {1: documents.1}
+	documents.find tags: $in: ['npc'] # {1: documents.1}
 	```
 
 - With JavaScript
