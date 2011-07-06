@@ -1,6 +1,6 @@
 # Query-Engine
 
-A NoSQL Query Engine coded in CoffeeScript for Server-Side with Node.js and Client-Side with Browsers
+A NoSQL (and MongoDB compliant) Query Engine coded in CoffeeScript for Server-Side use with Node.js and Client-Side use with Web-Browsers
 
 
 ## Supported Queries
@@ -9,7 +9,8 @@ Query-Engine supports the exact same queries as [MongoDb](http://www.mongodb.org
 
 [You can find the test suite which showcases how to use the supported queries here](http://google.com)
 
-## Using
+
+## Installation
 
 - Server-Side with Node.js
 
@@ -27,7 +28,25 @@ Query-Engine supports the exact same queries as [MongoDb](http://www.mongodb.org
 
 - Client-Side with Web Browsers
 
-	1. Instructions coming
+	1. [Download this file to your web-server](https://raw.github.com/balupton/query-engine.npm/master/test/query-engine.coffee)
+
+	2. Create a script element pointing to that file's location on your webserver
+
+
+## Using
+
+``` coffeescript
+# Dataset
+documents =
+	0:
+		tags: ['a','b']
+	1:
+		tags: ['a','b','c']
+
+# Query
+documents.find tags: $in: ['a'] # {0: documents.0, 1: documents.1}
+documents.find tags: $in: ['c'] # {1: documents.1}
+```
 
 
 ## History
