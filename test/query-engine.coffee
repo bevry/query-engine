@@ -1,13 +1,50 @@
-# -------------------------------------
-# Header
-
 # Requires
 assert = require 'assert'
 queryEngine = require __dirname+'/../lib/query-engine.coffee'
+get = queryEngine.get
+set = queryEngine.set
 
-# Prepare
-data =
-	documents:
+
+# -------------------------------------
+# Helpers
+
+Object::getData = ->
+	data = {}
+	for own key, value of @
+		if value.data?
+			data[key] = value.data
+		else
+			data[key] = value
+	data
+
+
+# -------------------------------------
+# Data
+
+# Models
+model = class
+	data:
+		id: null
+		title: null
+		content: null
+		tags: []
+		position: 1
+
+	constructor: (data={}) ->
+		for own key, value of @data
+			if typeof data[key] is 'undefined'
+				data[key] = value
+		@data = data
+	
+	set: (key,value) ->
+		@data[key] = value
+	
+	get: (key) ->
+		@data[key]
+
+# Store
+store =
+	associatedStandard:
 		'index':
 			id: 'index'
 			title: 'Index Page'
@@ -27,104 +64,139 @@ data =
 			tags: ['jquery','html5','history']
 			position: 3
 
+	associatedModels:
+		'index': new model
+			id: 'index'
+			title: 'Index Page'
+			content: 'this is the index page'
+			tags: []
+			position: 1
+		'jquery': new model
+			id: 'jquery'
+			title: 'jQuery'
+			content: 'this is about jQuery'
+			tags: ['jquery']
+			position: 2
+		'history': new model
+			id: 'history.js'
+			title: 'History.js'
+			content: 'this is about History.js'
+			tags: ['jquery','html5','history']
+			position: 3
+
+
 # -------------------------------------
 # Tests
 
-# Tests
-tests =
+# Test Suite
+testSuite = {}
 
-	'string': ->
-		actual = data.documents.find id: 'index'
-		expected = 'index': data.documents.index
-		assert.deepEqual actual, expected
+# Generate Test Suite
+generateTestSuite = (name,docs) ->
+	tests =
+		'string': ->
+			actual = docs.find id: 'index'
+			expected = 'index': docs.index
+			assert.deepEqual actual.getData(), expected.getData()
+		
+		'number': ->
+			actual = docs.find position: 3
+			expected = 'history': docs.history
+			assert.deepEqual actual.getData(), expected.getData()
+		
+		'regex': ->
+			actual = docs.find id: /^[hj]/
+			expected = 'jquery': docs.jquery, 'history': docs.history
+			assert.deepEqual actual.getData(), expected.getData()
+		
+		'async': ->
+			docs.find id: /^[hj]/, (err, actual, length) ->
+				expected = 'jquery': docs.jquery, 'history': docs.history
+				assert.deepEqual actual.getData(), expected.getData()
+				assert.equal length, 2
+		
+		'$ne': ->
+			actual = docs.find id: $ne: 'index'
+			expected = 'jquery': docs.jquery, 'history': docs.history
+			assert.deepEqual actual.getData(), expected.getData()
+		
+		'$all': ->
+			actual = docs.find tags: $all: ['jquery']
+			expected = 'jquery': docs.jquery
+			assert.deepEqual actual.getData(), expected.getData()
+		
+		'$in': ->
+			actual = docs.find tags: $in: ['jquery']
+			expected = 'jquery': docs.jquery, 'history': docs.history
+			assert.deepEqual actual.getData(), expected.getData()
+
+		'$nin': ->
+			actual = docs.find tags: $nin: ['history']
+			expected = 'index': docs.index, 'jquery': docs.jquery
+			assert.deepEqual actual.getData(), expected.getData()
+
+		'$size': ->
+			actual = docs.find tags: $size: 3
+			expected = 'history': docs.history
+			assert.deepEqual actual.getData(), expected.getData()
+
+		'$gt': ->
+			actual = docs.find position: $gt: 2
+			expected = 'history': docs.history
+			assert.deepEqual actual.getData(), expected.getData()
+
+		'$gte': ->
+			actual = docs.find position: $gte: 2
+			expected = 'jquery': docs.jquery, 'history': docs.history
+			assert.deepEqual actual.getData(), expected.getData()
+
+		'$lt': ->
+			actual = docs.find position: $lt: 2
+			expected = 'index': docs.index
+			assert.deepEqual actual.getData(), expected.getData()
+
+		'$lte': ->
+			actual = docs.find position: $lte: 2
+			expected = 'index': docs.index, 'jquery': docs.jquery
+			assert.deepEqual actual.getData(), expected.getData()
+
+		'all': ->
+			actual = docs.find({})
+			expected = docs
+			assert.deepEqual actual.getData(), expected.getData()
+
+		'sort-function': ->
+			actual = docs.find({}).sort (a,b) ->
+				return get(b,'position') - get(a,'position')
+			expected = [docs.history,docs.jquery,docs.index]
+			assert.deepEqual actual.getData(), expected.getData()
+
+		'sort-object': ->
+			actual = docs.find({}).sort position: -1
+			expected = [docs.history,docs.jquery,docs.index]
+			assert.deepEqual actual.getData(), expected.getData()
+
+		'findOne': ->
+			actual = docs.findOne()
+			expected = docs.index
+			assert.deepEqual actual.getData(), expected.getData()
+
+		'remove': ->
+			actual = docs.remove()
+			expected = {}
+			assert.deepEqual actual.getData(), expected.getData()
+			assert.deepEqual docs, expected
 	
-	'number': ->
-		actual = data.documents.find position: 3
-		expected = 'history': data.documents.history
-		assert.deepEqual actual, expected
-	
-	'regex': ->
-		actual = data.documents.find id: /^[hj]/
-		expected = 'jquery': data.documents.jquery, 'history': data.documents.history
-		assert.deepEqual actual, expected
-	
-	'async': ->
-		data.documents.find id: /^[hj]/, (err, actual, length) ->
-			expected = 'jquery': data.documents.jquery, 'history': data.documents.history
-			assert.deepEqual actual, expected
-			assert.equal length, 2
-	
-	'$ne': ->
-		actual = data.documents.find id: $ne: 'index'
-		expected = 'jquery': data.documents.jquery, 'history': data.documents.history
-		assert.deepEqual actual, expected
-	
-	'$all': ->
-		actual = data.documents.find tags: $all: ['jquery']
-		expected = 'jquery': data.documents.jquery
-		assert.deepEqual actual, expected
-	
-	'$in': ->
-		actual = data.documents.find tags: $in: ['jquery']
-		expected = 'jquery': data.documents.jquery, 'history': data.documents.history
-		assert.deepEqual actual, expected
+	for own key, value of tests
+		testSuite[name+'_'+key] = value
 
-	'$nin': ->
-		actual = data.documents.find tags: $nin: ['history']
-		expected = 'index': data.documents.index, 'jquery': data.documents.jquery
-		assert.deepEqual actual, expected
+# Generate Suites
+for own key, value of store
+	generateTestSuite key, value
 
-	'$size': ->
-		actual = data.documents.find tags: $size: 3
-		expected = 'history': data.documents.history
-		assert.deepEqual actual, expected
 
-	'$gt': ->
-		actual = data.documents.find position: $gt: 2
-		expected = 'history': data.documents.history
-		assert.deepEqual actual, expected
-
-	'$gte': ->
-		actual = data.documents.find position: $gte: 2
-		expected = 'jquery': data.documents.jquery, 'history': data.documents.history
-		assert.deepEqual actual, expected
-
-	'$lt': ->
-		actual = data.documents.find position: $lt: 2
-		expected = 'index': data.documents.index
-		assert.deepEqual actual, expected
-
-	'$lte': ->
-		actual = data.documents.find position: $lte: 2
-		expected = 'index': data.documents.index, 'jquery': data.documents.jquery
-		assert.deepEqual actual, expected
-
-	'all': ->
-		actual = data.documents.find({})
-		expected = data.documents
-		assert.deepEqual actual, expected
-
-	'sort-function': ->
-		actual = data.documents.find({}).sort (a,b) ->
-			return b.position - a.position
-		expected = [data.documents.history,data.documents.jquery,data.documents.index]
-		assert.deepEqual actual, expected
-
-	'sort-object': ->
-		actual = data.documents.find({}).sort position: -1
-		expected = [data.documents.history,data.documents.jquery,data.documents.index]
-		assert.deepEqual actual, expected
-
-	'findOne': ->
-		actual = data.documents.findOne()
-		expected = data.documents.index
-		assert.deepEqual actual, expected
-
-	'remove': ->
-		actual = data.documents.remove()
-		expected = {}
-		assert.deepEqual actual, expected
-		assert.deepEqual data.documents, expected
+# -------------------------------------
+# Export
 
 # Export
-module.exports = tests
+module.exports = testSuite

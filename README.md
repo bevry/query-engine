@@ -23,7 +23,7 @@ Query-Engine supports the exact same queries as [MongoDb](http://www.mongodb.org
 	3. Require
 
 		``` coffeescript
-		require 'query-engine'
+		queryEngine = require 'query-engine'
 		```
 
 - Client-Side with Web Browsers
@@ -37,6 +37,8 @@ Query-Engine supports the exact same queries as [MongoDb](http://www.mongodb.org
 	4. Save the result as a javascript file on your webserver
 
 	5. Create a script tag pointing to the file on your webserver
+
+	6. Make note of `window.queryEngine`
 
 
 ## Using
@@ -64,6 +66,10 @@ Query-Engine supports the exact same queries as [MongoDb](http://www.mongodb.org
 
 
 ## History
+
+- v0.3 August 11, 2011
+	- Now supports models as well as native javascript objects
+		- This was done by checking if the record has a `get` function, if it does then we use that instead of directly accessing the field from the object
 
 - v0.2 July 6, 2011
 	- Added toArray, sort, findOne, remove, forEach

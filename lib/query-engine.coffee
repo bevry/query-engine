@@ -1,5 +1,27 @@
 # http://www.mongodb.org/display/DOCS/Advanced+Queries
 
+
+# -------------------------------------
+# Helpers
+
+# Get the value of the object
+get = (obj,key) ->
+	if obj.get?
+		obj.get key
+	else
+		obj[key]
+
+# Set the value of the object
+set = (obj,key,value) ->
+	if obj.set?
+		obj.set key, value
+	else
+		obj[key] = value
+
+
+# -------------------------------------
+# Array Prototypes
+
 # Has In
 Array::hasIn = (options) ->
 	for value in @
@@ -10,6 +32,10 @@ Array::hasIn = (options) ->
 # Has All
 Array::hasAll = (options) ->
 	@.sort().join() is options.sort().join()
+
+
+# -------------------------------------
+# Object Prototypes
 
 # Find
 Object::find = (query={},next) ->
@@ -27,8 +53,9 @@ Object::find = (query={},next) ->
 		for own field, selector of query
 			empty = false
 			selectorType = typeof selector
-			exists = record[field]?
-			value = if exists then record[field] else false
+			value = get(record,field)
+			exists = typeof value isnt 'undefined'
+			value = false  unless exists
 
 			# Standard
 			if selectorType in ['string','number'] or selectorType instanceof String
@@ -177,10 +204,10 @@ Object::sort = (comparison,next) ->
 		for own key,value of comparison
 			if value is -1
 				arr.sort (a,b) ->
-					b[key] - a[key]
+					get(b,key) - get(a,key)
 			else if value is 1
 				arr.sort (a,b) ->
-					a[key] - b[key]
+					get(a,key) - get(b,key)
 
 	# Async
 	if next?
@@ -204,3 +231,13 @@ Object::remove = (query={},next) ->
 	# Sync
 	else
 		@
+
+
+# -------------------------------------
+# Exports
+
+# Exports
+if module? and module.exports?
+	module.exports = {set,get}
+else if window?
+	window.queryEngine = {set,get}
