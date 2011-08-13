@@ -9,10 +9,13 @@ Query-Engine supports the exact same queries as [MongoDb](http://www.mongodb.org
 
 [You can find the test suite which showcases how to use the supported queries here.](https://raw.github.com/balupton/query-engine.npm/master/test/query-engine.coffee)
 
+[You can try it out in real-time on the client side with a web browser here.](https://balupton.github.com/query-engine.npm/demo/)
+
+
 
 ## Installation
 
-- Server-Side with Node.js
+- Server-Side with Node.js and CoffeeScript
 
 	1. [Install Node.js](https://github.com/balupton/node/wiki/Installing-Node.js)
 
@@ -28,26 +31,24 @@ Query-Engine supports the exact same queries as [MongoDb](http://www.mongodb.org
 
 - Client-Side with Web Browsers
 
-	1. [Copy the contents of this file into your clipboard](https://raw.github.com/balupton/query-engine.npm/master/lib/query-engine.coffee)
+	1. [Download Query-Engine](https://github.com/balupton/query-engine.npm/zipball/master) and upload it to your webserver
 
-	2. [Paste the contents of the file into the "Try Coffeescript" area here](http://jashkenas.github.com/coffee-script/)
+	2. Include `lib/query-engine.js` inside your page
 
-	3. Copy the result into your clipboard
-
-	4. Save the result as a javascript file on your webserver
-
-	5. Create a script tag pointing to the file on your webserver
-
-	6. Make note of `window.queryEngine`
+		``` html
+		<script src="path/to/query-engine/lib/query-engine.js"></script>
+		```
+	
+	3. Utilise the `window.queryEngine` namespace
 
 
 ## Using
 
-- With CoffeeScript
+- Server-Side with Node.js and CoffeeScript
 
 	``` coffeescript
-	# Dataset
-	documents =
+	# Collection
+	documents = new queryEngine.Collection
 		0:
 			title: 'abc'
 			tags: ['a','b']
@@ -60,12 +61,45 @@ Query-Engine supports the exact same queries as [MongoDb](http://www.mongodb.org
 	documents.find title: 'blah' # {1: documents.1}
 	```
 
-- With JavaScript
+- Client-Side with Web Browsers and JavaScript
 	
-	> Do yourself a favour and learn CoffeeScript.
+	``` javascript
+	//Collection
+	var documents = new window.queryEngine.Collection({
+		0: {
+			title: 'abc',
+			tags: ['a', 'b']
+		},
+		1: {
+			title: 'blah',
+			tags: ['a', 'b', 'c']
+		}
+	});
+
+	// Query
+	documents.find({
+		tags: {
+			$in: ['a']
+		}
+	}); // {0: documents.0, 1: documents.1}
+	documents.find({
+		title: 'blah'
+	}); // {1: documents.1}
+	```
+
+- You can also extend the native object prototype so queryEngine will work for all objects (not just collections) by doing:
+
+	``` coffeescript
+	queryEngine.extendNatives()
+	```
 
 
 ## History
+
+- v0.5.0 August 13, 2011
+	- Added client side demo
+	- Added `queryEngine.Collection` class so it doesn't extend the object prototype by default
+		- If you would like to still extend the object prototype you can call `queryEngine.extendNatives()`
 
 - v0.4.0 August 13, 2011
 	- Find will now return a ID associated object always

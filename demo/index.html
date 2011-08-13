@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<!-- Configuration -->
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
+	<!-- Information -->
+	<title>Query-Engine Demo</title>
+
+	<!-- Styles -->
+	<style>
+		.pad,.editor {
+			width: 100%;
+			height: 300px;
+			margin:0;
+			padding:0;
+		}
+		.pad {
+			padding-bottom:10px;
+		}
+		.data {
+			height: 400px;
+		}
+		.query {
+			height: 100px;
+		}
+		.result {
+			height: 400px;
+		}
+	</style>
+</head>
+<body>
+<h1><a href="https://github.com/balupton/query-engine.npm">Query Engine</a></h1>
+<h2>by <a href="http://balupton.com">Benjamin Lupton</a></h2>
+
+Collection:
+<div class="pad data">
+<pre id="data" class="editor data">
+{
+	'index':
+		id: 'index'
+		title: 'Index Page'
+		content: 'this is the index page'
+		tags: []
+		position: 1
+		category: 1
+	'jquery':
+		id: 'jquery'
+		title: 'jQuery'
+		content: 'this is about jQuery'
+		tags: ['jquery']
+		position: 2
+		category: 1
+	'history':
+		id: 'history'
+		title: 'History.js'
+		content: 'this is about History.js'
+		tags: ['jquery','html5','history']
+		position: 3
+		category: 1
+}
+</pre>
+</div>
+
+Query:
+<div class="pad query">
+<pre id="query" class="editor query">
+collection.find tags: $in: ['jquery']
+</pre>
+</div>
+
+Result:
+<div class="pad result">
+<pre id="result" class="editor result">
+</pre>
+</div>
+
+
+<!-- Scripts -->
+<script src="http://ajax.cdnjs.com/ajax/libs/underscore.js/1.1.5/underscore-min.js"></script>
+<script src="http://ricostacruz.com/js2coffee/scripts/js2coffee.min.js"></script>
+<script src="ace/ace.js"></script>
+<script src="ace/mode-coffee.js"></script>
+<script type="text/coffeescript" src="demo1.coffee"></script>
+<script type="text/coffeescript" src="../lib/query-engine.coffee"></script>
+<script type="text/coffeescript" src="demo2.coffee"></script>
+<script src="http://jashkenas.github.com/coffee-script/extras/coffee-script.js"></script>
+
+</body>
+</html>

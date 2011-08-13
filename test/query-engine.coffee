@@ -3,6 +3,7 @@ assert = require 'assert'
 queryEngine = require __dirname+'/../lib/query-engine.coffee'
 get = queryEngine.get
 set = queryEngine.set
+queryEngine.extendNatives()
 
 
 # -------------------------------------
