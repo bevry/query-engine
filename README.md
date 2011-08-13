@@ -67,7 +67,11 @@ Query-Engine supports the exact same queries as [MongoDb](http://www.mongodb.org
 
 ## History
 
-- v0.3 August 11, 2011
+- v0.3.1 August 13, 2011
+	- Find will now return a ID associated object always
+		- Before it was only doing it when the object we were finding was an ID associated object
+
+- v0.3.0 August 11, 2011
 	- Now supports models as well as native javascript objects
 		- This was done by checking if the record has a `get` function, if it does then we use that instead of directly accessing the field from the object
 

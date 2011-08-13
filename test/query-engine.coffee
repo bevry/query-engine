@@ -58,7 +58,7 @@ store =
 			tags: ['jquery']
 			position: 2
 		'history':
-			id: 'history.js'
+			id: 'history'
 			title: 'History.js'
 			content: 'this is about History.js'
 			tags: ['jquery','html5','history']
@@ -78,7 +78,7 @@ store =
 			tags: ['jquery']
 			position: 2
 		'history': new model
-			id: 'history.js'
+			id: 'history'
 			title: 'History.js'
 			content: 'this is about History.js'
 			tags: ['jquery','html5','history']

@@ -54,6 +54,7 @@ Object::find = (query={},next) ->
 			empty = false
 			selectorType = typeof selector
 			value = get(record,field)
+			id = get(record,'id') or id
 			exists = typeof value isnt 'undefined'
 			value = false  unless exists
 
