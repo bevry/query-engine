@@ -42,15 +42,41 @@ Object::find = (query={},next) ->
 	# Matches
 	matches = {}
 	length = 0
+	$nor = false
+	$or = false
+	$and = false
+	matchType = 'and'
+	
+	# Determine matching type
+	if query.$type
+		matchType = query.$type
+		delete query.$type
+
+	# The $nor operator lets you use a boolean or expression to do queries. You give $nor a list of expressions, none of which can satisfy the query.
+	if query.$nor
+		$nor = query.$nor
+		delete query.$nor
+
+	# The $or operator lets you use a boolean or expression to do queries. You give $or a list of expressions, any of which can satisfy the query.
+	if query.$or
+		$or = query.$or
+		delete query.$or
+
+	# The $and operator lets you use boolean and in a query. You give $and an array of expressions, all of which must match to satisfy the query.
+	if query.$and
+		$and = query.$and
+		delete query.$and
 
 	# Start with entire set
 	for own id,record of @
 		# Match
-		match = false
+		matchAll = true
+		matchAny = false
 		empty = true
 
 		# Selectors
 		for own field, selector of query
+			match = false
 			empty = false
 			selectorType = typeof selector
 			value = get(record,field)
@@ -75,14 +101,6 @@ Object::find = (query={},next) ->
 
 			# Conditional Operators
 			else if selector instanceof Object
-				# The $nor operator lets you use a boolean or expression to do queries. You give $nor a list of expressions, none of which can satisfy the query.
-				if selector.$nor
-					match = false
-
-				# The $or operator lets you use a boolean or expression to do queries. You give $or a list of expressions, any of which can satisfy the query.
-				if selector.$or
-					match = false
-
 				# The $all operator is similar to $in, but instead of matching any value in the specified array all values in the array must be matched. 
 				if selector.$all
 					if exists and value.hasAll(selector.$all)
@@ -147,12 +165,64 @@ Object::find = (query={},next) ->
 				if selector.$gte
 					if exists and value >= selector.$gte
 						match = true
+			
+			# Matched
+			if match
+				matchAny = true
+			else
+				matchAll = false
+		
+		# Match all
+		if matchAll and !matchAny
+			matchAll = false
 
 		# Append
-		if match or empty
-			++length
-			matches[id] = record
+		append = false
+		if empty
+			append = true
+		else
+			switch matchType
+				when 'none','nor'
+					append = true  unless matchAny
+					
+				when 'any','or'
+					append = true  if matchAny
+
+				#when 'all','and'
+				else
+					append = true  if matchAll
+		
+		# Append
+		matches[id] = record  if append
+
+	# The $nor operator lets you use a boolean or expression to do queries. You give $nor a list of expressions, none of which can satisfy the query.
+	if $nor
+		newMatches = {}
+		for expression in $nor
+			for own key,value of matches.find expression
+				newMatches[key] = value
+		for own key,value of newMatches
+			if matches[key]?
+				delete matches[key]
+
+	# The $or operator lets you use a boolean or expression to do queries. You give $or a list of expressions, any of which can satisfy the query.
+	if $or
+		newMatches = {}
+		for expression in $or
+			for own key,value of matches.find expression
+				newMatches[key] = value
+		matches = newMatches
+
+	# The $and operator lets you use boolean and in a query. You give $and an array of expressions, all of which must match to satisfy the query.
+	if $and
+		for expression in $and
+			matches = matches.find expression
 	
+	# Calculate length
+	length = 0
+	for own match of matches
+		++length
+
 	# Async
 	if next?
 		next false, matches, length

@@ -51,18 +51,21 @@ store =
 			content: 'this is the index page'
 			tags: []
 			position: 1
+			category: 1
 		'jquery':
 			id: 'jquery'
 			title: 'jQuery'
 			content: 'this is about jQuery'
 			tags: ['jquery']
 			position: 2
+			category: 1
 		'history':
 			id: 'history'
 			title: 'History.js'
 			content: 'this is about History.js'
 			tags: ['jquery','html5','history']
 			position: 3
+			category: 1
 
 	associatedModels:
 		'index': new model
@@ -71,18 +74,21 @@ store =
 			content: 'this is the index page'
 			tags: []
 			position: 1
+			category: 1
 		'jquery': new model
 			id: 'jquery'
 			title: 'jQuery'
 			content: 'this is about jQuery'
 			tags: ['jquery']
 			position: 2
+			category: 1
 		'history': new model
 			id: 'history'
 			title: 'History.js'
 			content: 'this is about History.js'
 			tags: ['jquery','html5','history']
 			position: 3
+			category: 1
 
 
 # -------------------------------------
@@ -114,6 +120,41 @@ generateTestSuite = (name,docs) ->
 				expected = 'jquery': docs.jquery, 'history': docs.history
 				assert.deepEqual actual.getData(), expected.getData()
 				assert.equal length, 2
+		
+		'joint': ->
+			actual = docs.find id: 'index', category: 1
+			expected = 'index': docs.index
+			assert.deepEqual actual.getData(), expected.getData()
+		
+		'type-and': ->
+			actual = docs.find $type: 'and', id: 'index', category: 1
+			expected = 'index': docs.index
+			assert.deepEqual actual.getData(), expected.getData()
+		
+		'type-or': ->
+			actual = docs.find $type: 'or', id: 'index', position: 2
+			expected = 'index': docs.index, 'jquery': docs.jquery
+			assert.deepEqual actual.getData(), expected.getData()
+		
+		'type-nor': ->
+			actual = docs.find $type: 'nor', id: 'index', position: 2
+			expected = 'history': docs.history
+			assert.deepEqual actual.getData(), expected.getData()
+		
+		'$and': ->
+			actual = docs.find $all: [{id: 'index'}, {position: 2}]
+			expected = {}
+			assert.deepEqual actual.getData(), expected.getData()
+		
+		'$or': ->
+			actual = docs.find $or: [{id: 'index'}, {position: 2}]
+			expected = 'index': docs.index, 'jquery': docs.jquery
+			assert.deepEqual actual.getData(), expected.getData()
+		
+		'$nor': ->
+			actual = docs.find $nor: [{id: 'index'}, {position: 2}]
+			expected = 'history': docs.history
+			assert.deepEqual actual.getData(), expected.getData()
 		
 		'$ne': ->
 			actual = docs.find id: $ne: 'index'
