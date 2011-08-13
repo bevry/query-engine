@@ -9,7 +9,7 @@ Query-Engine supports the exact same queries as [MongoDb](http://www.mongodb.org
 
 [You can find the test suite which showcases how to use the supported queries here.](https://raw.github.com/balupton/query-engine.npm/master/test/query-engine.coffee)
 
-[You can try it out in real-time on the client side with a web browser here.](https://balupton.github.com/query-engine.npm/demo/)
+[You can try it out in real-time on the client side with a web browser here.](http://balupton.github.com/query-engine.npm/demo/)
 
 
 
