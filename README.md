@@ -96,6 +96,9 @@ Query-Engine supports the exact same queries as [MongoDb](http://www.mongodb.org
 
 ## History
 
+- v0.5.1 August 14, 2011
+	- Fixed date comparisons and added some date tests
+
 - v0.5.0 August 13, 2011
 	- Added client side demo
 	- Added `queryEngine.Collection` class so it doesn't extend the object prototype by default

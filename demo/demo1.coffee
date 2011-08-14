@@ -8,5 +8,7 @@ for key in ['data','query','result']
 	editor.setShowPrintMargin false
 	editor.getSession().setMode coffeeModeInstance
 	editor.setHighlightActiveLine true
+	editor.getSession().setTabSize 4
+	editor.getSession().setUseSoftTabs false
 	#editor.getSession().setUseWrapMode true
 	editors[key] = editor

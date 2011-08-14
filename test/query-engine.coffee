@@ -5,6 +5,11 @@ get = queryEngine.get
 set = queryEngine.set
 queryEngine.extendNatives()
 
+# Variables
+today = new Date()
+today.setHours 0
+today.setMinutes 0
+today.setSeconds 0
 
 # -------------------------------------
 # Helpers
@@ -53,6 +58,7 @@ store =
 			tags: []
 			position: 1
 			category: 1
+			date: today
 		'jquery':
 			id: 'jquery'
 			title: 'jQuery'
@@ -60,6 +66,7 @@ store =
 			tags: ['jquery']
 			position: 2
 			category: 1
+			date: new Date()
 		'history':
 			id: 'history'
 			title: 'History.js'
@@ -67,6 +74,7 @@ store =
 			tags: ['jquery','html5','history']
 			position: 3
 			category: 1
+			date: new Date()
 
 	associatedModels:
 		'index': new model
@@ -76,6 +84,7 @@ store =
 			tags: []
 			position: 1
 			category: 1
+			date: today
 		'jquery': new model
 			id: 'jquery'
 			title: 'jQuery'
@@ -83,6 +92,7 @@ store =
 			tags: ['jquery']
 			position: 2
 			category: 1
+			date: new Date()
 		'history': new model
 			id: 'history'
 			title: 'History.js'
@@ -90,6 +100,7 @@ store =
 			tags: ['jquery','html5','history']
 			position: 3
 			category: 1
+			date: new Date()
 
 
 # -------------------------------------
@@ -109,6 +120,11 @@ generateTestSuite = (name,docs) ->
 		'number': ->
 			actual = docs.find position: 3
 			expected = 'history': docs.history
+			assert.deepEqual actual.getData(), expected.getData()
+		
+		'date': ->
+			actual = docs.find date: today
+			expected = 'index': docs.index
 			assert.deepEqual actual.getData(), expected.getData()
 		
 		'regex': ->
@@ -187,6 +203,11 @@ generateTestSuite = (name,docs) ->
 			expected = 'history': docs.history
 			assert.deepEqual actual.getData(), expected.getData()
 
+		'$gt-date': ->
+			actual = docs.find date: $gt: today
+			expected = 'jquery': docs.jquery, 'history': docs.history
+			assert.deepEqual actual.getData(), expected.getData()
+
 		'$gte': ->
 			actual = docs.find position: $gte: 2
 			expected = 'jquery': docs.jquery, 'history': docs.history
@@ -197,9 +218,19 @@ generateTestSuite = (name,docs) ->
 			expected = 'index': docs.index
 			assert.deepEqual actual.getData(), expected.getData()
 
+		'$lt-date': ->
+			actual = docs.find date: $lt: today
+			expected = {}
+			assert.deepEqual actual.getData(), expected.getData()
+
 		'$lte': ->
 			actual = docs.find position: $lte: 2
 			expected = 'index': docs.index, 'jquery': docs.jquery
+			assert.deepEqual actual.getData(), expected.getData()
+
+		'$lte-date': ->
+			actual = docs.find date: $lte: today
+			expected = 'index': docs.index
 			assert.deepEqual actual.getData(), expected.getData()
 
 		'all': ->

@@ -100,6 +100,11 @@ Collection = class
 					if exists and value.hasAll(selector)
 						match = true  
 					
+				# Date
+				else if selector instanceof Date
+					if exists and value.toString() is selector.toString()
+						match = true  
+				
 				# Regular Expression
 				else if selector instanceof RegExp
 					if exists and selector.test(value)
