@@ -22,16 +22,28 @@ set = (obj,key,value) ->
 # -------------------------------------
 # Array Prototypes
 
-# Has In
-Array::hasIn = (options) ->
-	for value in @
-		if value in options
-			return true
-	return false
+Hash = class
+	# Array
+	arr: []
 
-# Has All
-Array::hasAll = (options) ->
-	@sort().join() is options.sort().join()
+	# Constructor
+	constructor: (arr) ->
+		@arr = arr or []
+
+	# Has In
+	hasIn: (options) ->
+		for value in @arr
+			if value in options
+				return true
+		return false
+
+	# Has All
+	hasAll: (options) ->
+		@arr.sort().join() is options.sort().join()
+
+for key,value of Array::
+	Hash::[key] = (args...) ->
+		value.apply(@arr,args)
 
 
 # -------------------------------------
@@ -97,7 +109,7 @@ Collection = class
 
 				# Array
 				else if selector instanceof Array
-					if exists and value.hasAll(selector)
+					if exists and (new Hash value).hasAll(selector)
 						match = true  
 					
 				# Date
@@ -114,19 +126,19 @@ Collection = class
 				else if selector instanceof Object
 					# The $all operator is similar to $in, but instead of matching any value in the specified array all values in the array must be matched. 
 					if selector.$all
-						if exists and value.hasAll(selector.$all)
+						if exists and (new Hash value).hasAll(selector.$all)
 							match = true
 					
 					# The $in operator is analogous to the SQL IN modifier, allowing you to specify an array of possible matches.
 					if selector.$in
 						if exists
-							if (value.hasIn? and value.hasIn(selector.$in)) or (value in selector.$in)
+							if (value instanceof Array and (new Hash value).hasIn(selector.$in)) or (value in selector.$in)
 								match = true  
 					
 					# The $nin operator is similar to $in except that it selects objects for which the specified field does not have any value in the specified array. 
 					if selector.$nin
 						if exists 
-							if !(value.hasIn? and value.hasIn(selector.$nin)) and !(value in selector.$nin)
+							if !(value instanceof Array and (new Hash value).hasIn(selector.$nin)) and !(value in selector.$nin)
 								match = true
 					
 					# The $size operator matches any array with the specified number of elements. The following example would match the object {a:["foo"]}, since that array has just one element:
@@ -315,14 +327,14 @@ Collection = class
 			@
 
 extendNatives = ->
-	for own key,value of Collection.prototype
-		Object.prototype[key] ?= value
+	Array.prototype[key] ?= value  for own key,value of Hash.prototype
+	Object.prototype[key] ?= value  for own key,value of Collection.prototype
 
 # -------------------------------------
 # Exports
 
 # Exports
 if module? and module.exports?
-	module.exports = {set,get,Collection,extendNatives}
+	module.exports = {set,get,Collection,Hash,extendNatives}
 else if window?
-	window.queryEngine = {set,get,Collection,extendNatives}
+	window.queryEngine = {set,get,Collection,Hash,extendNatives}

@@ -96,6 +96,9 @@ Query-Engine supports the exact same queries as [MongoDb](http://www.mongodb.org
 
 ## History
 
+- v0.5.2 September 5, 2011
+	- Array prototype is no longer extended by default. Introduces `queryEngine.Hash` as the extender.
+
 - v0.5.1 August 14, 2011
 	- Fixed date comparisons and added some date tests
 
