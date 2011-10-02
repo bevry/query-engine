@@ -10,6 +10,10 @@ today = new Date()
 today.setHours 0
 today.setMinutes 0
 today.setSeconds 0
+tomorrow = new Date()
+tomorrow.setDate(today.getDate()+1)
+yesterday = new Date()
+yesterday.setDate(today.getDate()-1)
 
 # -------------------------------------
 # Helpers
@@ -35,6 +39,7 @@ model = class
 		content: null
 		tags: []
 		position: 1
+		date: null
 
 	constructor: (data={}) ->
 		for own key, value of @data
@@ -66,7 +71,7 @@ store =
 			tags: ['jquery']
 			position: 2
 			category: 1
-			date: new Date()
+			date: yesterday
 		'history':
 			id: 'history'
 			title: 'History.js'
@@ -74,7 +79,7 @@ store =
 			tags: ['jquery','html5','history']
 			position: 3
 			category: 1
-			date: new Date()
+			date: tomorrow
 
 	associatedModels:
 		'index': new model
@@ -92,7 +97,7 @@ store =
 			tags: ['jquery']
 			position: 2
 			category: 1
-			date: new Date()
+			date: yesterday
 		'history': new model
 			id: 'history'
 			title: 'History.js'
@@ -100,7 +105,7 @@ store =
 			tags: ['jquery','html5','history']
 			position: 3
 			category: 1
-			date: new Date()
+			date: tomorrow
 
 
 # -------------------------------------
@@ -205,7 +210,7 @@ generateTestSuite = (name,docs) ->
 
 		'$gt-date': ->
 			actual = docs.find date: $gt: today
-			expected = 'jquery': docs.jquery, 'history': docs.history
+			expected = 'history': docs.history
 			assert.deepEqual actual.getData(), expected.getData()
 
 		'$gte': ->
@@ -220,7 +225,7 @@ generateTestSuite = (name,docs) ->
 
 		'$lt-date': ->
 			actual = docs.find date: $lt: today
-			expected = {}
+			expected = 'jquery': docs.jquery
 			assert.deepEqual actual.getData(), expected.getData()
 
 		'$lte': ->
@@ -230,7 +235,7 @@ generateTestSuite = (name,docs) ->
 
 		'$lte-date': ->
 			actual = docs.find date: $lte: today
-			expected = 'index': docs.index
+			expected = 'index': docs.index, 'jquery': docs.jquery
 			assert.deepEqual actual.getData(), expected.getData()
 
 		'all': ->
@@ -238,15 +243,26 @@ generateTestSuite = (name,docs) ->
 			expected = docs
 			assert.deepEqual actual.getData(), expected.getData()
 
-		'sort-function': ->
+		'sort-numeric-function': ->
 			actual = docs.find({}).sort (a,b) ->
 				return get(b,'position') - get(a,'position')
 			expected = [docs.history,docs.jquery,docs.index]
 			assert.deepEqual actual.getData(), expected.getData()
 
-		'sort-object': ->
+		'sort-numeric-object': ->
 			actual = docs.find({}).sort position: -1
 			expected = [docs.history,docs.jquery,docs.index]
+			assert.deepEqual actual.getData(), expected.getData()
+
+		'sort-date-function': ->
+			actual = docs.find({}).sort (a,b) ->
+				return get(b,'date') - get(a,'date')
+			expected = [docs.history,docs.index,docs.jquery]
+			assert.deepEqual actual.getData(), expected.getData()
+
+		'sort-date-object': ->
+			actual = docs.find({}).sort date: -1
+			expected = [docs.history,docs.index,docs.jquery]
 			assert.deepEqual actual.getData(), expected.getData()
 
 		'findOne': ->
