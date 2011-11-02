@@ -18,6 +18,15 @@ set = (obj,key,value) ->
 	else
 		obj[key] = value
 
+# To array
+toArray = (value) ->
+	unless value
+		[]
+	else unless value instanceof Array
+		[value]
+	else
+		value
+
 
 # -------------------------------------
 # Array Prototypes
@@ -28,10 +37,11 @@ Hash = class
 
 	# Constructor
 	constructor: (arr) ->
-		@arr = arr or []
-
+		@arr = toArray(arr)
+		
 	# Has In
 	hasIn: (options) ->
+		options = toArray(options)
 		for value in @arr
 			if value in options
 				return true
@@ -126,19 +136,22 @@ Collection = class
 				else if selector instanceof Object
 					# The $all operator is similar to $in, but instead of matching any value in the specified array all values in the array must be matched. 
 					if selector.$all
-						if exists and (new Hash value).hasAll(selector.$all)
-							match = true
+						if exists
+							if (new Hash value).hasAll(selector.$all)
+								match = true
 					
 					# The $in operator is analogous to the SQL IN modifier, allowing you to specify an array of possible matches.
 					if selector.$in
 						if exists
-							if (value instanceof Array and (new Hash value).hasIn(selector.$in)) or (value in selector.$in)
-								match = true  
+							if (new Hash value).hasIn(selector.$in)
+								match = true
+							else if (new Hash selector.$in).hasIn(value)
+								match = true
 					
 					# The $nin operator is similar to $in except that it selects objects for which the specified field does not have any value in the specified array. 
 					if selector.$nin
-						if exists 
-							if !(value instanceof Array and (new Hash value).hasIn(selector.$nin)) and !(value in selector.$nin)
+						if exists
+							if (new Hash value).hasIn(selector.$in) is false and (new Hash selector.$in).hasIn(value) is false
 								match = true
 					
 					# The $size operator matches any array with the specified number of elements. The following example would match the object {a:["foo"]}, since that array has just one element:

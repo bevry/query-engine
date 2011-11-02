@@ -96,6 +96,10 @@ Query-Engine supports the exact same queries as [MongoDb](http://www.mongodb.org
 
 ## History
 
+- v0.5.3 November 2, 2011
+	- `$in` and `$all` have had considerable improvements and fixes
+	- Fixed npm web to url warnings
+
 - v0.5.2 September 5, 2011
 	- Array prototype is no longer extended by default. Introduces `queryEngine.Hash` as the extender.
 
