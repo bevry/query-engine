@@ -309,9 +309,11 @@ Collection = class
 			arr.sort(comparison)
 		else
 			for own key,value of comparison
+				# Descending
 				if value is -1
 					arr.sort (a,b) ->
 						get(b,key) - get(a,key)
+				# Ascending
 				else if value is 1
 					arr.sort (a,b) ->
 						get(a,key) - get(b,key)
