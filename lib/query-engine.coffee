@@ -134,6 +134,18 @@ Collection = class
 
 				# Conditional Operators
 				else if selector instanceof Object
+					# The $beginsWith operator checks if the value begins with a particular value
+					if selector.$beginsWith
+						if exists
+							if typeof value is 'string' and value.substr(0,selector.$beginsWith.length) is selector.$beginsWith
+								match = true
+					
+					# The $endsWith operator checks if the value ends with a particular value
+					if selector.$endsWith
+						if exists
+							if typeof value is 'string' and value.substr(selector.$endsWith.length*-1) is selector.$endsWith
+								match = true
+					
 					# The $all operator is similar to $in, but instead of matching any value in the specified array all values in the array must be matched. 
 					if selector.$all
 						if exists
@@ -151,7 +163,7 @@ Collection = class
 					# The $nin operator is similar to $in except that it selects objects for which the specified field does not have any value in the specified array. 
 					if selector.$nin
 						if exists
-							if (new Hash value).hasIn(selector.$in) is false and (new Hash selector.$in).hasIn(value) is false
+							if (new Hash value).hasIn(selector.$nin) is false and (new Hash selector.$nin).hasIn(value) is false
 								match = true
 					
 					# The $size operator matches any array with the specified number of elements. The following example would match the object {a:["foo"]}, since that array has just one element:

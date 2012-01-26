@@ -1,6 +1,6 @@
 {
 	"name": "query-engine",
-	"version": "0.5.3",
+	"version": "0.5.4",
 	"description": "A NoSQL (and MongoDB compliant) Query Engine coded in CoffeeScript for Server-Side use with Node.js and Client-Side use with url-Browsers",
 	"homepage": "https://github.com/balupton/query-engine.npm",
 	"keywords": [

@@ -117,6 +117,16 @@ testSuite = {}
 # Generate Test Suite
 generateTestSuite = (name,docs) ->
 	tests =
+		'beginsWith': ->
+			actual = docs.find title: $beginsWith: 'Index'
+			expected = 'index': docs.index
+			assert.deepEqual actual.getData(), expected.getData()
+		
+		'endsWidth': ->
+			actual = docs.find title: $endsWith: '.js'
+			expected = 'history': docs.history
+			assert.deepEqual actual.getData(), expected.getData()
+		
 		'string': ->
 			actual = docs.find id: 'index'
 			expected = 'index': docs.index
