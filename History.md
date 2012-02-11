@@ -1,5 +1,9 @@
 ## History
 
+- v0.6.0 February 11, 2012
+	- Moved unit tests to [Mocha](http://visionmedia.github.com/mocha/)
+	- Added [docco](http://jashkenas.github.com/docco/) docs
+
 - v0.5.4 January 26, 2012
 	- Fixed `$nin`
 	- Added `$beginsWith` and `$endsWith`

@@ -5,11 +5,11 @@ A NoSQL (and MongoDB compliant) Query Engine coded in CoffeeScript for Server-Si
 
 ## Supported Queries
 
-Query-Engine supports the exact same queries as [MongoDb](http://www.mongodb.org/). [Find the full listing of supported queries here.](http://www.mongodb.org/display/DOCS/Advanced+Queries)
+Query-Engine supports the exact same queries as [MongoDb](http://www.mongodb.org/). [Find the full listing of supported queries here](http://www.mongodb.org/display/DOCS/Advanced+Queries)
 
-[You can find the test suite which showcases how to use the supported queries here.](https://raw.github.com/balupton/query-engine.npm/master/test/query-engine.coffee)
+[You can find the test suite which showcases how to use the supported queries here](https://raw.github.com/balupton/query-engine.npm/master/test/query-engine.coffee)
 
-[You can try it out in real-time on the client side with a web browser here.](http://balupton.github.com/query-engine.npm/demo/)
+[You can try it out in real-time on the client side with a web browser here](http://balupton.github.com/query-engine.npm/demo/)
 
 
 
@@ -20,14 +20,17 @@ Query-Engine supports the exact same queries as [MongoDb](http://www.mongodb.org
 	1. [Install Node.js](https://github.com/balupton/node/wiki/Installing-Node.js)
 
 	2. Install
-
-			npm install query-engine
+		
+		``` bash
+		npm install query-engine
+		```
 	
 	3. Require
 
 		``` coffeescript
 		queryEngine = require 'query-engine'
 		```
+
 
 - Client-Side with Web Browsers
 
@@ -94,12 +97,13 @@ Query-Engine supports the exact same queries as [MongoDb](http://www.mongodb.org
 	```
 
 
+
 ## History
 
-Discover the history inside the `History.md` file
+You can discover the history inside the [History.md](https://github.com/balupton/query-engine.npm/blob/master/History.md#files) file
 
 
 ## License
 
 Licensed under the [MIT License](http://creativecommons.org/licenses/MIT/)
-Copyright 2011 [Benjamin Arthur Lupton](http://balupton.com)
+<br/>Copyright &copy; 2011-2012 [Benjamin Arthur Lupton](http://balupton.com)

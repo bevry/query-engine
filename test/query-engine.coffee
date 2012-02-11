@@ -1,11 +1,17 @@
 # Requires
-assert = require 'assert'
-queryEngine = require __dirname+'/../lib/query-engine.coffee'
+assert = require('assert')
+queryEngine = require(__dirname+'/../lib/query-engine.coffee')
 get = queryEngine.get
 set = queryEngine.set
 queryEngine.extendNatives()
 
+
+# =====================================
+# Configuration
+
+# -------------------------------------
 # Variables
+
 today = new Date()
 today.setHours 0
 today.setMinutes 0
@@ -108,194 +114,185 @@ store =
 			date: tomorrow
 
 
-# -------------------------------------
+# =====================================
 # Tests
-
-# Test Suite
-testSuite = {}
 
 # Generate Test Suite
 generateTestSuite = (name,docs) ->
-	tests =
-		'beginsWith': ->
+	describe name, ->
+		it 'beginsWith', ->
 			actual = docs.find title: $beginsWith: 'Index'
 			expected = 'index': docs.index
 			assert.deepEqual actual.getData(), expected.getData()
 		
-		'endsWidth': ->
+		it 'endsWidth', ->
 			actual = docs.find title: $endsWith: '.js'
 			expected = 'history': docs.history
 			assert.deepEqual actual.getData(), expected.getData()
 		
-		'string': ->
+		it 'string', ->
 			actual = docs.find id: 'index'
 			expected = 'index': docs.index
 			assert.deepEqual actual.getData(), expected.getData()
 		
-		'number': ->
+		it 'number', ->
 			actual = docs.find position: 3
 			expected = 'history': docs.history
 			assert.deepEqual actual.getData(), expected.getData()
 		
-		'date': ->
+		it 'date', ->
 			actual = docs.find date: today
 			expected = 'index': docs.index
 			assert.deepEqual actual.getData(), expected.getData()
 		
-		'regex': ->
+		it 'regex', ->
 			actual = docs.find id: /^[hj]/
 			expected = 'jquery': docs.jquery, 'history': docs.history
 			assert.deepEqual actual.getData(), expected.getData()
 		
-		'async': ->
+		it 'async', (done) ->
 			docs.find id: /^[hj]/, (err, actual, length) ->
 				expected = 'jquery': docs.jquery, 'history': docs.history
 				assert.deepEqual actual.getData(), expected.getData()
 				assert.equal length, 2
+				done()
 		
-		'joint': ->
+		it 'joint', ->
 			actual = docs.find id: 'index', category: 1
 			expected = 'index': docs.index
 			assert.deepEqual actual.getData(), expected.getData()
 		
-		'type-and': ->
+		it 'type-and', ->
 			actual = docs.find $type: 'and', id: 'index', category: 1
 			expected = 'index': docs.index
 			assert.deepEqual actual.getData(), expected.getData()
 		
-		'type-or': ->
+		it 'type-or', ->
 			actual = docs.find $type: 'or', id: 'index', position: 2
 			expected = 'index': docs.index, 'jquery': docs.jquery
 			assert.deepEqual actual.getData(), expected.getData()
 		
-		'type-nor': ->
+		it 'type-nor', ->
 			actual = docs.find $type: 'nor', id: 'index', position: 2
 			expected = 'history': docs.history
 			assert.deepEqual actual.getData(), expected.getData()
 		
-		'$and': ->
+		it '$and', ->
 			actual = docs.find $all: [{id: 'index'}, {position: 2}]
 			expected = {}
 			assert.deepEqual actual.getData(), expected.getData()
 		
-		'$or': ->
+		it '$or', ->
 			actual = docs.find $or: [{id: 'index'}, {position: 2}]
 			expected = 'index': docs.index, 'jquery': docs.jquery
 			assert.deepEqual actual.getData(), expected.getData()
 		
-		'$nor': ->
+		it '$nor', ->
 			actual = docs.find $nor: [{id: 'index'}, {position: 2}]
 			expected = 'history': docs.history
 			assert.deepEqual actual.getData(), expected.getData()
 		
-		'$ne': ->
+		it '$ne', ->
 			actual = docs.find id: $ne: 'index'
 			expected = 'jquery': docs.jquery, 'history': docs.history
 			assert.deepEqual actual.getData(), expected.getData()
 		
-		'$all': ->
+		it '$all', ->
 			actual = docs.find tags: $all: ['jquery']
 			expected = 'jquery': docs.jquery
 			assert.deepEqual actual.getData(), expected.getData()
 		
-		'$in': ->
+		it '$in', ->
 			actual = docs.find tags: $in: ['jquery']
 			expected = 'jquery': docs.jquery, 'history': docs.history
 			assert.deepEqual actual.getData(), expected.getData()
 
-		'$nin': ->
+		it '$nin', ->
 			actual = docs.find tags: $nin: ['history']
 			expected = 'index': docs.index, 'jquery': docs.jquery
 			assert.deepEqual actual.getData(), expected.getData()
 
-		'$size': ->
+		it '$size', ->
 			actual = docs.find tags: $size: 3
 			expected = 'history': docs.history
 			assert.deepEqual actual.getData(), expected.getData()
 
-		'$gt': ->
+		it '$gt', ->
 			actual = docs.find position: $gt: 2
 			expected = 'history': docs.history
 			assert.deepEqual actual.getData(), expected.getData()
 
-		'$gt-date': ->
+		it '$gt-date', ->
 			actual = docs.find date: $gt: today
 			expected = 'history': docs.history
 			assert.deepEqual actual.getData(), expected.getData()
 
-		'$gte': ->
+		it '$gte', ->
 			actual = docs.find position: $gte: 2
 			expected = 'jquery': docs.jquery, 'history': docs.history
 			assert.deepEqual actual.getData(), expected.getData()
 
-		'$lt': ->
+		it '$lt', ->
 			actual = docs.find position: $lt: 2
 			expected = 'index': docs.index
 			assert.deepEqual actual.getData(), expected.getData()
 
-		'$lt-date': ->
+		it '$lt-date', ->
 			actual = docs.find date: $lt: today
 			expected = 'jquery': docs.jquery
 			assert.deepEqual actual.getData(), expected.getData()
 
-		'$lte': ->
+		it '$lte', ->
 			actual = docs.find position: $lte: 2
 			expected = 'index': docs.index, 'jquery': docs.jquery
 			assert.deepEqual actual.getData(), expected.getData()
 
-		'$lte-date': ->
+		it '$lte-date', ->
 			actual = docs.find date: $lte: today
 			expected = 'index': docs.index, 'jquery': docs.jquery
 			assert.deepEqual actual.getData(), expected.getData()
 
-		'all': ->
+		it 'all', ->
 			actual = docs.find({})
 			expected = docs
 			assert.deepEqual actual.getData(), expected.getData()
 
-		'sort-numeric-function': ->
+		it 'sort-numeric-function', ->
 			actual = docs.find({}).sort (a,b) ->
 				return get(b,'position') - get(a,'position')
 			expected = [docs.history,docs.jquery,docs.index]
 			assert.deepEqual actual.getData(), expected.getData()
 
-		'sort-numeric-object': ->
+		it 'sort-numeric-object', ->
 			actual = docs.find({}).sort position: -1
 			expected = [docs.history,docs.jquery,docs.index]
 			assert.deepEqual actual.getData(), expected.getData()
 
-		'sort-date-function': ->
+		it 'sort-date-function', ->
 			actual = docs.find({}).sort (a,b) ->
 				return get(b,'date') - get(a,'date')
 			expected = [docs.history,docs.index,docs.jquery]
 			assert.deepEqual actual.getData(), expected.getData()
 
-		'sort-date-object': ->
+		it 'sort-date-object', ->
 			actual = docs.find({}).sort date: -1
 			expected = [docs.history,docs.index,docs.jquery]
 			assert.deepEqual actual.getData(), expected.getData()
 
-		'findOne': ->
+		it 'findOne', ->
 			actual = docs.findOne()
 			expected = docs.index
 			assert.deepEqual actual.getData(), expected.getData()
 
-		'remove': ->
+		it 'remove', ->
 			actual = docs.remove()
 			expected = {}
 			assert.deepEqual actual.getData(), expected.getData()
 			assert.deepEqual docs, expected
-	
-	for own key, value of tests
-		testSuite[name+'_'+key] = value
 
 # Generate Suites
 for own key, value of store
 	generateTestSuite key, value
 
-
-# -------------------------------------
-# Export
-
-# Export
-module.exports = testSuite
+# Return
+null
