@@ -48,8 +48,12 @@ Hash = class
 		return false
 
 	# Has All
-	hasAll: (options) ->
-		@arr.sort().join() is options.sort().join()
+	hasAll: (options) -> 
+		options = toArray(options)
+		for option in options
+			if option not in @arr
+				return false
+		return true
 
 for key,value of Array::
 	Hash::[key] = (args...) ->
