@@ -8,15 +8,29 @@
 get = (obj,key) ->
 	if obj.get?
 		obj.get key
-	else
-		obj[key]
+	else if typeof obj is 'object'
+		keys = key.split '.', 2
+
+		if keys.length is 1 and typeof obj[keys[0]] isnt 'undefined'
+			obj[keys[0]]
+		else
+			get obj[keys[0]], keys[1]
 
 # Set the value of the object
 set = (obj,key,value) ->
 	if obj.set?
 		obj.set key, value
 	else
-		obj[key] = value
+		keys = key.split '.', 2
+
+		if keys.length is 1
+			obj[key] = value
+		else
+			if typeof obj[keys[0]] is 'undefined'
+				obj[keys[0]] = {}
+
+			if typeof obj[keys[0]] is 'object'
+				set obj[keys[0]], keys[1], value
 
 # To array
 toArray = (value) ->
