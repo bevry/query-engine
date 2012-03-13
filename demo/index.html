@@ -19,11 +19,8 @@
 		.pad {
 			padding-bottom:10px;
 		}
-		.data {
-			height: 400px;
-		}
-		.query {
-			height: 100px;
+		.code {
+			height: 600px;
 		}
 		.result {
 			height: 400px;
@@ -34,10 +31,11 @@
 <h1><a href="https://github.com/balupton/query-engine.npm">Query Engine</a></h1>
 <h2>by <a href="http://balupton.com">Benjamin Lupton</a></h2>
 
-Collection:
-<div class="pad data">
-<pre id="data" class="editor data">
-{
+Code:
+<div class="pad code">
+<pre id="code" class="editor code">
+# Create our collection
+collection = queryEngine.createCollection {
 	'index':
 		id: 'index'
 		title: 'Index Page'
@@ -60,17 +58,15 @@ Collection:
 		position: 3
 		category: 1
 }
-</pre>
-</div>
 
-Query:
-<div class="pad query">
-<pre id="query" class="editor query">
-collection.find({
-	tags: {
+# Perform our query
+result = collection.find(
+	tags:
 		$in: ['jquery']
-	}
-})
+)
+
+# Return our result
+return result.toJSON()
 </pre>
 </div>
 
