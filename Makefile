@@ -1,16 +1,8 @@
 test:
-	./node_modules/.bin/mocha \
-		--reporter spec \
-		--ui bdd \
-		--ignore-leaks \
-		--growl
+	./node_modules/.bin/mocha
 
 test-debug:
-	node --debug-brk ./node_modules/.bin/mocha \
-		--reporter spec \
-		--ui bdd \
-		--ignore-leaks \
-		--growl
+	node --debug-brk ./node_modules/.bin/mocha
 
 docs:
 	./node_modules/.bin/docco lib/*.coffee

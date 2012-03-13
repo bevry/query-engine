@@ -66,7 +66,11 @@ Collection:
 Query:
 <div class="pad query">
 <pre id="query" class="editor query">
-collection.find tags: $in: ['jquery']
+collection.find({
+	tags: {
+		$in: ['jquery']
+	}
+})
 </pre>
 </div>
 
@@ -78,14 +82,15 @@ Result:
 
 
 <!-- Scripts -->
-<script src="coffee-script.js"></script>
-<script src="underscore-min.js"></script>
-<script src="js2coffee.min.js"></script>
-<script src="ace/ace.js"></script>
-<script src="ace/mode-coffee.js"></script>
-<script type="text/coffeescript" src="demo1.coffee"></script>
-<script type="text/coffeescript" src="../lib/query-engine.coffee"></script>
-<script type="text/coffeescript" src="demo2.coffee"></script>
+<script src="lib/coffee-script.js"></script>
+<script src="lib/underscore-min.js"></script>
+<script src="lib/backbone-min.js"></script>
+<script src="lib/js2coffee.min.js"></script>
+<script src="lib/ace/ace.js"></script>
+<script src="lib/ace/mode-coffee.js"></script>
+<script src="../lib/query-engine.js"></script>
+<script type="text/coffeescript" src="scripts/demo1.coffee"></script>
+<script type="text/coffeescript" src="scripts/demo2.coffee"></script>
 
 </body>
 </html>
