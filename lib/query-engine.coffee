@@ -11,15 +11,15 @@ util =
 	safeRegex: (str) ->
 		return (str or '').replace('(.)','\\$1')
 
-	# Make Regex
+	# Create Regex
 	# Convert a string into a regular expression
-	makeRegex: (str) ->
+	createRegex: (str) ->
 		return new RegExp(str,'ig')
 
-	# Make Safe Regex
+	# Create Safe Regex
 	# Convert a string into a safe regular expression
-	makeSafeRegex: (str) ->
-		return util.makeRegex util.safeRegex(str)
+	createSafeRegex: (str) ->
+		return util.createRegex util.safeRegex(str)
 
 	# To Array
 	toArray: (value) ->
@@ -121,8 +121,8 @@ BaseCollection = Backbone.Collection.extend
 		else
 			exists = false
 
-		# Chain
-		@
+		# Return exists
+		return exists
 
 	# Safe Remove
 	# Remove an item from the collection, only if it exists within the collection
@@ -136,7 +136,7 @@ BaseCollection = Backbone.Collection.extend
 	# Safe Add
 	# Add an item from the collection, only if it doesn't exist within the collection
 	# Useful for bypassing the "already exists" warning
-	safeAadd: (model) ->
+	safeAdd: (model) ->
 		exists = @hasModel(model)
 		unless exists
 			this.add(model)
@@ -166,19 +166,23 @@ BaseCollection = Backbone.Collection.extend
 		# Return sorted array
 		return arr
 
+	# Create Live Collection
+	createLiveCollection: ->
+		collection = new LiveCollection()
+			.setParentCollection(@)
+		return collection
+
 	# Find
 	find: (query) ->
-		collection = new LiveCollection()
+		collection = @createLiveCollection()
 			.setQuery('find',query)
-			.setParentCollection(@)
 			.query()
 		return collection
 
 	# Find One
 	findOne: (query) ->
-		collection = new LiveCollection()
+		collection = @createLiveCollection()
 			.setQuery('find',query)
-			.setParentCollection(@)
 			.query()
 		if collection and collection.length
 			return collection.models[0]
@@ -235,9 +239,10 @@ LiveCollection = BaseCollection.extend
 		# Prepare
 		me = @
 		models = []
+		collection = @options.parentCollection or @
 
 		# Cycle through the parent collection finding passing models
-		@options.parentCollection.each (model) ->
+		collection.each (model) ->
 			pass = me.test(model)
 			if pass
 				models.push(model)
@@ -368,10 +373,13 @@ LiveCollection = BaseCollection.extend
 	setPill: (name,value) ->
 		# Prepare
 		pills = @options.pills
+		searchString = @options.searchString
 
 		# Apply or delete the value
 		if value?
 			value = new Pill(value)  unless (value instanceof Pill)
+			if searchString
+				value.setSearchString(searchString)
 			pills[name] = value
 		else if pills[name]?
 			delete pills[name]
@@ -379,15 +387,20 @@ LiveCollection = BaseCollection.extend
 		# Chain
 		@
 
-	# Set Search
-	setSearch: (searchString) ->
+	# Set Search String
+	setSearchString: (searchString) ->
+		# Prepare
+		pills = @options.pills
+		cleanedSearchString = searchString
+
 		# Apply the search string to each of our pills
 		# and for each applicable pill, clean up our search string
-		_.each @pills, (pill,pillName) ->
-			search = pill.setSearch(searchString)
+		_.each pills, (pill,pillName) ->
+			cleanedSearchString = pill.setSearchString(searchString)
 
-		# Apply the cleaned up search
+		# Apply
 		@options.searchString = searchString
+		@options.cleanedSearchString = cleanedSearchString
 
 		# Chain
 		@
@@ -398,7 +411,7 @@ LiveCollection = BaseCollection.extend
 
 	# Test everything against the model
 	test: (model) ->
-		pass = @testFilters(model) and @testQueries(model) and @testPills(pass)
+		pass = @testFilters(model) and @testQueries(model) and @testPills(model)
 		return pass
 
 	# Perform the Filters against a Model
@@ -408,10 +421,12 @@ LiveCollection = BaseCollection.extend
 	testFilters: (model) ->
 		# Prepare
 		pass = true
+		cleanedSearchString = @options.cleanedSearchString
+		filters = @options.filters
 
 		# Cycle
-		_.each @options.filters, (filter,filterName) ->
-			if filter(model,@search) is false
+		_.each filters, (filter,filterName) ->
+			if filter(model,cleanedSearchString) is false
 				pass = false
 				return false # break
 
@@ -425,9 +440,10 @@ LiveCollection = BaseCollection.extend
 	testQueries: (model) ->
 		# Prepare
 		pass = true
+		queries = @options.queries
 
 		# Cycle
-		_.each @options.queries, (query,queryName) ->
+		_.each queries, (query,queryName) ->
 			if query.test(model) is false
 				pass = false
 				return false # break
@@ -442,10 +458,12 @@ LiveCollection = BaseCollection.extend
 	testPills: (model) ->
 		# Prepare
 		pass = true
+		searchString = @options.searchString
+		pills = @options.pills
 
 		# Cycle
-		if @options.searchString
-			_.each @pills, (pill,pillName) ->
+		if searchString
+			_.each pills, (pill,pillName) ->
 				if pill.test(model) is false
 					pass = false
 					return false # break
@@ -467,9 +485,9 @@ class Pill
 	# The prefixes that our pill matches
 	prefixes: null # Array
 
-	# Search
+	# Search String
 	# The search string that we are comparing against
-	search: null # String
+	searchString: null # String
 
 	# Value
 	# The discovered value of the pill within the search
@@ -493,28 +511,31 @@ class Pill
 		regexString ='('+safePrefixesStr+')([^\\s]+)'
 
 		# Apply the regular expression
-		@regex = util.makeRegex(regexString)
+		@regex = util.createRegex(regexString)
 
 		# Chain
 		@
 
-	# Set Search
+	# Set Search String
 	# Apply the search string to the pill, and extract our value
 	# Returns the cleaned search string
-	setSearch: (search) ->
-		# Apply
-		@search = search
+	setSearchString: (searchString) ->
+		# Prepare
+		cleanedSearchString = searchString
+		value = null
 
 		# Extract information
-		@match = @regex.exec(search);
-		if @match 
-			@value = @match[2].trim()
-			search = search.replace(@match[0],'').trim()
-		else
-			@value = null
+		match = @regex.exec(searchString)
+		if match 
+			value = match[2].trim()
+			cleanedSearchString = searchString.replace(match[0],'').trim()
+
+		# Apply
+		@searchString = searchString
+		@value = value
 		
 		# Return cleaned search
-		return @search
+		return cleanedSearchString
 
 	# Test
 	# Test our pill against our discovered values
@@ -727,8 +748,8 @@ class Query
 # Prepare
 exports = {
 	safeRegex: util.safeRegex,
-	makeRegex: util.makeRegex,
-	makeSafeRegex: util.makeSafeRegex,
+	createRegex: util.createRegex,
+	createSafeRegex: util.createSafeRegex,
 	toArray: util.toArray,
 	Hash
 	BaseCollection

@@ -1,19 +1,26 @@
 {
 	"name": "query-engine",
-	"version": "0.6.0",
-	"description": "A NoSQL (and MongoDB compliant) Query Engine coded in CoffeeScript for Server-Side use with Node.js and Client-Side use with url-Browsers",
-	"homepage": "https://github.com/balupton/query-engine.npm",
+	"version": "1.0.0",
+	"description": "Query-Engine is a NoSQL and MongoDb compliant query engine. It can run on the server-side with Node.js, or on the client-side within web browsers",
+	"homepage": "https://github.com/bevry/query-engine",
 	"keywords": [
 		"coffeescript",
 		"query-engine",
 		"nosql",
 		"query",
-		"sql"
+		"sql",
+		"pills",
+		"search",
+		"searching",
+		"lucene",
+		"filter",
+		"filtering",
+		"collections"
 	],
 	"author": {
-		"name": "Benjamin Lupton",
-		"email": "b@lupton.cc",
-		"url": "http://balupton.com"
+		"name": "Bevry Pty Ltd",
+		"email": "us@bevry.me",
+		"url": "http://bevry.me"
 	},
 	"maintainers": [
 		{
@@ -30,7 +37,7 @@
 		}
 	],
 	"bugs": {
-		"url": "https://github.com/balupton/query-engine.npm/issues"
+		"url": "https://github.com/bevry/query-engine/issues"
 	},
 	"licenses": [
 		{
@@ -40,14 +47,13 @@
 	],
 	"repository" : {
 		"type" : "git",
-		"url" : "http://github.com/balupton/query-engine.npm.git"
+		"url" : "http://github.com/bevry/query-engine.git"
 	},
 	"dependencies": {
 		"underscore": "1.3.x",
 		"backbone": "0.9.x"
 	},
 	"devDependencies": {
-		"docco": "0.3.x",
 		"mocha": "0.14.x"
 	},
 	"engines" : {

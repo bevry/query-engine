@@ -1,5 +1,26 @@
 ## History
 
+- v1.0.0 March 14, 2012
+	- Large rewrite, and backwards compatibility breaking release
+	- Introduces the dependencies:
+		- [Underscore.js](http://documentcloud.github.com/underscore/)
+		- [Backbone.js](http://documentcloud.github.com/backbone/)
+	- Introduces these features:
+		- Live Collections
+			- Live Collections, instead of re-querying everything when something changes, instead we test a model when it is added or changed. This means that our live collections are always in the correct state, and update dynamicly.
+			- They also support binding to a parent collection
+		- Queries
+			- These are the v0.x NoSQL type queries
+		- Filters
+			- These are custom functions that will fire and test the models
+		- Searching
+			- You can now do text based searches against collections, the search string is passed to the filters
+		- Pills
+			- For text based searches we allow for the concept of pills, e.g. `user:ben status:awesome`
+	- Other changes:
+		- New demo page allows you to modify the actual code that performs the query, instead of just the query itself
+
+
 - v0.6.0 February 11, 2012
 	- Moved unit tests to [Mocha](http://visionmedia.github.com/mocha/)
 	- Added [docco](http://jashkenas.github.com/docco/) docs
