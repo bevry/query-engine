@@ -32,7 +32,7 @@ Query-Engine is a [NoSQL](http://www.mongodb.org/display/DOCS/Advanced+Queries) 
 		``` html
 		<script src="http://documentcloud.github.com/underscore/underscore-min.js"></script>
 		<script src="http://documentcloud.github.com/backbone/backbone-min.js"></script>
-		<script src="http://raw.github.com/balupton/query-engine.npm/master/lib/query-engine.js"></script>
+		<script src="http://raw.github.com/bevry/query-engine/master/lib/query-engine.js"></script>
 		```
 	
 	2. Access Query-Engine via the `window.queryEngine` variable
