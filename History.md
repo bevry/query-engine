@@ -1,5 +1,9 @@
 ## History
 
+- v1.1.1 April 2, 2012
+	- Fixed the ability to specify filters, queries and pills via `options`
+	- Fixed an issue with pills and searching
+
 - v1.1.0 April 2, 2012
 	- Upgraded Mocha to v1.0.0 from v0.14.0
 	- Updated Backbone.js to 0.9.2 from 0.9.1

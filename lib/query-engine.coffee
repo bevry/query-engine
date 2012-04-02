@@ -108,15 +108,23 @@ QueryCollection = Backbone.Collection.extend
 	# Constructor
 	initialize: (models,options) ->
 		# Defaults
-		@options = _.extend({},options);
-		@options.filters or= {};
-		@options.pills or= {};
-		@options.queries or= {};
+		@options = _.extend({}, @options or {}, options)
+		@options.filters or= {}
+		@options.queries or= {}
+		@options.pills or= {}
 		@options.searchString or= null
 
 		# Bindings
 		_.bindAll(@, 'onChange', 'onParentChange', 'onParentRemove', 'onParentAdd', 'onParentReset')
 		
+		# Filters, Queries, Pills
+		for own key,value of @options.filters
+			@setFilter(key,value)
+		for own key,value of @options.queries
+			@setQuery(key,value)
+		for own key,value of @options.pills
+			@setPill(key,value)
+
 		# Set
 		if @options.parentCollection?
 			@setParentCollection(@options.parentCollection,true)
@@ -435,7 +443,8 @@ QueryCollection = Backbone.Collection.extend
 		# Apply the search string to each of our pills
 		# and for each applicable pill, clean up our search string
 		_.each pills, (pill,pillName) ->
-			cleanedSearchString = pill.setSearchString(searchString)
+			cleanedSearchString = pill.setSearchString(cleanedSearchString)
+			return true
 
 		# Apply
 		@options.searchString = searchString
@@ -501,7 +510,7 @@ QueryCollection = Backbone.Collection.extend
 		pills = @options.pills
 
 		# Cycle
-		if searchString
+		if searchString?
 			_.each pills, (pill,pillName) ->
 				if pill.test(model) is false
 					pass = false
@@ -568,8 +577,7 @@ class Pill
 		value = null
 
 		# Extract information
-		match = @regex.exec(searchString)
-		if match 
+		while match = @regex.exec(searchString)
 			value = match[2].trim()
 			cleanedSearchString = searchString.replace(match[0],'').trim()
 
