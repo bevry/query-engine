@@ -98,12 +98,54 @@ class Hash extends Array
 
 
 
-# Base Collection
-# Handles basic query engine collection functionality
-BaseCollection = Backbone.Collection.extend
+# Query Collection
+# Creates a Collection that Supports Querying
+QueryCollection = Backbone.Collection.extend
 	# Model
 	# The model that this query engine supports
 	model: Backbone.Model
+
+	# Constructor
+	initialize: (models,options) ->
+		# Defaults
+		@options = _.extend({},options);
+		@options.filters or= {};
+		@options.pills or= {};
+		@options.queries or= {};
+		@options.searchString or= null
+
+		# Bindings
+		_.bindAll(@, 'onChange', 'onParentChange', 'onParentRemove', 'onParentAdd', 'onParentReset')
+		
+		# Set
+		if @options.parentCollection?
+			@setParentCollection(@options.parentCollection,true)
+
+		# Live
+		@live()
+
+		# Chain
+		@
+
+	# Set Parent Collection
+	setParentCollection: (parentCollection,skipCheck) ->
+		# Check
+		if !skipCheck and @options.parentCollection is parentCollection
+			return @ # nothing to do
+
+		# Apply
+		@options.parentCollection = parentCollection
+
+		# Live
+		@live()
+
+		# Chain
+		@
+
+
+	# ---------------------------------
+	# Helpers
+	# Used to assist our other functions
 
 	# Has Model
 	# Does this model exist within our collection?
@@ -142,96 +184,40 @@ BaseCollection = Backbone.Collection.extend
 			this.add(model)
 		@
 
+
+	# ---------------------------------
+	# Generic API
+	
 	# Sort Array
+	# Return the results as an array sorted by our comparator
 	sortArray: (comparator) ->
 		# Prepare
 		arr = @toJSON()
 
 		# Sort
-		if comparator instanceof Function
-			arr.sort(comparator)
-		else if comparator instanceof Object
-			for own key,value of comparator
-				# Descending
-				if value is -1
-					arr.sort (a,b) ->
-						b[key] - a[key]
-				# Ascending
-				else if value is 1
-					arr.sort (a,b) ->
-						a[key] - b[key]
+		if comparator
+			if comparator instanceof Function
+				arr.sort(comparator)
+			else if comparator instanceof Object
+				for own key,value of comparator
+					# Descending
+					if value is -1
+						arr.sort (a,b) ->
+							b[key] - a[key]
+					# Ascending
+					else if value is 1
+						arr.sort (a,b) ->
+							a[key] - b[key]
+			else
+				throw new Error('Unknown comparator type was passed to QueryCollection::sortArray')
 		else
-			throw new Error('Cannot sort a set without a comparator')
+			if @comparator
+				return @sortArray(@comparator)
+			else
+				throw new Error('Cannot sort a set without a comparator')
 
 		# Return sorted array
 		return arr
-
-	# Create Live Collection
-	createLiveCollection: ->
-		collection = new LiveCollection()
-			.setParentCollection(@)
-		return collection
-
-	# Find
-	find: (query) ->
-		collection = @createLiveCollection()
-			.setQuery('find',query)
-			.query()
-		return collection
-
-	# Find One
-	findOne: (query) ->
-		collection = @createLiveCollection()
-			.setQuery('find',query)
-			.query()
-		if collection and collection.length
-			return collection.models[0]
-		else
-			return null
-
-
-
-# Live Collection
-LiveCollection = BaseCollection.extend
-
-	# Constructor
-	initialize: (models,options) ->
-		# Defaults
-		@options = _.extend({},options);
-		@options.filters or= {};
-		@options.pills or= {};
-		@options.queries or= {};
-		@options.searchString or= null
-
-		# Bindings
-		_.bindAll(@, 'onChange', 'onParentChange', 'onParentRemove', 'onParentAdd', 'onParentReset')
-		@on('change',@onChange)
-
-		# Set
-		if @options.parentCollection?
-			@setParentCollection(@options.parentCollection,true)
-
-		# Chain
-		@
-
-	# Set Parent Collection
-	setParentCollection: (parentCollection,skipCheck) ->
-		# Check
-		if !skipCheck and @options.parentCollection is parentCollection
-			return @ # nothing to do
-
-		# Apply
-		@options.parentCollection = parentCollection
-
-		# Subscribe the live events to our parent collection
-		@options.parentCollection
-			.on('change',@onParentChange)
-			.on('remove',@onParentRemove)
-			.on('add',@onParentAdd)
-			.on('reset',@onParentReset)
-
-		# Chain
-		@
 
 	# Query
 	# Reset our collection with the new rules that we are using
@@ -253,10 +239,63 @@ LiveCollection = BaseCollection.extend
 		# Chain
 		@
 
+	# Create Child Collection
+	createChildCollection: ->
+		collection = new QueryCollection()
+			.setParentCollection(@)
+		return collection
+
+	# Find All
+	findAll: (query) ->
+		collection = @createChildCollection()
+			.setQuery('find',query)
+			.query()
+		return collection
+
+	# Find One
+	findOne: (query) ->
+		collection = @createChildCollection()
+			.setQuery('find',query)
+			.query()
+		if collection and collection.length
+			return collection.models[0]
+		else
+			return null
+
 	
 	# ---------------------------------
 	# Live Functionality
 	# Used so we can live update the collection when modifications are made to our collection
+
+	# Live
+	live: (enabled) ->
+		# Prepare
+		enabled ?= @options.live
+		
+		# Save live mode
+		@options.live = enabled
+
+		# Subscribe to change events on our existing models
+		if enabled
+			@on('change',@onChange)
+		else
+			@off('change',@onChange)
+
+		# Subscribe the live events to our parent collection
+		if @options.parentCollection?
+			if enabled
+				@options.parentCollection.on('change',@onParentChange)
+				@options.parentCollection.on('remove',@onParentRemove)
+				@options.parentCollection.on('add',@onParentAdd)
+				@options.parentCollection.on('reset',@onParentReset)
+			else
+				@options.parentCollection.off('change',@onParentChange)
+				@options.parentCollection.off('remove',@onParentRemove)
+				@options.parentCollection.off('add',@onParentAdd)
+				@options.parentCollection.off('reset',@onParentReset)
+
+		# Chain
+		@
 
 	# Fired when we want to add some models to our own collection
 	# We should check if the models pass our tests, if so then we add them
@@ -472,6 +511,10 @@ LiveCollection = BaseCollection.extend
 		return pass
 
 
+# Pill
+# Provides the ability to perform pill based searches, e.g.
+# Searching for "user:ben" will search for the key user, and value ben
+# Pills must be coded manually, as otherwise that could be a security problem
 class Pill
 	# Callback
 	# Our pills tester function
@@ -752,17 +795,16 @@ exports = {
 	createSafeRegex: util.createSafeRegex,
 	toArray: util.toArray,
 	Hash
-	BaseCollection
-	LiveCollection
+	QueryCollection
 	Query
 	Pill
-	createCollection: (models) ->
+	createCollection: (models,options) ->
 		models = util.toArray(models)
-		collection = new BaseCollection(models)
+		collection = new QueryCollection(models,options)
 		return collection
-	createLiveCollection: (models) ->
+	createLiveCollection: (models,options) ->
 		models = util.toArray(models)
-		collection = new LiveCollection(models)
+		collection = new QueryCollection(models,options).live(true)
 		return collection
 }
 

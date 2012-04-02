@@ -141,6 +141,7 @@ describe 'live queries', ->
 		assert.deepEqual actual, expected
 
 
+describe 'live parent queries', ->
 
 	# Perform a query with a parent collection
 	it 'should support parent collections', ->

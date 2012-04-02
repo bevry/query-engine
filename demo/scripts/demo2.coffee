@@ -12,14 +12,15 @@ performQuery = ->
 		inCollection = eval(code)
 		resultCollection = queryEngine.createCollection(inCollection)
 		resultCoffee = Js2coffee.build 'var result = ' + JSON.stringify resultCollection
-		editors.result.getSession().setValue resultCoffee
+		editors.result.getSession().setValue(resultCoffee)
 
 	catch err
+		errMessage = err.toString()
 		console.log err
-		editors.result.getSession().setValue err.toString()
+		editors.result.getSession().setValue(errMessage)
 
 # Bind our change event to the code input
-editors.code.getSession().on 'change', performQuery
+editors.code.getSession().on('change', performQuery)
 
 # Perform the initial query
 performQuery()

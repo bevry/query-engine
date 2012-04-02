@@ -3,3 +3,4 @@
 --ignore-leaks
 --growl
 --bail
+--compilers coffee:coffee-script

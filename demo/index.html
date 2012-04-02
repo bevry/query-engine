@@ -20,10 +20,10 @@
 			padding-bottom:10px;
 		}
 		.code {
-			height: 600px;
+			height: 300px;
 		}
 		.result {
-			height: 400px;
+			height: 300px;
 		}
 	</style>
 </head>
@@ -62,7 +62,7 @@ models = [
 # Perform a query to find only the items that have the tag "jquery"
 if true
 	result = queryEngine.createCollection(models)
-		.find({
+		.findAll({
 			tags:
 				$has: ['jquery']
 		})

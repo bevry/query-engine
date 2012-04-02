@@ -1,5 +1,14 @@
 ## History
 
+- v1.1.0 April 2, 2012
+	- Upgraded Mocha to v1.0.0 from v0.14.0
+	- Updated Backbone.js to 0.9.2 from 0.9.1
+	- Merged `BaseCollection` and `LiveCollection` into `QueryCollection`
+	- Added `live([true/false])` to `QueryCollection`
+		- Use this to subscribe to events on your collection and parent collection
+	- Renamed `createLiveCollection` to `createChildCollection` on `QueryCollection`
+	- Renamed `find` to `findAll` on `QueryCollection` to not conflict with Backbone's find command
+
 - v1.0.0 March 14, 2012
 	- Large rewrite, and backwards compatibility breaking release
 	- Introduces the dependencies:
