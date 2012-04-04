@@ -380,7 +380,7 @@ QueryCollection = Backbone.Collection.extend
 	# We should reset our own collection when this happens with the parent collection's models
 	# For each model, it will trigger _prepareModel which will check if the model passes our tests
 	onParentReset: (model) ->
-		@reset(@parentCollection.models)
+		@reset(@options.parentCollection.models)
 		@
 
 
