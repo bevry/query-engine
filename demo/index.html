@@ -10,29 +10,42 @@
 
 	<!-- Styles -->
 	<style>
+		h2 {
+			font-size: 150%;
+			padding: 0;
+			margin: 0;
+		}
 		.pad,.editor {
 			width: 100%;
-			height: 300px;
+			height: 600px;
 			margin:0;
 			padding:0;
 		}
 		.pad {
+			width: 50%;
 			padding-bottom:10px;
 		}
-		.code {
-			height: 300px;
+		.editor {
+			border: 1px solid #AAA;
 		}
-		.result {
-			height: 300px;
+		.code.pad {
+			float:left;
+		}
+		.result.pad {
+			float:right;
 		}
 	</style>
 </head>
 <body>
-<h1><a href="https://github.com/bevry/query-engine">Query Engine</a></h1>
-<p>Query-Engine is a <a href="http://www.mongodb.org/display/DOCS/Advanced+Queries">NoSQL</a> and <a href="http://www.mongodb.org/">MongoDb</a> compliant query engine. It can run on the server-side with <a href="http://nodejs.org/">Node.js</a>, or on the client-side within web browsers.</p>
 
-Code:
+<div class="header">
+	<h1><a href="https://github.com/bevry/query-engine">Query Engine</a></h1>
+	<p>Query-Engine is a <a href="http://www.mongodb.org/display/DOCS/Advanced+Queries">NoSQL</a> and <a href="http://www.mongodb.org/">MongoDb</a> compliant query engine. It can run on the server-side with <a href="http://nodejs.org/">Node.js</a>, or on the client-side within web browsers.</p>
+</div>
+
+<div class="content">
 <div class="pad code">
+<h2>Code:</h2>
 <pre id="code" class="editor code">
 # Create a simple array of all our models
 models = [
@@ -113,18 +126,20 @@ return result
 </pre>
 </div>
 
-Result:
 <div class="pad result">
+<h2>Result:</h2>
 <pre id="result" class="editor result">
 </pre>
+</div>
 </div>
 
 
 <!-- Scripts -->
-<script src="lib/coffee-script.js"></script>
-<script src="lib/underscore-min.js"></script>
-<script src="lib/backbone-min.js"></script>
-<script src="lib/js2coffee.min.js"></script>
+<script src="lib/coffeescript.js"></script>
+<script src="lib/jquery.js"></script>
+<script src="lib/underscore.js"></script>
+<script src="lib/backbone.js"></script>
+<script src="lib/js2coffee.js"></script>
 <script src="lib/ace/ace.js"></script>
 <script src="lib/ace/mode-coffee.js"></script>
 <script src="../lib/query-engine.js"></script>

@@ -253,6 +253,11 @@ QueryCollection = Backbone.Collection.extend
 			.setParentCollection(@)
 		return collection
 
+	# Create Live Child Collection
+	createLiveChildCollection: ->
+		collection = @createChildCollection().live(true)
+		return collection
+
 	# Find All
 	findAll: (query) ->
 		collection = @createChildCollection()

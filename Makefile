@@ -4,4 +4,7 @@ test:
 test-global:
 	mocha
 
-.PHONY: test test-global
+compile:
+	coffee -c lib/query-engine.coffee
+
+.PHONY: test test-global compile

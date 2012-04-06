@@ -1,5 +1,12 @@
 ## History
 
+- v1.1.2 April 6, 2012
+	- Fixed `reset` on a parent collection not triggering the appropriate handler for a live child collection
+		- Thanks to [Nicholas Firth-McCoy](https://github.com/bevry/query-engine/pull/3)
+	- Updated the demo with better styling and horizontal columns now instead of vertical
+	- Added way more unit tests for live parent collections and live events
+	- Added `createLiveChildCollection` to `QueryCollection`
+
 - v1.1.1 April 2, 2012
 	- Fixed the ability to specify filters, queries and pills via `options`
 	- Fixed an issue with pills and searching

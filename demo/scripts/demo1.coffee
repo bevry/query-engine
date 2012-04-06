@@ -1,3 +1,11 @@
+# Set pad widths to half of the screen
+$(window)
+	.resize ->
+		padWidth = $(window).width()/2 - 20
+		padHeight = $(window).height() - $('.header:first').height() - 80
+		$('.pad,.editor').width(padWidth).height(padHeight)
+	.trigger('resize')
+
 # Load in the coffescript Ace editor mode
 coffeeMode = require('ace/mode/coffee').Mode
 coffeeModeInstance = new coffeeMode()
