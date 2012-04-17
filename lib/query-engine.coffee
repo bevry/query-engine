@@ -316,19 +316,20 @@ QueryCollection = Backbone.Collection.extend
 		# Prepare
 		options = if options then _.clone(options) else {}
 		models = if _.isArray(models) then models.slice() else [models]
-		passedModels = []
 
 		# Cycle through the models
-		for model in models
+		passedModels = for model in models
 			# Prepare
 			model = @_prepareModel(model,options)
 
 			# Check
 			if model and @test(model)
-				passedModels.push(model)
+				model
+			else
+				# empty else to make sure model is pushed to passedModels when it passes the test
 
 		# Add the passed models
-		Backbone.Collection.prototype.add.apply(@,[passedModels,options])
+		Backbone.Collection::add.apply(@,[passedModels,options])
 
 		# Chain
 		@
@@ -343,7 +344,7 @@ QueryCollection = Backbone.Collection.extend
 		# Check
 		if model and @test(model)
 			# It passed, so create the model
-			Backbone.Collection.prototype.create.apply(@,[model,options])
+			Backbone.Collection::create.apply(@,[model,options])
 
 		# Chain
 		@
