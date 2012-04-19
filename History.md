@@ -1,5 +1,11 @@
 ## History
 
+- v1.1.3 April 19, 2012
+	- For development, we've added CoffeeScript as a `devDependency` and added `make dev` to keep the compiled Query-Engine up to date using it
+	- Query-Engine for Node now includes the compiled Query-Engine code, rather than the source CoffeeScript version
+		- This means you no longer have to `require('coffee-script')` just to use Query-Engine with Node
+	- Thanks to [Farid Neshat](https://github.com/alFReD-NSH) for the pull requests
+
 - v1.1.2 April 6, 2012
 	- Fixed `reset` on a parent collection not triggering the appropriate handler for a live child collection
 		- Thanks to [Nicholas Firth-McCoy](https://github.com/bevry/query-engine/pull/3)

@@ -1,6 +1,7 @@
 # Requires
+path = require('path')
+queryEngine = require(path.join __dirname, '..', 'lib', 'query-engine.js')
 assert = require('assert')
-queryEngine = require("#{__dirname}/../lib/query-engine.coffee")
 Backbone = require('backbone')
 
 

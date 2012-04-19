@@ -5,6 +5,9 @@ test-global:
 	mocha
 
 compile:
-	coffee -c lib/query-engine.coffee
+	./node_modules/.bin/coffee -c lib/query-engine.coffee
 
-.PHONY: test test-global compile
+dev:
+	./node_modules/.bin/coffee -w -c lib/query-engine.coffee
+
+.PHONY: test test-global compile dev

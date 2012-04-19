@@ -8,7 +8,7 @@ Query-Engine is a [NoSQL](http://www.mongodb.org/display/DOCS/Advanced+Queries) 
 
 ## Installation
 
-- Server-Side with Node.js and CoffeeScript
+- Server-Side with Node.js
 
 	1. [Install Node.js](https://github.com/balupton/node/wiki/Installing-Node.js)
 
@@ -20,8 +20,8 @@ Query-Engine is a [NoSQL](http://www.mongodb.org/display/DOCS/Advanced+Queries) 
 	
 	3. Require
 
-		``` coffeescript
-		queryEngine = require('query-engine')
+		``` javascript
+		var queryEngine = require('query-engine');
 		```
 
 
