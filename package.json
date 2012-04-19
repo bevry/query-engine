@@ -54,7 +54,8 @@
 		"backbone": "0.9.x"
 	},
 	"devDependencies": {
-		"mocha": "1.0.x"
+		"mocha": "1.0.x",
+		"coffee-script": "1.3.x"
 	},
 	"engines" : {
 		"node": ">=0.4.0"
