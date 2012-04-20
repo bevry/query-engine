@@ -109,9 +109,9 @@ QueryCollection = Backbone.Collection.extend
 	initialize: (models,options) ->
 		# Defaults
 		@options = _.extend({}, @options or {}, options)
-		@options.filters or= {}
-		@options.queries or= {}
-		@options.pills or= {}
+		@options.filters = _.extend({}, @options.filters)
+		@options.queries = _.extend({}, @options.queries)
+		@options.pills = _.extend({}, @options.pills)
 		@options.searchString or= null
 
 		# Bindings
