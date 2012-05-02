@@ -5,6 +5,7 @@ node_js:
 notifications:
   irc:
     - "irc.freenode.org#bevry"
+    - "irc.freenode.org#docpad"
   email:
     recipients:
       - queryengine@bevry.me
