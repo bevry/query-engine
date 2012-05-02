@@ -21,32 +21,32 @@ Query-Engine provides extensive Querying, Filtering, and Searching abilities for
 
 ### Server-Side with Node.js
 
-	1. [Install Node.js](https://github.com/balupton/node/wiki/Installing-Node.js)
+1. [Install Node.js](https://github.com/balupton/node/wiki/Installing-Node.js)
 
-	2. Install
-		
-		``` bash
-		npm install query-engine
-		```
+2. Install
 	
-	3. Require
+	``` bash
+	npm install query-engine
+	```
 
-		``` javascript
-		var queryEngine = require('query-engine');
-		```
+3. Require
+
+	``` javascript
+	var queryEngine = require('query-engine');
+	```
 
 
 ### Client-Side with Web Browsers
 
-	1. Include the necessary scripts
-		
-		``` html
-		<script src="http://documentcloud.github.com/underscore/underscore-min.js"></script>
-		<script src="http://documentcloud.github.com/backbone/backbone-min.js"></script>
-		<script src="http://raw.github.com/bevry/query-engine/master/lib/query-engine.js"></script>
-		```
+1. Include the necessary scripts
 	
-	2. Access Query-Engine via the `window.queryEngine` variable
+	``` html
+	<script src="http://documentcloud.github.com/underscore/underscore-min.js"></script>
+	<script src="http://documentcloud.github.com/backbone/backbone-min.js"></script>
+	<script src="http://raw.github.com/bevry/query-engine/master/lib/query-engine.js"></script>
+	```
+
+2. Access Query-Engine via the `window.queryEngine` variable
 
 
 
