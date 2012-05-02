@@ -1,6 +1,9 @@
 # Query-Engine
 
-Query-Engine provides extensive Querying, Filtering, and Searching abilities for [Backbone.js Collections](http://documentcloud.github.com/backbone/#Collection) and JavaScript arrays and objects in general too. In summary, it:
+Query-Engine provides extensive Querying, Filtering, and Searching abilities for [Backbone.js Collections](http://documentcloud.github.com/backbone/#Collection) as well as JavaScript arrays and objects.
+
+
+## Features
 
 * includes a [live interactive demo](http://bevry.github.com/query-engine/demo/)
 * currently [source-code documentation](https://github.com/bevry/query-engine/blob/master/lib/query-engine.coffee#files) only
