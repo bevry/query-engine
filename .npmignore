@@ -1,0 +1,8 @@
+.DS_Store
+.git*
+.travis*
+*.md
+Makefile
+demo/
+test/
+lib/*.coffee
