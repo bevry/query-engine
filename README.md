@@ -4,6 +4,18 @@ Query-Engine is a [NoSQL](http://www.mongodb.org/display/DOCS/Advanced+Queries) 
 
 [You can give Query-Engine a go inside your web browser by clicking here.](http://bevry.github.com/query-engine/demo/)
 
+## Features
+
+* provides extensive querying, filtering, and searching functionality for backbone.js collections
+* includes [live interactive demo](http://bevry.github.com/query-engine/demo/)
+* currently [source-code documentation only](https://github.com/bevry/query-engine/blob/master/lib/query-engine.coffee#files)
+* runs on node.js and in the browser
+* supports [NoSQL](http://www.mongodb.org/display/DOCS/Advanced+Queries) queries (like [MongoDb](http://www.mongodb.org/) )
+* supports filters (applying a filter function to a collection)
+* supports search strings (useful for turning search input fields into useful queries)
+* supports pills for search strings (e.g. `author:ben priority:important`)
+* supports optional live collections (when a model is changed, added or removed, it can automatically be tested against the collections queries, filters, and search string, if it fails, remove it from the collection)
+* supports parent and child collections (when a parent collection has a model removed, it is removed from the child collection too, when a parent collection has a model added or changed, it is retested against the child collection)
 
 
 ## Installation
