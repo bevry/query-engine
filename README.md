@@ -1,4 +1,4 @@
-# Query-Engine
+# Query-Engine [![Build Status](https://secure.travis-ci.org/bevry/query-engine.png?branch=master)](http://travis-ci.org/bevry/query-engine)
 
 Query-Engine provides extensive Querying, Filtering, and Searching abilities for [Backbone.js Collections](http://documentcloud.github.com/backbone/#Collection) as well as JavaScript arrays and objects.
 
@@ -23,7 +23,7 @@ Query-Engine provides extensive Querying, Filtering, and Searching abilities for
 1. [Install Node.js](https://github.com/balupton/node/wiki/Installing-Node.js)
 
 2. Install Query-Engine
-	
+
 	``` bash
 	npm install query-engine
 	```
@@ -38,7 +38,7 @@ Query-Engine provides extensive Querying, Filtering, and Searching abilities for
 ### Client-Side with Web Browsers
 
 1. Include the necessary scripts
-	
+
 	``` html
 	<script src="http://documentcloud.github.com/underscore/underscore-min.js"></script>
 	<script src="http://documentcloud.github.com/backbone/backbone-min.js"></script>
