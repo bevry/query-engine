@@ -35,7 +35,7 @@ util =
 					result.push(item)
 			else
 				result.push(value)
-		
+
 		# Return the result
 		result
 
@@ -100,6 +100,12 @@ class Hash extends Array
 
 # Query Collection
 # Creates a Collection that Supports Querying
+# Options:
+# - filters: a hash of filter functions
+# - queries: a hash of query instances or query objects
+# - pills: a hash of pill instances or pill objects
+# - parentCollection: a backbone.js collection to be used as the parent
+# - live: whether or not to automaticaly perform retests when events fire
 QueryCollection = Backbone.Collection.extend
 	# Model
 	# The model that this query engine supports
@@ -107,33 +113,174 @@ QueryCollection = Backbone.Collection.extend
 
 	# Constructor
 	initialize: (models,options) ->
-		# Defaults
-		@options = _.extend({}, @options or {}, options)
-		@options.filters = _.extend({}, @options.filters)
-		@options.queries = _.extend({}, @options.queries)
-		@options.pills = _.extend({}, @options.pills)
-		@options.searchString or= null
-
 		# Bindings
 		_.bindAll(@, 'onChange', 'onParentChange', 'onParentRemove', 'onParentAdd', 'onParentReset')
-		
-		# Filters, Queries, Pills
-		for own key,value of @options.filters
-			@setFilter(key,value)
-		for own key,value of @options.queries
-			@setQuery(key,value)
-		for own key,value of @options.pills
-			@setPill(key,value)
 
-		# Set
-		if @options.parentCollection?
-			@setParentCollection(@options.parentCollection,true)
+		# Defaults
+		@options = _.extend({}, @options or {}, options or {})
+		@options.filters = _.extend({}, @options.filters or {})
+		@options.queries = _.extend({}, @options.queries or {})
+		@options.pills = _.extend({}, @options.pills or {})
+		@options.searchString or= null
 
-		# Live
+		# Initialise filters, queries and pills if we have them
+		@setFilters(@options.filters)
+		@setQueries(@options.queries)
+		@setPills(@options.pills)
+		@setSearchString(@options.searchString)
+
+		# Initliase live events if we use them
 		@live()
 
 		# Chain
 		@
+
+
+	# ---------------------------------
+	# Filters: Getters and Setters
+
+	# Get Filters
+	getFilter: (key) ->
+		@options.filters[key]
+
+	# Get Filters
+	getFilters: ->
+		@options.filters
+
+	# Set Filters
+	setFilters: (filters) ->
+		filters or= {}
+		for own key,value of filters
+			@setFilter(key,value)
+		@
+
+	# Set Filter
+	setFilter: (name,value) ->
+		# Prepare
+		filters = @options.filters
+
+		# Apply or delete the value
+		if value?
+			filters[name] = value
+		else if filters[name]?
+			delete filters[name]
+
+		# Apply or delete the value
+		@
+
+
+	# ---------------------------------
+	# Queries: Getters and Setters
+
+	# Get Query
+	getQuery: (key) ->
+		@options.queries[key]
+
+	# Get Queries
+	getQueries: ->
+		@options.queries
+
+	# Set Queries
+	setQueries: (queries) ->
+		queries or= {}
+		for own key,value of queries
+			@setQuery(key,value)
+		@
+
+	# Set Query
+	setQuery: (name,value) ->
+		# Prepare
+		queries = @options.queries
+
+		# Apply or delete the value
+		if value?
+			value = new Query(value)  unless (value instanceof Query)
+			queries[name] = value
+		else if queries[name]?
+			delete queries[name]
+
+		# Chain
+		@
+
+
+	# ---------------------------------
+	# Pills: Getters and Setters
+
+	# Get Pill
+	getPill: (key) ->
+		@options.pills[key]
+
+	# Get Pills
+	getPills: ->
+		@options.pills
+
+	# Set Pills
+	setPills: (pills) ->
+		pills or= {}
+		for own key,value of pills
+			@setPill(key,value)
+		@
+
+	# Set Pill
+	setPill: (name,value) ->
+		# Prepare
+		pills = @options.pills
+		searchString = @options.searchString
+
+		# Apply or delete the value
+		if value?
+			value = new Pill(value)  unless (value instanceof Pill)
+			if searchString
+				value.setSearchString(searchString)
+			pills[name] = value
+		else if pills[name]?
+			delete pills[name]
+
+		# Chain
+		@
+
+
+	# ---------------------------------
+	# Search String: Getters and Setters
+
+	# Get Cleaned Search String
+	getCleanedSearchString: ->
+		@options.cleanedSearchString
+
+	# Get Search String
+	getSearchString: ->
+		@options.searchString
+
+	# Set Search String
+	setSearchString: (searchString) ->
+		# Prepare
+		pills = @options.pills
+		cleanedSearchString = searchString
+
+		# Apply the search string to each of our pills
+		# and for each applicable pill, clean up our search string
+		_.each pills, (pill,pillName) ->
+			cleanedSearchString = pill.setSearchString(cleanedSearchString)
+			return true
+
+		# Apply
+		@options.searchString = searchString
+		@options.cleanedSearchString = cleanedSearchString
+
+		# Chain
+		@
+
+
+	# ---------------------------------
+	# Parent Collection: Getters and Setters
+
+	# Has Parent Collection
+	hasParentCollection: ->
+		@options.parentCollection?
+
+	# Get Parent Collection
+	getParentCollection: ->
+		@options.parentCollection
 
 	# Set Parent Collection
 	setParentCollection: (parentCollection,skipCheck) ->
@@ -195,7 +342,7 @@ QueryCollection = Backbone.Collection.extend
 
 	# ---------------------------------
 	# Generic API
-	
+
 	# Sort Array
 	# Return the results as an array sorted by our comparator
 	sortArray: (comparator) ->
@@ -233,7 +380,7 @@ QueryCollection = Backbone.Collection.extend
 		# Prepare
 		me = @
 		models = []
-		collection = @options.parentCollection or @
+		collection = @getParentCollection() or @
 
 		# Cycle through the parent collection finding passing models
 		collection.each (model) ->
@@ -275,7 +422,7 @@ QueryCollection = Backbone.Collection.extend
 		else
 			return null
 
-	
+
 	# ---------------------------------
 	# Live Functionality
 	# Used so we can live update the collection when modifications are made to our collection
@@ -284,7 +431,7 @@ QueryCollection = Backbone.Collection.extend
 	live: (enabled) ->
 		# Prepare
 		enabled ?= @options.live
-		
+
 		# Save live mode
 		@options.live = enabled
 
@@ -294,18 +441,19 @@ QueryCollection = Backbone.Collection.extend
 		else
 			@off('change',@onChange)
 
-		# Subscribe the live events to our parent collection
-		if @options.parentCollection?
+		# Subscribe the live events on our parent collection (if we have one)
+		parentCollection = @getParentCollection()
+		if parentCollection?
 			if enabled
-				@options.parentCollection.on('change',@onParentChange)
-				@options.parentCollection.on('remove',@onParentRemove)
-				@options.parentCollection.on('add',@onParentAdd)
-				@options.parentCollection.on('reset',@onParentReset)
+				parentCollection.on('change',@onParentChange)
+				parentCollection.on('remove',@onParentRemove)
+				parentCollection.on('add',@onParentAdd)
+				parentCollection.on('reset',@onParentReset)
 			else
-				@options.parentCollection.off('change',@onParentChange)
-				@options.parentCollection.off('remove',@onParentRemove)
-				@options.parentCollection.off('add',@onParentAdd)
-				@options.parentCollection.off('reset',@onParentReset)
+				parentCollection.off('change',@onParentChange)
+				parentCollection.off('remove',@onParentRemove)
+				parentCollection.off('add',@onParentAdd)
+				parentCollection.off('reset',@onParentReset)
 
 		# Chain
 		@
@@ -317,7 +465,7 @@ QueryCollection = Backbone.Collection.extend
 		options = if options then _.clone(options) else {}
 		models = if _.isArray(models) then models.slice() else [models]
 		passedModels = []
-		
+
 		# Cycle through the models
 		for model in models
 			# Ensure we have a model
@@ -325,7 +473,7 @@ QueryCollection = Backbone.Collection.extend
 
 			# Only add passed models
 			if model and @test(model)
-				passedModels.push(model) 
+				passedModels.push(model)
 
 		# Add the passed models
 		Backbone.Collection::add.apply(@,[passedModels,options])
@@ -361,7 +509,7 @@ QueryCollection = Backbone.Collection.extend
 	# We should check if the model now passes our own tests, and if so add it to our own
 	# and if it doesn't then we should remove the model from our own
 	onParentChange: (model) ->
-		pass = @test(model)
+		pass = @test(model) and @getParentCollection().test(model)
 		if pass
 			@safeAdd(model)
 		else
@@ -385,77 +533,7 @@ QueryCollection = Backbone.Collection.extend
 	# We should reset our own collection when this happens with the parent collection's models
 	# For each model, it will trigger _prepareModel which will check if the model passes our tests
 	onParentReset: (model) ->
-		@reset(@options.parentCollection.models)
-		@
-
-
-	# ---------------------------------
-	# Setters
-
-	# Set Filter
-	setFilter: (name,value) ->
-		# Prepare
-		filters = @options.filters
-
-		# Apply or delete the value
-		if value?
-			filters[name] = value
-		else if filters[name]?
-			delete filters[name]
-
-		# Apply or delete the value
-		@
-
-	# Set Query
-	setQuery: (name,value) ->
-		# Prepare
-		queries = @options.queries
-
-		# Apply or delete the value
-		if value?
-			value = new Query(value)  unless (value instanceof Query)
-			queries[name] = value
-		else if queries[name]?
-			delete queries[name]
-
-		# Chain
-		@
-
-	# Set Pill
-	setPill: (name,value) ->
-		# Prepare
-		pills = @options.pills
-		searchString = @options.searchString
-
-		# Apply or delete the value
-		if value?
-			value = new Pill(value)  unless (value instanceof Pill)
-			if searchString
-				value.setSearchString(searchString)
-			pills[name] = value
-		else if pills[name]?
-			delete pills[name]
-
-		# Chain
-		@
-
-	# Set Search String
-	setSearchString: (searchString) ->
-		# Prepare
-		pills = @options.pills
-		cleanedSearchString = searchString
-
-		# Apply the search string to each of our pills
-		# and for each applicable pill, clean up our search string
-		_.each pills, (pill,pillName) ->
-			cleanedSearchString = pill.setSearchString(cleanedSearchString)
-			return true
-
-		# Apply
-		@options.searchString = searchString
-		@options.cleanedSearchString = cleanedSearchString
-
-		# Chain
+		@reset(@getParentCollection().models)
 		@
 
 
@@ -474,8 +552,8 @@ QueryCollection = Backbone.Collection.extend
 	testFilters: (model) ->
 		# Prepare
 		pass = true
-		cleanedSearchString = @options.cleanedSearchString
-		filters = @options.filters
+		cleanedSearchString = @getCleanedSearchString()
+		filters = @getFilters()
 
 		# Cycle
 		_.each filters, (filter,filterName) ->
@@ -493,7 +571,7 @@ QueryCollection = Backbone.Collection.extend
 	testQueries: (model) ->
 		# Prepare
 		pass = true
-		queries = @options.queries
+		queries = @getQueries()
 
 		# Cycle
 		_.each queries, (query,queryName) ->
@@ -511,8 +589,8 @@ QueryCollection = Backbone.Collection.extend
 	testPills: (model) ->
 		# Prepare
 		pass = true
-		searchString = @options.searchString
-		pills = @options.pills
+		searchString = @getSearchString()
+		pills = @getPills()
 
 		# Cycle
 		if searchString?
@@ -533,7 +611,7 @@ class Pill
 	# Callback
 	# Our pills tester function
 	callback: null # Function
-	
+
 	# Regex
 	# Our pills regex that we will use to extract the values
 	regex: null # RegExp
@@ -589,7 +667,7 @@ class Pill
 		# Apply
 		@searchString = searchString
 		@value = value
-		
+
 		# Return cleaned search
 		return cleanedSearchString
 
@@ -675,13 +753,13 @@ class Query
 			# Array
 			else if _.isArray(selector)
 				if exists and (new Hash value).isSame(selector)
-					match = true  
-				
+					match = true
+
 			# Date
 			else if _.isDate(selector)
 				if exists and value.toString() is selector.toString()
-					match = true  
-			
+					match = true
+
 			# Regular Expression
 			else if _.isRegExp(selector)
 				if exists and selector.test(value)
@@ -694,21 +772,21 @@ class Query
 					if exists
 						if typeof value is 'string' and value.substr(0,selector.$beginsWith.length) is selector.$beginsWith
 							match = true
-				
+
 				# The $endsWith operator checks if the value ends with a particular value
 				if selector.$endsWith
 					if exists
 						if typeof value is 'string' and value.substr(selector.$endsWith.length*-1) is selector.$endsWith
 							match = true
-				
-				# The $all operator is similar to $in, but instead of matching any value in the specified array all values in the array must be matched. 
+
+				# The $all operator is similar to $in, but instead of matching any value in the specified array all values in the array must be matched.
 				if selector.$all
 					if exists
 						if (new Hash value).hasAll(selector.$all)
 							match = true
-				
+
 				# The $in operator is analogous to the SQL IN modifier, allowing you to specify an array of possible matches.
-				# The target field's value can also be an array; if so then the document matches if any of the elements of the array's value matches any of the $in field's values 
+				# The target field's value can also be an array; if so then the document matches if any of the elements of the array's value matches any of the $in field's values
 				if selector.$in
 					if exists
 						if (new Hash value).hasIn(selector.$in)
@@ -730,22 +808,22 @@ class Query
 						if (new Hash value).hasIn(selector.$hasAll)
 							match = true
 
-				# The $nin operator is similar to $in except that it selects objects for which the specified field does not have any value in the specified array. 
+				# The $nin operator is similar to $in except that it selects objects for which the specified field does not have any value in the specified array.
 				if selector.$nin
 					if exists
 						if (new Hash value).hasIn(selector.$nin) is false and (new Hash selector.$nin).hasIn(value) is false
 							match = true
-				
+
 				# The $size operator matches any array with the specified number of elements. The following example would match the object {a:["foo"]}, since that array has just one element:
 				if selector.$size
 					if value.length? and value.length is selector.$size
 						match = true
-			
+
 				# The $type operator matches values based on their BSON type.
 				if selector.$type
 					if typeof value is selector.$type
 						match = true
-				
+
 				# Check for existence (or lack thereof) of a field.
 				if selector.$exists
 					if selector.$exists
@@ -754,11 +832,11 @@ class Query
 					else
 						if exists is false
 							match = true
-				
+
 				# The $mod operator allows you to do fast modulo queries to replace a common case for where clauses.
 				if selector.$mod
 					match = false
-				
+
 				# Use $ne for "not equals".
 				if selector.$ne
 					if exists and value isnt selector.$ne
@@ -768,12 +846,12 @@ class Query
 				if selector.$lt
 					if exists and value < selector.$lt
 						match = true
-				
+
 				# greater than
 				if selector.$gt
 					if exists and value > selector.$gt
 						match = true
-				
+
 				# less than or equal to
 				if selector.$lte
 					if exists and value <= selector.$lte
@@ -783,13 +861,13 @@ class Query
 				if selector.$gte
 					if exists and value >= selector.$gte
 						match = true
-			
+
 			# Matched
 			if match
 				matchAny = true
 			else
 				matchAll = false
-		
+
 		# Match all
 		if matchAll and !matchAny
 			matchAll = false
