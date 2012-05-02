@@ -23,13 +23,13 @@ Query-Engine provides extensive Querying, Filtering, and Searching abilities for
 
 1. [Install Node.js](https://github.com/balupton/node/wiki/Installing-Node.js)
 
-2. Install
+2. Install Query-Engine
 	
 	``` bash
 	npm install query-engine
 	```
 
-3. Require
+3. Require Query-Engine
 
 	``` javascript
 	var queryEngine = require('query-engine');
