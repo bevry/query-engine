@@ -5,7 +5,7 @@ Query-Engine provides extensive Querying, Filtering, and Searching abilities for
 
 ## Features
 
-* includes a [live interactive demo](http://bevry.github.com/query-engine/demo/) with serveral examples, as well as [source-code documentation](https://github.com/bevry/query-engine/blob/master/lib/query-engine.coffee#files)
+* includes a [live interactive demo](http://bevry.github.com/query-engine/demo/) with several examples, as well as [source-code documentation](https://github.com/bevry/query-engine/blob/master/lib/query-engine.coffee#files)
 * runs on [node.js](http://nodejs.org/) and in the browser
 * supports [NoSQL](http://www.mongodb.org/display/DOCS/Advanced+Queries) queries (like [MongoDB](http://www.mongodb.org/))
 * supports filters (applying a filter function to a collection)
