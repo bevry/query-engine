@@ -1,21 +1,17 @@
 # Query-Engine
 
-Query-Engine is a [NoSQL](http://www.mongodb.org/display/DOCS/Advanced+Queries) and [MongoDb](http://www.mongodb.org/) compliant query engine. It can run on the server-side with [Node.js](http://nodejs.org/), or on the client-side within web browsers.
+Query-Engine provides extensive Querying, Filtering, and Searching abilities for [Backbone.js Collections](http://documentcloud.github.com/backbone/#Collection) and JavaScript arrays and objects in general too. In summary, it:
 
-[You can give Query-Engine a go inside your web browser by clicking here.](http://bevry.github.com/query-engine/demo/)
-
-## Features
-
-* provides extensive querying, filtering, and searching functionality for backbone.js collections
-* includes [live interactive demo](http://bevry.github.com/query-engine/demo/)
-* currently [source-code documentation only](https://github.com/bevry/query-engine/blob/master/lib/query-engine.coffee#files)
+* includes a [live interactive demo](http://bevry.github.com/query-engine/demo/)
+* currently [source-code documentation](https://github.com/bevry/query-engine/blob/master/lib/query-engine.coffee#files) only
 * runs on node.js and in the browser
-* supports [NoSQL](http://www.mongodb.org/display/DOCS/Advanced+Queries) queries (like [MongoDb](http://www.mongodb.org/) )
+* supports [NoSQL](http://www.mongodb.org/display/DOCS/Advanced+Queries) queries (like [MongoDB](http://www.mongodb.org/))
 * supports filters (applying a filter function to a collection)
 * supports search strings (useful for turning search input fields into useful queries)
 * supports pills for search strings (e.g. `author:ben priority:important`)
 * supports optional live collections (when a model is changed, added or removed, it can automatically be tested against the collections queries, filters, and search string, if it fails, remove it from the collection)
 * supports parent and child collections (when a parent collection has a model removed, it is removed from the child collection too, when a parent collection has a model added or changed, it is retested against the child collection)
+* actively maintained, supported, and implemented by several companies
 
 
 ## Installation
