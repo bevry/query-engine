@@ -19,7 +19,7 @@ Query-Engine provides extensive Querying, Filtering, and Searching abilities for
 
 ## Installation
 
-- Server-Side with Node.js
+### Server-Side with Node.js
 
 	1. [Install Node.js](https://github.com/balupton/node/wiki/Installing-Node.js)
 
@@ -36,7 +36,7 @@ Query-Engine provides extensive Querying, Filtering, and Searching abilities for
 		```
 
 
-- Client-Side with Web Browsers
+### Client-Side with Web Browsers
 
 	1. Include the necessary scripts
 		
