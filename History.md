@@ -1,5 +1,15 @@
 ## History
 
+- v1.1.6 May 8, 2012
+	- Cleaned the code up a little bit
+	- Aliases `$beginsWith` with `$startsWith`, and `$endsWith` with `$finishesWith`
+		- Which all now support array values, e.g. `something: $beginsWith: ['a','b','c']`
+	- Exposes the uses Backbone.js module through `QueryEngine.Backbone`
+		- You should use this instead of including your own backbone module due to [this bug](https://github.com/documentcloud/backbone/issues/1288) in Backbone.js
+
+- v1.1.4 and v1.1.5
+	- Bugfixes
+
 - v1.1.3 April 19, 2012
 	- For development, we've added CoffeeScript as a `devDependency` and added `make dev` to keep the compiled Query-Engine up to date using it
 	- Query-Engine for Node now includes the compiled Query-Engine code, rather than the source CoffeeScript version

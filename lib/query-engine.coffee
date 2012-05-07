@@ -30,7 +30,7 @@ util =
 		if value
 			if _.isArray(value)
 				result = value
-			else if value instanceof Object
+			else if _.isObject(value)
 				for own key,item of value
 					result.push(item)
 			else
@@ -106,7 +106,7 @@ class Hash extends Array
 # - pills: a hash of pill instances or pill objects
 # - parentCollection: a backbone.js collection to be used as the parent
 # - live: whether or not to automaticaly perform retests when events fire
-QueryCollection = Backbone.Collection.extend
+class QueryCollection extends Backbone.Collection
 	# Model
 	# The model that this query engine supports
 	model: Backbone.Model
@@ -707,7 +707,6 @@ class Query
 		for own field, selector of @query
 			match = false
 			empty = false
-			selectorType = typeof selector
 			value = model.get(field)
 			id = model.get('id')
 			exists = typeof value isnt 'undefined'
@@ -746,7 +745,7 @@ class Query
 						match = false
 
 			# Standard
-			if selectorType in ['string','number'] or selectorType instanceof String
+			if _.isString(selector) or _.isNumber(selector)
 				if exists and value is selector
 					match = true
 
@@ -766,18 +765,24 @@ class Query
 					match = true
 
 			# Conditional Operators
-			else if selector instanceof Object
-				# The $beginsWith operator checks if the value begins with a particular value
-				if selector.$beginsWith
-					if exists
-						if typeof value is 'string' and value.substr(0,selector.$beginsWith.length) is selector.$beginsWith
+			else if _.isObject(selector)
+				# The $beginsWith operator checks if the value begins with a particular value or values if an array was passed
+				$beginsWith = selector.$beginsWith or selector.$startsWith or null
+				if $beginsWith and exists and _.isString(value)
+					$beginsWith = [$beginsWith]  unless _.isArray($beginsWith)
+					for $beginsWithValue in $beginsWith
+						if value.substr(0,$beginsWithValue.length) is $beginsWithValue
 							match = true
+							break
 
-				# The $endsWith operator checks if the value ends with a particular value
-				if selector.$endsWith
-					if exists
-						if typeof value is 'string' and value.substr(selector.$endsWith.length*-1) is selector.$endsWith
+				# The $endsWith operator checks if the value ends with a particular value or values if an array was passed
+				$endsWith = selector.$endsWith or selector.$finishesWith or null
+				if $endsWith and exists and _.isString(value)
+					$endsWith = [$endsWith]  unless _.isArray($endsWith)
+					for $endWithValue in $endsWith
+						if value.substr($endWithValue.length*-1) is $endWithValue
 							match = true
+							break
 
 				# The $all operator is similar to $in, but instead of matching any value in the specified array all values in the array must be matched.
 				if selector.$all
@@ -881,14 +886,15 @@ class Query
 
 # Prepare
 exports = {
-	safeRegex: util.safeRegex,
-	createRegex: util.createRegex,
-	createSafeRegex: util.createSafeRegex,
-	toArray: util.toArray,
-	Hash
-	QueryCollection
-	Query
-	Pill
+	safeRegex: util.safeRegex
+	createRegex: util.createRegex
+	createSafeRegex: util.createSafeRegex
+	toArray: util.toArray
+	Backbone: Backbone
+	Hash: Hash
+	QueryCollection: QueryCollection
+	Query: Query
+	Pill: Pill
 	createCollection: (models,options) ->
 		models = util.toArray(models)
 		collection = new QueryCollection(models,options)
