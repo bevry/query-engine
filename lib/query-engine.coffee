@@ -764,6 +764,11 @@ class Query
 				if exists and selector.test(value)
 					match = true
 
+      # Boolean
+    else if _.isBoolean(selector)
+      if exists and value
+        match = true
+
 			# Conditional Operators
 			else if _.isObject(selector)
 				# The $beginsWith operator checks if the value begins with a particular value or values if an array was passed

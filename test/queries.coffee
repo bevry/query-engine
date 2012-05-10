@@ -34,6 +34,7 @@ store =
 			position: 1
 			category: 1
 			date: today
+      good: true
 		'jquery':
 			id: 'jquery'
 			title: 'jQuery'
@@ -42,6 +43,7 @@ store =
 			position: 2
 			category: 1
 			date: yesterday
+      good: false
 		'history':
 			id: 'history'
 			title: 'History.js'
@@ -60,6 +62,7 @@ store =
 			position: 1
 			category: 1
 			date: today
+      good: true
 		'jquery': new Backbone.Model
 			id: 'jquery'
 			title: 'jQuery'
@@ -68,6 +71,7 @@ store =
 			position: 2
 			category: 1
 			date: yesterday
+      good: false
 		'history': new Backbone.Model
 			id: 'history'
 			title: 'History.js'
@@ -119,11 +123,16 @@ generateTestSuite = (name,docs) ->
 			expected = queryEngine.createCollection 'index': docs.get('index')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
+  it 'boolean', ->
+      actual = docs.findAll good: true
+      expected = queryEngine.createCollection 'index': docs.get('index')
+      assert.deepEqual actual.toJSON(), expected.toJSON()
+
 		it '$and', ->
 			actual = docs.findAll $all: [{id: 'index'}, {position: 2}]
 			expected = queryEngine.createCollection()
 			assert.deepEqual actual.toJSON(), expected.toJSON()
-		
+
 		it '$or', ->
 			actual = docs.findAll $or: [{id: 'index'}, {position: 2}]
 			expected = queryEngine.createCollection 'index': docs.get('index'), 'jquery': docs.get('jquery')
