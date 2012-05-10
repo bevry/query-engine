@@ -22,13 +22,13 @@ QueryEngine provides extensive Querying, Filtering, and Searching abilities for 
 
 1. [Install Node.js](https://github.com/balupton/node/wiki/Installing-Node.js)
 
-2. Install Query-Engine
+2. Install QueryEngine
 
 	``` bash
 	npm install query-engine
 	```
 
-3. Require Query-Engine
+3. Require QueryEngine
 
 	``` javascript
 	var queryEngine = require('query-engine');
@@ -45,7 +45,7 @@ QueryEngine provides extensive Querying, Filtering, and Searching abilities for 
 	<script src="http://raw.github.com/bevry/query-engine/master/lib/query-engine.js"></script>
 	```
 
-2. Access Query-Engine via the `window.queryEngine` variable
+2. Access QueryEngine via the `window.queryEngine` variable
 
 
 ## Using
