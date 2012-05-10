@@ -50,17 +50,17 @@ QueryEngine provides extensive Querying, Filtering, and Searching abilities for 
 
 ## Using
 
-[You can find all the information you desire about using QueryEngine on its Using QueryEngine Wiki Page](https://github.com/bevry/query-engine/wiki/Using).
+[You can find all the information you desire about using QueryEngine on its Using QueryEngine Wiki Page](https://github.com/bevry/query-engine/wiki/Using)
 
 
 ## History
 
-You can discover the history inside the [History.md](https://github.com/bevry/query-engine/blob/master/History.md#files) file
+[You can discover the history inside the `History.md` file](https://github.com/bevry/query-engine/blob/master/History.md#files)
 
 
 
 ## License
 
-Licensed under the [MIT License](http://creativecommons.org/licenses/MIT/)
+Licensed under the incredibly [permissive](http://en.wikipedia.org/wiki/Permissive_free_software_licence) [MIT License](http://creativecommons.org/licenses/MIT/)
 <br/>Copyright &copy; 2012 [Bevry Pty Ltd](http://bevry.me)
 <br/>Copyright &copy; 2011 [Benjamin Lupton](http://balupton.com)
