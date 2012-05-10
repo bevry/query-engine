@@ -1,6 +1,6 @@
-# Query-Engine [![Build Status](https://secure.travis-ci.org/bevry/query-engine.png?branch=master)](http://travis-ci.org/bevry/query-engine)
+# QueryEngine [![Build Status](https://secure.travis-ci.org/bevry/query-engine.png?branch=master)](http://travis-ci.org/bevry/query-engine)
 
-Query-Engine provides extensive Querying, Filtering, and Searching abilities for [Backbone.js Collections](http://documentcloud.github.com/backbone/#Collection) as well as JavaScript arrays and objects.
+QueryEngine provides extensive Querying, Filtering, and Searching abilities for [Backbone.js Collections](http://documentcloud.github.com/backbone/#Collection) as well as JavaScript arrays and objects.
 
 
 ## Features
@@ -47,6 +47,10 @@ Query-Engine provides extensive Querying, Filtering, and Searching abilities for
 
 2. Access Query-Engine via the `window.queryEngine` variable
 
+
+## Using
+
+You can find all the information you desire about using QueryEngine on it's [Using QueryEngine Wiki Page](https://github.com/bevry/query-engine/wiki/Using).
 
 
 ## History
