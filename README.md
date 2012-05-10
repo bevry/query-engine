@@ -50,7 +50,7 @@ QueryEngine provides extensive Querying, Filtering, and Searching abilities for 
 
 ## Using
 
-You can find all the information you desire about using QueryEngine on it's [Using QueryEngine Wiki Page](https://github.com/bevry/query-engine/wiki/Using).
+[You can find all the information you desire about using QueryEngine on its Using QueryEngine Wiki Page](https://github.com/bevry/query-engine/wiki/Using).
 
 
 ## History
