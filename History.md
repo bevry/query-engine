@@ -1,6 +1,7 @@
 ## History
 
 - v1.1.6 May 8, 2012
+	- Cleaned the code up a little bit
 	- Aliases `$beginsWith` with `$startsWith`, and `$endsWith` with `$finishesWith`
 		- Which all now support array values, e.g. `something: $beginsWith: ['a','b','c']`
 	- Exposes the uses Backbone.js module through `QueryEngine.Backbone`
