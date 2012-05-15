@@ -1,5 +1,8 @@
 ## History
 
+- v1.1.7 May 15, 2012
+	- Fixed boolean comparison
+
 - v1.1.6 May 8, 2012
 	- Cleaned the code up a little bit
 	- Aliases `$beginsWith` with `$startsWith`, and `$endsWith` with `$finishesWith`

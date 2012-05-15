@@ -744,8 +744,8 @@ class Query
 					unless query.test(model)
 						match = false
 
-			# Standard
-			if _.isString(selector) or _.isNumber(selector)
+			# String, Number, Boolean
+			if _.isString(selector) or _.isNumber(selector) or _.isBoolean(selector)
 				if exists and value is selector
 					match = true
 
@@ -763,11 +763,6 @@ class Query
 			else if _.isRegExp(selector)
 				if exists and selector.test(value)
 					match = true
-
-      # Boolean
-    else if _.isBoolean(selector)
-      if exists and value
-        match = true
 
 			# Conditional Operators
 			else if _.isObject(selector)
