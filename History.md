@@ -1,6 +1,6 @@
 ## History
 
-- v1.1.7 May 15, 2012
+- v1.1.8 May 15, 2012
 	- Fixed boolean comparison
 
 - v1.1.6 May 8, 2012
