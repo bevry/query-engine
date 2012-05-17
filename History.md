@@ -1,13 +1,22 @@
 ## History
 
+- v1.1.9 May 17, 2012
+	- Added
+		- `queryEngine.generatorComparator`
+		- `QueryCollection::setComparator`
+		- `QueryCollection::sortCollection`
+	- When creating a child collection, the parent collection's comparator will now be copied over
+	- Comparators can now be arrays of comparators too
+
 - v1.1.8 May 15, 2012
 	- Fixed boolean comparison
+	- Now uses CoffeeScripts `extends` rather than `Backbone.extend`
 
 - v1.1.6 May 8, 2012
 	- Cleaned the code up a little bit
 	- Aliases `$beginsWith` with `$startsWith`, and `$endsWith` with `$finishesWith`
 		- Which all now support array values, e.g. `something: $beginsWith: ['a','b','c']`
-	- Exposes the uses Backbone.js module through `QueryEngine.Backbone`
+	- Exposes the used Backbone.js module through `queryEngine.Backbone`
 		- You should use this instead of including your own backbone module due to [this bug](https://github.com/documentcloud/backbone/issues/1288) in Backbone.js
 
 - v1.1.4 and v1.1.5

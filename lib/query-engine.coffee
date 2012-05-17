@@ -39,6 +39,43 @@ util =
 		# Return the result
 		result
 
+	# Generate Comparator
+	generateComparator: (input) ->
+		# Creates a function for a comparator
+		generateFunction = (comparator) ->
+			unless comparator
+				throw new Error('Cannot sort without a comparator')
+			else if _.isFunction(comparator)
+				return comparator
+			else if _.isObject(comparator)
+				return (a,b) ->
+					comparison = 0
+					for own key,value of comparator
+						# Prepare
+						aValue = a.get?(key) or a[key]
+						bValue = b.get?(key) or b[key]
+						# Descending
+						if value is -1
+							comparison = bValue - aValue
+						# Ascending
+						else if value is 1
+							comparison = aValue - bValue
+						# Return early if we have something
+						return comparison  if comparison
+					# Return likey 0
+					return comparison
+			else if _.isArray(comparator)
+				return (a,b) ->
+					comparison = 0
+					for value,key in comparator
+						comparison = generateFunction(value)(a,b)
+						return comparison  if comparison
+					# Return likey 0
+					return comparison
+			else
+				throw new Error('Unknown comparator type')
+		# Return the generated function for our comparator
+		return generateFunction(input)
 
 # Hash
 # Extends the Array class with:
@@ -343,33 +380,39 @@ class QueryCollection extends Backbone.Collection
 	# ---------------------------------
 	# Generic API
 
+	# Set Comparator
+	setComparator: (comparator) ->
+		# Prepare comparator
+		comparator = util.generateComparator(comparator)
+
+		# Apply it
+		@comparator = comparator
+
+		# Chain
+		@
+
+	# Sort Collection
+	# Sorts our current collection by our comparator
+	sortCollection: (comparator) ->
+		# Sort our collection
+		if comparator
+			comparator = util.generateComparator(comparator)
+			@models.sort(comparator)
+		else
+			@models.sort()
+
+		# Chain
+		return @
+
 	# Sort Array
 	# Return the results as an array sorted by our comparator
 	sortArray: (comparator) ->
-		# Prepare
-		arr = @toJSON()
+		# Prepare comparator
+		comparator = util.generateComparator(comparator)
 
-		# Sort
-		if comparator
-			if comparator instanceof Function
-				arr.sort(comparator)
-			else if comparator instanceof Object
-				for own key,value of comparator
-					# Descending
-					if value is -1
-						arr.sort (a,b) ->
-							b[key] - a[key]
-					# Ascending
-					else if value is 1
-						arr.sort (a,b) ->
-							a[key] - b[key]
-			else
-				throw new Error('Unknown comparator type was passed to QueryCollection::sortArray')
-		else
-			if @comparator
-				return @sortArray(@comparator)
-			else
-				throw new Error('Cannot sort a set without a comparator')
+		# Generate the array and sort it
+		arr = @toJSON()
+		arr.sort(comparator)
 
 		# Return sorted array
 		return arr
@@ -398,6 +441,7 @@ class QueryCollection extends Backbone.Collection
 	createChildCollection: ->
 		collection = new QueryCollection()
 			.setParentCollection(@)
+		collection.comparator ?= @comparator  if @comparator
 		return collection
 
 	# Create Live Child Collection
@@ -438,6 +482,8 @@ class QueryCollection extends Backbone.Collection
 		# Subscribe to change events on our existing models
 		if enabled
 			@on('change',@onChange)
+			# onChange will do our resort
+			# we do not need a onAdd for our resort, as backbone already does this
 		else
 			@off('change',@onChange)
 
@@ -499,10 +545,14 @@ class QueryCollection extends Backbone.Collection
 	# Fired when a model that is inside our own collection changes
 	# We should check if it still passes our tests
 	# and if it doesn't then we should remove the model
+	# We should perform a resort
 	onChange: (model) ->
 		pass = @test(model)
 		unless pass
 			@safeRemove(model)
+		#else
+		#	@sortCollection()
+		# ^ not yet supported
 		@
 
 	# Fired when a model in our parent collection changes
@@ -820,8 +870,9 @@ class Query
 							match = true
 
 				# The $size operator matches any array with the specified number of elements. The following example would match the object {a:["foo"]}, since that array has just one element:
-				if selector.$size
-					if value.length? and value.length is selector.$size
+				$size = selector.$size or selector.$length
+				if $size
+					if value.length? and value.length is $size
 						match = true
 
 				# The $type operator matches values based on their BSON type.
@@ -889,6 +940,7 @@ exports = {
 	safeRegex: util.safeRegex
 	createRegex: util.createRegex
 	createSafeRegex: util.createSafeRegex
+	generateComparator: util.generateComparator
 	toArray: util.toArray
 	Backbone: Backbone
 	Hash: Hash

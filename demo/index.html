@@ -93,15 +93,15 @@ else if true
 
 # Perform a wildcard search
 else if true
-	result = queryEngine.createLiveCollection()
-		.setFilter('search', (model,searchString) ->
-			searchRegex = queryEngine.createSafeRegex searchString
-			pass = searchRegex.test(model.get('title')) or searchRegex.test(model.get('content'))
-			return pass
-		)
-		.setSearchString('about') # try it with "this", or "the" as well :)
-		.add(models)
-		.toJSON()
+result = queryEngine.createLiveCollection()
+	.setFilter('search', (model,searchString) ->
+		searchRegex = queryEngine.createSafeRegex(searchString)
+		pass = searchRegex.test(model.get('title')) or searchRegex.test(model.get('content'))
+		return pass
+	)
+	.setSearchString('about') # try it with "this", or "the" as well :)
+	.add(models)
+	.toJSON()
 
 # Perform a pill search
 else if true

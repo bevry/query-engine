@@ -1,5 +1,8 @@
 test:
-	./node_modules/.bin/mocha
+	node ./node_modules/mocha/bin/mocha
+
+test-debug:
+	node ./node_modules/mocha/bin/mocha --debug-brk
 
 test-global:
 	mocha
@@ -10,4 +13,4 @@ compile:
 dev:
 	./node_modules/.bin/coffee -w -c lib/query-engine.coffee
 
-.PHONY: test test-global compile dev
+.PHONY: test test-debug test-global compile dev

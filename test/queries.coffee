@@ -1,6 +1,6 @@
 # Requires
 assert = require('assert')
-queryEngine = require(__dirname+'/../lib/query-engine.coffee')
+queryEngine = require(__dirname+'/../lib/query-engine.js')
 Backbone = require('backbone')
 
 
@@ -213,36 +213,15 @@ generateTestSuite = (name,docs) ->
 			expected = docs
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
-		it 'sort-numeric-function', ->
-			actual = docs.sortArray (a,b) ->
-				return b.position - a.position
-			expected = queryEngine.createCollection [docs.get('history'),docs.get('jquery'),docs.get('index')]
-			assert.deepEqual actual, expected.toJSON()
-
-		it 'sort-numeric-object', ->
-			actual = docs.sortArray position: -1
-			expected = queryEngine.createCollection [docs.get('history'),docs.get('jquery'),docs.get('index')]
-			assert.deepEqual actual, expected.toJSON()
-
-		it 'sort-date-function', ->
-			actual = docs.sortArray (a,b) ->
-				return b.date - a.date
-			expected = queryEngine.createCollection [docs.get('history'),docs.get('index'),docs.get('jquery')]
-			assert.deepEqual actual, expected.toJSON()
-
-		it 'sort-date-object', ->
-			actual = docs.sortArray date: -1
-			expected = queryEngine.createCollection [docs.get('history'),docs.get('index'),docs.get('jquery')]
-			assert.deepEqual actual, expected.toJSON()
-
 		it 'findOne', ->
 			actual = docs.findOne()
 			expected = docs.get('index')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
 # Generate Suites
-for own key, value of store
-	generateTestSuite key, value
+describe 'queries', ->
+	for own key, value of store
+		generateTestSuite key, value
 
 # Return
 null
