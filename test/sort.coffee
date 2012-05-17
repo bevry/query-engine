@@ -31,7 +31,7 @@ store =
 			title: 'Index Page'
 			content: 'this is the index page'
 			tags: []
-			position: 1
+			position: 2
 			category: 1
 			date: today
 			good: true
@@ -40,7 +40,7 @@ store =
 			title: 'jQuery'
 			content: 'this is about jQuery'
 			tags: ['jquery']
-			position: 2
+			position: 3
 			category: 1
 			date: yesterday
 			good: false
@@ -49,7 +49,7 @@ store =
 			title: 'History.js'
 			content: 'this is about History.js'
 			tags: ['jquery','html5','history']
-			position: 3
+			position: 4
 			category: 1
 			date: tomorrow
 
@@ -59,7 +59,7 @@ store =
 			title: 'Index Page'
 			content: 'this is the index page'
 			tags: []
-			position: 1
+			position: 2
 			category: 1
 			date: today
 			good: true
@@ -68,7 +68,7 @@ store =
 			title: 'jQuery'
 			content: 'this is about jQuery'
 			tags: ['jquery']
-			position: 2
+			position: 3
 			category: 1
 			date: yesterday
 			good: false
@@ -77,7 +77,7 @@ store =
 			title: 'History.js'
 			content: 'this is about History.js'
 			tags: ['jquery','html5','history']
-			position: 3
+			position: 4
 			category: 1
 			date: tomorrow
 
@@ -135,13 +135,11 @@ generateTestSuite = (collectionName,docs) ->
 				expected = queryEngine.createCollection [docs.get('history'),docs.get('jquery'),docs.get('index')]
 				assert.deepEqual(actual.toJSON(), expected.toJSON())
 
-			###
 			it 'live-onchange', ->
-				actual = queryEngine.createLiveCollection().setComparator(position: -1).add(docs.models)
+				actual = queryEngine.createLiveCollection().setComparator(position:-1).add(docs.models)
 				actual.at(0).set({'position':0})
 				expected = queryEngine.createCollection [docs.get('jquery'),docs.get('index'),docs.get('history')]
 				assert.deepEqual(actual.toJSON(), expected.toJSON())
-			###
 
 # Generate Suites
 describe 'sort', ->

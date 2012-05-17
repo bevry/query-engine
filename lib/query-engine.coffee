@@ -52,14 +52,18 @@ util =
 					comparison = 0
 					for own key,value of comparator
 						# Prepare
-						aValue = a.get?(key) or a[key]
-						bValue = b.get?(key) or b[key]
-						# Descending
+						aValue = a.get?(key) ? a[key]
+						bValue = b.get?(key) ? b[key]
+						# Compare
+						if aValue is bValue
+							comparison = 0
+						else if aValue < bValue
+							comparison = -1
+						else if aValue > bValue
+							comparison = 1
+						# If descending, flip the comparison
 						if value is -1
-							comparison = bValue - aValue
-						# Ascending
-						else if value is 1
-							comparison = aValue - bValue
+							comparison *= -1
 						# Return early if we have something
 						return comparison  if comparison
 					# Return likey 0
@@ -398,8 +402,10 @@ class QueryCollection extends Backbone.Collection
 		if comparator
 			comparator = util.generateComparator(comparator)
 			@models.sort(comparator)
+		else if @comparator
+			@models.sort(@comparator)
 		else
-			@models.sort()
+			throw new Error('You need a comparator to sort')
 
 		# Chain
 		return @
@@ -407,12 +413,17 @@ class QueryCollection extends Backbone.Collection
 	# Sort Array
 	# Return the results as an array sorted by our comparator
 	sortArray: (comparator) ->
-		# Prepare comparator
-		comparator = util.generateComparator(comparator)
-
-		# Generate the array and sort it
+		# Prepare
 		arr = @toJSON()
-		arr.sort(comparator)
+
+		# Sort our collection
+		if comparator
+			comparator = util.generateComparator(comparator)
+			arr.sort(comparator)
+		else if @comparator
+			arr.sort(@comparator)
+		else
+			throw new Error('You need a comparator to sort')
 
 		# Return sorted array
 		return arr
@@ -550,9 +561,8 @@ class QueryCollection extends Backbone.Collection
 		pass = @test(model)
 		unless pass
 			@safeRemove(model)
-		#else
-		#	@sortCollection()
-		# ^ not yet supported
+		else
+			@sortCollection()  if @comparator
 		@
 
 	# Fired when a model in our parent collection changes

@@ -1,5 +1,9 @@
 ## History
 
+- v1.1.10 May 17, 2012
+	- Added sorting on change events if the collection is live
+	- Fixed sorting by a value that could be 0
+
 - v1.1.9 May 17, 2012
 	- Added
 		- `queryEngine.generatorComparator`
