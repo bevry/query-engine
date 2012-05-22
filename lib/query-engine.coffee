@@ -197,6 +197,9 @@ class QueryCollection extends Backbone.Collection
 
 	# Set Filter
 	setFilter: (name,value) ->
+		# Check we have been called with both arguments
+		throw new Error('QueryCollection::setFilter was called without both arguments')  if typeof value is 'undefined'
+
 		# Prepare
 		filters = @options.filters
 
@@ -230,6 +233,9 @@ class QueryCollection extends Backbone.Collection
 
 	# Set Query
 	setQuery: (name,value) ->
+		# Check we have been called with both arguments
+		throw new Error('QueryCollection::setQuery was called without both arguments')  if typeof value is 'undefined'
+
 		# Prepare
 		queries = @options.queries
 
@@ -264,6 +270,9 @@ class QueryCollection extends Backbone.Collection
 
 	# Set Pill
 	setPill: (name,value) ->
+		# Check we have been called with both arguments
+		throw new Error('QueryCollection::setPill was called without both arguments')  if typeof value is 'undefined'
+
 		# Prepare
 		pills = @options.pills
 		searchString = @options.searchString
@@ -450,8 +459,7 @@ class QueryCollection extends Backbone.Collection
 
 	# Create Child Collection
 	createChildCollection: ->
-		collection = new QueryCollection()
-			.setParentCollection(@)
+		collection = new QueryCollection().setParentCollection(@)
 		collection.comparator ?= @comparator  if @comparator
 		return collection
 

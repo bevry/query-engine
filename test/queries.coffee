@@ -214,8 +214,8 @@ generateTestSuite = (name,docs) ->
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
 		it 'findOne', ->
-			actual = docs.findOne()
-			expected = docs.get('index')
+			actual = docs.findOne(tags: $has: 'jquery')
+			expected = docs.get('jquery')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
 # Generate Suites
