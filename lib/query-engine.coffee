@@ -459,7 +459,7 @@ class QueryCollection extends Backbone.Collection
 
 	# Create Child Collection
 	createChildCollection: ->
-		collection = new QueryCollection().setParentCollection(@)
+		collection = new (@collection or QueryCollection)().setParentCollection(@)
 		collection.comparator ?= @comparator  if @comparator
 		return collection
 

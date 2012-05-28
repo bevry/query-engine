@@ -1,5 +1,9 @@
 ## History
 
+- v1.1.12 May 17, 2012
+	- You can now specify the `collection` property inside your custom collection classes
+		- If specified, it will be used as the class for child collections
+
 - v1.1.11 May 17, 2012
 	- We now throw errors if `QueryCollection::setFilter`, `QueryCollection::setQuery`, and `QueryCollection::setPill` are called without both arguments
 
