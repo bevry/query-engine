@@ -134,7 +134,12 @@ generateTestSuite = (name,docs) ->
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
 		it '$and', ->
-			actual = docs.findAll $all: [{id: 'index'}, {position: 2}]
+			actual = docs.findAll $and: [{id: 'index'}, {position: 1}]
+			expected = queryEngine.createCollection 'index': docs.get('index')
+			assert.deepEqual actual.toJSON(), expected.toJSON()
+
+		it '$and-none', ->
+			actual = docs.findAll $and: [{random:Math.random()}]
 			expected = queryEngine.createCollection()
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
@@ -143,9 +148,24 @@ generateTestSuite = (name,docs) ->
 			expected = queryEngine.createCollection 'index': docs.get('index'), 'jquery': docs.get('jquery')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
+		it '$or-object', ->
+			actual = docs.findAll $or: {id: 'index', position: 2}
+			expected = queryEngine.createCollection 'index': docs.get('index'), 'jquery': docs.get('jquery')
+			assert.deepEqual actual.toJSON(), expected.toJSON()
+
+		it '$or-none', ->
+			actual = docs.findAll $or: [{random:Math.random()}]
+			expected = queryEngine.createCollection()
+			assert.deepEqual actual.toJSON(), expected.toJSON()
+
 		it '$nor', ->
 			actual = docs.findAll $nor: [{id: 'index'}, {position: 2}]
 			expected = queryEngine.createCollection 'history': docs.get('history')
+			assert.deepEqual actual.toJSON(), expected.toJSON()
+
+		it '$nor-none', ->
+			actual = docs.findAll $nor: [{random:Math.random()}]
+			expected = docs
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
 		it '$ne', ->

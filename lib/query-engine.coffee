@@ -39,6 +39,26 @@ util =
 		# Return the result
 		result
 
+	# To Array Group
+	toArrayGroup: (value) ->
+		# Prepare
+		result = []
+
+		# Determine the correct type
+		if value
+			if _.isArray(value)
+				result = value
+			else if _.isObject(value)
+				for own key,item of value
+					obj = {}
+					obj[key] = item
+					result.push(obj)
+			else
+				result.push(value)
+
+		# Return the result
+		result
+
 	# Generate Comparator
 	generateComparator: (input) ->
 		# Creates a function for a comparator
@@ -772,168 +792,167 @@ class Query
 		empty = true
 
 		# Selectors
-		for own field, selector of @query
+		for own selectorName, selectorValue of @query
 			match = false
 			empty = false
-			value = model.get(field)
-			id = model.get('id')
-			exists = typeof value isnt 'undefined'
-			value = false  unless exists
+			modelValue = model.get(selectorName)
+			modelId = model.get('id')
+			modelValueExists = typeof modelValue isnt 'undefined'
+			modelValue = false  unless modelValueExists
 
 			# The $nor operator lets you use a boolean or expression to do queries. You give $nor a list of expressions, none of which can satisfy the query.
-			if field is '$nor'
+			if selectorName is '$nor'
 				match = true
-				empty = true
-				for query in selector
-					empty = false
+				queryGroup = util.toArrayGroup(selectorValue)
+				unless queryGroup.length then throw new Error('Query called with an empty $nor statement')
+				for query in queryGroup
 					query = new Query(query)
 					if query.test(model)
 						match = false
 						break
-				match = true  if empty
 
 			# The $or operator lets you use a boolean or expression to do queries. You give $or a list of expressions, any of which can satisfy the query.
-			if field is '$or'
-				match = false
-				empty = true
-				for query in selector
-					empty = false
+			if selectorName is '$or'
+				queryGroup = util.toArrayGroup(selectorValue)
+				unless queryGroup.length then throw new Error('Query called with an empty $or statement')
+				for query in queryGroup
 					query = new Query(query)
 					if query.test(model)
 						match = true
 						break
-				match = true  if empty
 
 			# The $and operator lets you use boolean and in a query. You give $and an array of expressions, all of which must match to satisfy the query.
-			if field is '$and'
+			if selectorName is '$and'
 				match = true
-				for query in selector
+				queryGroup = util.toArrayGroup(selectorValue)
+				unless queryGroup.length then throw new Error('Query called with an empty $and statement')
+				for query in queryGroup
 					query = new Query(query)
 					unless query.test(model)
 						match = false
 
 			# String, Number, Boolean
-			if _.isString(selector) or _.isNumber(selector) or _.isBoolean(selector)
-				if exists and value is selector
+			if _.isString(selectorValue) or _.isNumber(selectorValue) or _.isBoolean(selectorValue)
+				if modelValueExists and modelValue is selectorValue
 					match = true
 
 			# Array
-			else if _.isArray(selector)
-				if exists and (new Hash value).isSame(selector)
+			else if _.isArray(selectorValue)
+				if modelValueExists and (new Hash modelValue).isSame(selectorValue)
 					match = true
 
 			# Date
-			else if _.isDate(selector)
-				if exists and value.toString() is selector.toString()
+			else if _.isDate(selectorValue)
+				if modelValueExists and modelValue.toString() is selectorValue.toString()
 					match = true
 
 			# Regular Expression
-			else if _.isRegExp(selector)
-				if exists and selector.test(value)
+			else if _.isRegExp(selectorValue)
+				if modelValueExists and selectorValue.test(modelValue)
 					match = true
 
 			# Conditional Operators
-			else if _.isObject(selector)
+			else if _.isObject(selectorValue)
 				# The $beginsWith operator checks if the value begins with a particular value or values if an array was passed
-				$beginsWith = selector.$beginsWith or selector.$startsWith or null
-				if $beginsWith and exists and _.isString(value)
+				$beginsWith = selectorValue.$beginsWith or selectorValue.$startsWith or null
+				if $beginsWith and modelValueExists and _.isString(modelValue)
 					$beginsWith = [$beginsWith]  unless _.isArray($beginsWith)
 					for $beginsWithValue in $beginsWith
-						if value.substr(0,$beginsWithValue.length) is $beginsWithValue
+						if modelValue.substr(0,$beginsWithValue.length) is $beginsWithValue
 							match = true
 							break
 
 				# The $endsWith operator checks if the value ends with a particular value or values if an array was passed
-				$endsWith = selector.$endsWith or selector.$finishesWith or null
-				if $endsWith and exists and _.isString(value)
+				$endsWith = selectorValue.$endsWith or selectorValue.$finishesWith or null
+				if $endsWith and modelValueExists and _.isString(modelValue)
 					$endsWith = [$endsWith]  unless _.isArray($endsWith)
 					for $endWithValue in $endsWith
-						if value.substr($endWithValue.length*-1) is $endWithValue
+						if modelValue.substr($endWithValue.length*-1) is $endWithValue
 							match = true
 							break
 
 				# The $all operator is similar to $in, but instead of matching any value in the specified array all values in the array must be matched.
-				if selector.$all
-					if exists
-						if (new Hash value).hasAll(selector.$all)
+				if selectorValue.$all
+					if modelValueExists
+						if (new Hash modelValue).hasAll(selectorValue.$all)
 							match = true
 
 				# The $in operator is analogous to the SQL IN modifier, allowing you to specify an array of possible matches.
 				# The target field's value can also be an array; if so then the document matches if any of the elements of the array's value matches any of the $in field's values
-				if selector.$in
-					if exists
-						if (new Hash value).hasIn(selector.$in)
+				if selectorValue.$in
+					if modelValueExists
+						if (new Hash modelValue).hasIn(selectorValue.$in)
 							match = true
-						else if (new Hash selector.$in).hasIn(value)
-							match = true
-
-				# Query-Engine Specific
-				# The $has operator checks if any of the selector values exist within our model's value
-				if selector.$has
-					if exists
-						if (new Hash value).hasIn(selector.$has)
+						else if (new Hash selectorValue.$in).hasIn(modelValue)
 							match = true
 
 				# Query-Engine Specific
-				# The $hasAll operator checks if all of the selector values exist within our model's value
-				if selector.$hasAll
-					if exists
-						if (new Hash value).hasIn(selector.$hasAll)
+				# The $has operator checks if any of the selectorValue values exist within our model's value
+				if selectorValue.$has
+					if modelValueExists
+						if (new Hash modelValue).hasIn(selectorValue.$has)
+							match = true
+
+				# Query-Engine Specific
+				# The $hasAll operator checks if all of the selectorValue values exist within our model's value
+				if selectorValue.$hasAll
+					if modelValueExists
+						if (new Hash modelValue).hasIn(selectorValue.$hasAll)
 							match = true
 
 				# The $nin operator is similar to $in except that it selects objects for which the specified field does not have any value in the specified array.
-				if selector.$nin
-					if exists
-						if (new Hash value).hasIn(selector.$nin) is false and (new Hash selector.$nin).hasIn(value) is false
+				if selectorValue.$nin
+					if modelValueExists
+						if (new Hash modelValue).hasIn(selectorValue.$nin) is false and (new Hash selectorValue.$nin).hasIn(selectorValue) is false
 							match = true
 
 				# The $size operator matches any array with the specified number of elements. The following example would match the object {a:["foo"]}, since that array has just one element:
-				$size = selector.$size or selector.$length
+				$size = selectorValue.$size or selectorValue.$length
 				if $size
-					if value.length? and value.length is $size
+					if modelValue.length? and modelValue.length is $size
 						match = true
 
 				# The $type operator matches values based on their BSON type.
-				if selector.$type
-					if typeof value is selector.$type
+				if selectorValue.$type
+					if typeof modelValue is selectorValue.$type
 						match = true
 
 				# Check for existence (or lack thereof) of a field.
-				if selector.$exists
-					if selector.$exists
-						if exists is true
+				if selectorValue.$exists
+					if selectorValue.$exists
+						if modelValueExists is true
 							match = true
 					else
-						if exists is false
+						if modelValueExists is false
 							match = true
 
 				# The $mod operator allows you to do fast modulo queries to replace a common case for where clauses.
-				if selector.$mod
+				if selectorValue.$mod
 					match = false
 
 				# Use $ne for "not equals".
-				if selector.$ne
-					if exists and value isnt selector.$ne
+				if selectorValue.$ne
+					if modelValueExists and modelValue isnt selectorValue.$ne
 						match = true
 
 				# less than
-				if selector.$lt
-					if exists and value < selector.$lt
+				if selectorValue.$lt
+					if modelValueExists and modelValue < selectorValue.$lt
 						match = true
 
 				# greater than
-				if selector.$gt
-					if exists and value > selector.$gt
+				if selectorValue.$gt
+					if modelValueExists and modelValue > selectorValue.$gt
 						match = true
 
 				# less than or equal to
-				if selector.$lte
-					if exists and value <= selector.$lte
+				if selectorValue.$lte
+					if modelValueExists and modelValue <= selectorValue.$lte
 						match = true
 
 				# greater than or equal to
-				if selector.$gte
-					if exists and value >= selector.$gte
+				if selectorValue.$gte
+					if modelValueExists and modelValue >= selectorValue.$gte
 						match = true
 
 			# Matched

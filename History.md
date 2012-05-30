@@ -1,5 +1,11 @@
 ## History
 
+- v1.1.13 May 30, 2012
+	- Made the query source code a bit more readable
+	- Fixed `$nor`, `$or`, and `$and` queries
+		- They also now support objects (instead of just arrays) as their values
+	- Added `queryEngine.toArrayGroup` which returns an array, with an array item for each key-value pair in the object
+
 - v1.1.12 May 17, 2012
 	- You can now specify the `collection` property inside your custom collection classes
 		- If specified, it will be used as the class for child collections
