@@ -1,5 +1,8 @@
 ## History
 
+- v1.1.14 June 5, 2012
+	- Fixed using arrays in `queryEngine.generateComparator`
+
 - v1.1.13 May 30, 2012
 	- Made the query source code a bit more readable
 	- Fixed `$nor`, `$or`, and `$and` queries

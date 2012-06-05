@@ -67,6 +67,14 @@ util =
 				throw new Error('Cannot sort without a comparator')
 			else if _.isFunction(comparator)
 				return comparator
+			else if _.isArray(comparator)
+				return (a,b) ->
+					comparison = 0
+					for value,key in comparator
+						comparison = generateFunction(value)(a,b)
+						return comparison  if comparison
+					# Return likey 0
+					return comparison
 			else if _.isObject(comparator)
 				return (a,b) ->
 					comparison = 0
@@ -85,14 +93,6 @@ util =
 						if value is -1
 							comparison *= -1
 						# Return early if we have something
-						return comparison  if comparison
-					# Return likey 0
-					return comparison
-			else if _.isArray(comparator)
-				return (a,b) ->
-					comparison = 0
-					for value,key in comparator
-						comparison = generateFunction(value)(a,b)
 						return comparison  if comparison
 					# Return likey 0
 					return comparison
