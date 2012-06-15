@@ -616,13 +616,18 @@
 
     Pill.prototype.searchString = null;
 
-    Pill.prototype.value = null;
+    Pill.prototype.values = null;
+
+    Pill.prototype.combinedType = 'OR';
 
     function Pill(pill) {
       var prefix, regexString, safePrefixes, safePrefixesStr, _i, _len, _ref;
       pill || (pill = {});
       this.callback = pill.callback;
       this.prefixes = pill.prefixes;
+      if (pill.combinedType != null) {
+        this.combinedType = pill.combinedType;
+      }
       safePrefixes = [];
       _ref = this.prefixes;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -637,23 +642,46 @@
     }
 
     Pill.prototype.setSearchString = function(searchString) {
-      var cleanedSearchString, match, value;
+      var cleanedSearchString, match, values;
       cleanedSearchString = searchString;
-      value = null;
+      values = [];
       while (match = this.regex.exec(searchString)) {
-        value = match[2].trim().replace(/(^['"]\s*|\s*['"]$)/g, '');
+        values.push(match[2].trim().replace(/(^['"]\s*|\s*['"]$)/g, ''));
         cleanedSearchString = searchString.replace(match[0], '').trim();
       }
       this.searchString = searchString;
-      this.value = value;
+      this.values = values;
       return cleanedSearchString;
     };
 
     Pill.prototype.test = function(model) {
-      var pass;
-      pass = null;
-      if (this.value != null) {
-        pass = this.callback(model, this.value);
+      var pass, value, _i, _j, _len, _len1, _ref, _ref1, _ref2;
+      if ((_ref = this.values) != null ? _ref.length : void 0) {
+        if (this.combinedType === 'OR') {
+          pass = false;
+          _ref1 = this.values;
+          for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+            value = _ref1[_i];
+            pass = this.callback(model, value);
+            if (pass) {
+              break;
+            }
+          }
+        } else if (this.combinedType === 'AND') {
+          pass = true;
+          _ref2 = this.values;
+          for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
+            value = _ref2[_j];
+            pass = this.callback(model, value);
+            if (!pass) {
+              break;
+            }
+          }
+        } else {
+          throw new Error('Unkown combined type');
+        }
+      } else {
+        pass = null;
       }
       return pass;
     };

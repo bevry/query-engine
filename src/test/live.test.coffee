@@ -49,7 +49,7 @@ modelsObject =
 		id: 'docpad'
 		title: 'DocPad'
 		content: 'this is about DocPad'
-		tags: ['nodejs']
+		tags: ['nodejs','html5']
 		position: 1
 		category: 2
 		date: today
@@ -174,8 +174,45 @@ describe 'live', (describe,it) ->
 				expected = [modelsObject.index]
 				assert.deepEqual actual, expected
 
-			# Perform a pill search and a filter
-			it 'should support pills and searching at the same time', ->
+			# With OR pills
+			it 'should support pill searches with OR pills', ->
+				# Perform the query
+				liveCollection = queryEngine.createLiveCollection()
+					.setPill('tag', {
+						prefixes: ['tag:']
+						callback: (model,value) ->
+							pass = value in model.get('tags')
+							return pass
+					})
+					.setSearchString('tag:html5 tag:jquery')
+					.add(models)
+
+				# Check the result
+				actual = liveCollection.toJSON()
+				expected = [modelsObject.jquery, modelsObject.history, modelsObject.docpad]
+				assert.deepEqual actual, expected
+
+			# With AND pills
+			it 'should support pill searches with AND pills', ->
+				# Perform the query
+				liveCollection = queryEngine.createLiveCollection()
+					.setPill('tag', {
+						combinedType: 'AND'
+						prefixes: ['tag:']
+						callback: (model,value) ->
+							pass = value in model.get('tags')
+							return pass
+					})
+					.setSearchString('tag:html5 tag:jquery')
+					.add(models)
+
+				# Check the result
+				actual = liveCollection.toJSON()
+				expected = [modelsObject.history]
+				assert.deepEqual actual, expected
+
+			# With filter
+			it 'should support pills searches with filters', ->
 				# Perform the query
 				liveCollection = queryEngine.createLiveCollection()
 					.setFilter('search', (model,searchString) ->

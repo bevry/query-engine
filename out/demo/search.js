@@ -21,6 +21,14 @@
     return $('.pad,.editor').width(padWidth).height(padHeight);
   }).trigger('resize');
 
+  $(document).keydown(function(e) {
+    var isInput;
+    isInput = $(document.activeElement).is(':input');
+    if (e.keyCode === 8 && !isInput) {
+      return e.preventDefault();
+    }
+  });
+
   _ref = ['code', 'result'];
   for (_i = 0, _len = _ref.length; _i < _len; _i++) {
     key = _ref[_i];
@@ -58,6 +66,6 @@
 
   editors.code.getSession().on('change', codeChanged);
 
-  editors.code.getSession().setValue("# Create our project collection from an array of models\n# and set several pills that we can use for searching\nprojectCollection = window.queryEngine\n	.createLiveCollection([\n			id: 1\n			name: \"Query Engine\"\n			tags: [\"backbone\", \"node.js\"]\n			description: \"Query-Engine provides extensive Querying, Filtering, and Searching abilities for Backbone.js Collections as well as JavaScript arrays and objects\"\n		,\n			id: 2\n			name: \"Joe\"\n			tags: [\"testing\", \"node.js\"]\n			description: \"Node.js asynchronous testing framework, runner and reporter\"\n	])\n	.setPill('id', {\n		prefixes: ['id:']\n		callback: (model,value) ->\n			valueRegex = queryEngine.createSafeRegex(value)\n			pass = valueRegex.test(model.get('id'))\n			return pass\n	})\n	.setPill('tag', {\n		prefixes: ['tag:']\n		callback: (model,value) ->\n			pass = _.indexOf(model.get('tags'),value) isnt -1\n			return pass\n	})\n	.setPill('name', {\n		prefixes: ['name:']\n		callback: (model,value) ->\n			pass = model.get('name') is value\n			return pass\n	})\n\n$searchbar = $('#searchbar').empty()\n$visualsearch = $('<div>').appendTo($searchbar)\nvisualsearch = window.VS.init({\n	container: $visualsearch\n	callbacks:\n		search: (searchString, searchCollection) ->\n			projectCollection.setSearchString(searchString).query()\n			window.updateResults(projectCollection)\n\n		facetMatches: (callback) ->\n			pills = projectCollection.getPills()\n			pillNames = _.keys(pills)\n			callback(pillNames)\n\n		valueMatches: (facet, searchTerm, callback) ->\n			switch facet\n				when 'id'\n					callback  projectCollection.pluck('id')\n				when 'tag'\n					callback  _.uniq  _.flatten  projectCollection.pluck('tags')\n				when 'name'\n					callback  projectCollection.pluck('name')\n})\nvisualsearch.searchBox.value('tag:\"node.js\"');\n\n\n# Return our project collection\nreturn projectCollection");
+  editors.code.getSession().setValue("# Create our project collection from an array of models\n# and set several pills that we can use for searching\nprojectCollection = window.queryEngine.createLiveCollection([\n			id: 1\n			name: \"Query Engine\"\n			tags: [\"backbone\", \"node.js\"]\n			description: \"Query-Engine provides extensive Querying, Filtering, and Searching abilities for Backbone.js Collections as well as JavaScript arrays and objects\"\n		,\n			id: 2\n			name: \"Joe\"\n			tags: [\"testing\", \"node.js\"]\n			description: \"Node.js asynchronous testing framework, runner and reporter\"\n	])\nprojectSearchCollection = projectCollection.createLiveChildCollection()\n	.setPill('id', {\n		prefixes: ['id:']\n		callback: (model,value) ->\n			valueRegex = queryEngine.createSafeRegex(value)\n			pass = valueRegex.test(model.get('id'))\n			return pass\n	})\n	.setPill('tag', {\n		prefixes: ['tag:']\n		callback: (model,value) ->\n			pass = _.indexOf(model.get('tags'),value) isnt -1\n			return pass\n	})\n	.setPill('name', {\n		prefixes: ['name:']\n		callback: (model,value) ->\n			pass = model.get('name') is value\n			return pass\n	})\n	.query()\n\n$searchbar = $('#searchbar').empty()\n$visualsearch = $('<div>').appendTo($searchbar)\nvisualsearch = window.VS.init({\n	container: $visualsearch\n	callbacks:\n		search: (searchString, searchCollection) ->\n			window.updateResults  projectSearchCollection.setSearchString(searchString).query()\n\n		facetMatches: (callback) ->\n			pills = projectSearchCollection.getPills()\n			pillNames = _.keys(pills)\n			callback(pillNames)\n\n		valueMatches: (facet, searchTerm, callback) ->\n			switch facet\n				when 'id'\n					callback  projectCollection.pluck('id')\n				when 'tag'\n					callback  _.uniq  _.flatten  projectCollection.pluck('tags')\n				when 'name'\n					callback  projectCollection.pluck('name')\n})\nvisualsearch.searchBox.value('tag:\"node.js\"');\n\n\n# Return our project collection\nreturn projectSearchCollection");
 
 }).call(this);

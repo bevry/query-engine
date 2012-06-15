@@ -18,6 +18,11 @@ $(window)
 		$('.pad,.editor').width(padWidth).height(padHeight)
 	.trigger('resize')
 
+# Disable backspace redirect as it happens often
+$(document).keydown (e) ->
+	isInput = $(document.activeElement).is(':input')
+	e.preventDefault()  if e.keyCode is 8 and not isInput
+
 # Create our two code editors
 for key in ['code','result']
 	# Create our editor
@@ -59,8 +64,7 @@ editors.code.getSession().on('change', codeChanged)
 editors.code.getSession().setValue """
 	# Create our project collection from an array of models
 	# and set several pills that we can use for searching
-	projectCollection = window.queryEngine
-		.createLiveCollection([
+	projectCollection = window.queryEngine.createLiveCollection([
 				id: 1
 				name: "Query Engine"
 				tags: ["backbone", "node.js"]
@@ -71,6 +75,7 @@ editors.code.getSession().setValue """
 				tags: ["testing", "node.js"]
 				description: "Node.js asynchronous testing framework, runner and reporter"
 		])
+	projectSearchCollection = projectCollection.createLiveChildCollection()
 		.setPill('id', {
 			prefixes: ['id:']
 			callback: (model,value) ->
@@ -90,6 +95,7 @@ editors.code.getSession().setValue """
 				pass = model.get('name') is value
 				return pass
 		})
+		.query()
 
 	$searchbar = $('#searchbar').empty()
 	$visualsearch = $('<div>').appendTo($searchbar)
@@ -97,11 +103,10 @@ editors.code.getSession().setValue """
 		container: $visualsearch
 		callbacks:
 			search: (searchString, searchCollection) ->
-				projectCollection.setSearchString(searchString).query()
-				window.updateResults(projectCollection)
+				window.updateResults  projectSearchCollection.setSearchString(searchString).query()
 
 			facetMatches: (callback) ->
-				pills = projectCollection.getPills()
+				pills = projectSearchCollection.getPills()
 				pillNames = _.keys(pills)
 				callback(pillNames)
 
@@ -118,5 +123,5 @@ editors.code.getSession().setValue """
 
 
 	# Return our project collection
-	return projectCollection
+	return projectSearchCollection
 	"""

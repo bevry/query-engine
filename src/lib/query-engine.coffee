@@ -719,8 +719,12 @@ class Pill
 	searchString: null # String
 
 	# Value
-	# The discovered value of the pill within the search
-	value: null # String
+	# The discovered values of the pill within the search
+	values: null # Array of Strings
+
+	# Combine Type
+	# If this pill exists multiple times in our search string, how should it be handled
+	combinedType: 'OR'
 
 	# Constructor
 	# Construct our regular expression and apply our properties
@@ -729,6 +733,7 @@ class Pill
 		pill or= {}
 		@callback = pill.callback
 		@prefixes = pill.prefixes
+		@combinedType = pill.combinedType  if pill.combinedType?
 
 		# Sanitize the prefixes
 		safePrefixes = []
@@ -751,16 +756,16 @@ class Pill
 	setSearchString: (searchString) ->
 		# Prepare
 		cleanedSearchString = searchString
-		value = null
+		values = []
 
 		# Extract information
 		while match = @regex.exec(searchString)
-			value = match[2].trim().replace(/(^['"]\s*|\s*['"]$)/g, '')
+			values.push match[2].trim().replace(/(^['"]\s*|\s*['"]$)/g, '')
 			cleanedSearchString = searchString.replace(match[0],'').trim()
 
 		# Apply
 		@searchString = searchString
-		@value = value
+		@values = values
 
 		# Return cleaned search
 		return cleanedSearchString
@@ -770,11 +775,23 @@ class Pill
 	# Returns whether our pill passed or not
 	test: (model) ->
 		# Prepare
-		pass = null
 
 		# Extract the pill information from the query
-		if @value?
-			pass = @callback(model,@value)
+		if @values?.length
+			if @combinedType is 'OR'
+				pass = false
+				for value in @values
+					pass = @callback(model,value)
+					break  if pass
+			else if @combinedType is 'AND'
+				pass = true
+				for value in @values
+					pass = @callback(model,value)
+					break  unless pass
+			else
+				throw new Error('Unkown combined type')
+		else
+			pass = null
 
 		# Return
 		return pass
