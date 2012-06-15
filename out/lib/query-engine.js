@@ -630,7 +630,7 @@
         safePrefixes.push(util.safeRegex(prefix));
       }
       safePrefixesStr = safePrefixes.join('|');
-      regexString = '(' + safePrefixesStr + ')([^\\s]+)';
+      regexString = "(" + safePrefixesStr + ")\\s*('[^']+'|\\\"[^\\\"]+\\\"|[^'\\\"\\s]\\S*)";
       this.regex = util.createRegex(regexString);
       this;
 
@@ -641,7 +641,7 @@
       cleanedSearchString = searchString;
       value = null;
       while (match = this.regex.exec(searchString)) {
-        value = match[2].trim();
+        value = match[2].trim().replace(/(^['"]\s*|\s*['"]$)/g, '');
         cleanedSearchString = searchString.replace(match[0], '').trim();
       }
       this.searchString = searchString;

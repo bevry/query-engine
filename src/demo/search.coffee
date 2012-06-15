@@ -62,12 +62,12 @@ editors.code.getSession().setValue """
 	projectCollection = window.queryEngine
 		.createLiveCollection([
 				id: 1
-				title: "Query Engine"
+				name: "Query Engine"
 				tags: ["backbone", "node.js"]
 				description: "Query-Engine provides extensive Querying, Filtering, and Searching abilities for Backbone.js Collections as well as JavaScript arrays and objects"
 			,
 				id: 2
-				title: "Joe"
+				name: "Joe"
 				tags: ["testing", "node.js"]
 				description: "Node.js asynchronous testing framework, runner and reporter"
 		])
@@ -87,8 +87,7 @@ editors.code.getSession().setValue """
 		.setPill('name', {
 			prefixes: ['name:']
 			callback: (model,value) ->
-				valueRegex = queryEngine.createSafeRegex(value)
-				pass = valueRegex.test(model.get('name'))
+				pass = model.get('name') is value
 				return pass
 		})
 

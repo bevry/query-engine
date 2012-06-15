@@ -737,7 +737,7 @@ class Pill
 
 		# Build the regular expression used to match the pill
 		safePrefixesStr = safePrefixes.join('|')
-		regexString ='('+safePrefixesStr+')([^\\s]+)'
+		regexString = """(#{safePrefixesStr})\\s*('[^']+'|\\"[^\\"]+\\"|[^'\\"\\s]\\S*)"""
 
 		# Apply the regular expression
 		@regex = util.createRegex(regexString)
@@ -755,7 +755,7 @@ class Pill
 
 		# Extract information
 		while match = @regex.exec(searchString)
-			value = match[2].trim()
+			value = match[2].trim().replace(/(^['"]\s*|\s*['"]$)/g, '')
 			cleanedSearchString = searchString.replace(match[0],'').trim()
 
 		# Apply

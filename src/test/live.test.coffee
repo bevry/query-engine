@@ -24,7 +24,7 @@ modelsObject =
 	index:
 		id: 'index'
 		title: 'Index Page'
-		content: 'this is the index page'
+		content: 'welcome home'
 		tags: []
 		position: 1
 		category: 1
@@ -117,47 +117,86 @@ describe 'live', (describe,it) ->
 			assert.deepEqual actual, expected
 
 		# Perform a pill search for anything with the id of index
-		it 'should support pill searches', ->
-			# Perform the query
-			liveCollection = queryEngine.createLiveCollection()
-				.setPill('id', {
-					prefixes: ['id:','#']
-					callback: (model,value) ->
-						pillRegex = queryEngine.createSafeRegex(value)
-						pass = pillRegex.test(model.get('id'))
+		describe 'pill searches', (describe,it) ->
+			# Without spacing
+			it 'should support pill searches without spacing', ->
+				# Perform the query
+				liveCollection = queryEngine.createLiveCollection()
+					.setPill('id', {
+						prefixes: ['id:','#']
+						callback: (model,value) ->
+							pillRegex = queryEngine.createSafeRegex(value)
+							pass = pillRegex.test(model.get('id'))
+							return pass
+					})
+					.setSearchString('id:index')
+					.add(models)
+
+				# Check the result
+				actual = liveCollection.toJSON()
+				expected = [modelsObject.index]
+				assert.deepEqual actual, expected
+
+			# With spacing
+			it 'should support pill searches with spacing', ->
+				# Perform the query
+				liveCollection = queryEngine.createLiveCollection()
+					.setPill('id', {
+						prefixes: ['id:','#']
+						callback: (model,value) ->
+							pillRegex = queryEngine.createSafeRegex(value)
+							pass = pillRegex.test(model.get('id'))
+							return pass
+					})
+					.setSearchString('id: index')
+					.add(models)
+
+				# Check the result
+				actual = liveCollection.toJSON()
+				expected = [modelsObject.index]
+				assert.deepEqual actual, expected
+
+			# With quotes
+			it 'should support pill searches with quotes', ->
+				# Perform the query
+				liveCollection = queryEngine.createLiveCollection()
+					.setPill('title', {
+						prefixes: ['title:']
+						callback: (model,value) ->
+							pass = value is model.get('title')
+							return pass
+					})
+					.setSearchString('title:"Index Page"')
+					.add(models)
+
+				# Check the result
+				actual = liveCollection.toJSON()
+				expected = [modelsObject.index]
+				assert.deepEqual actual, expected
+
+			# Perform a pill search and a filter
+			it 'should support pills and searching at the same time', ->
+				# Perform the query
+				liveCollection = queryEngine.createLiveCollection()
+					.setFilter('search', (model,searchString) ->
+						searchRegex = queryEngine.createSafeRegex(searchString)
+						pass = searchRegex.test(model.get('content'))
 						return pass
-				})
-				.setSearchString('id:index')
-				.add(models)
+					)
+					.setPill('category', {
+						prefixes: ['category:']
+						callback: (model,value) ->
+							pillRegex = queryEngine.createSafeRegex(value)
+							pass = pillRegex.test(model.get('category'))
+							return pass
+					})
+					.setSearchString('category:1 about')
+					.add(models)
 
-			# Check the result
-			actual = liveCollection.toJSON()
-			expected = [modelsObject.index]
-			assert.deepEqual actual, expected
-
-		# Perform a pill search and a filter
-		it 'should support pills and searching at the same time', ->
-			# Perform the query
-			liveCollection = queryEngine.createLiveCollection()
-				.setFilter('search', (model,searchString) ->
-					searchRegex = queryEngine.createSafeRegex(searchString)
-					pass = searchRegex.test(model.get('content'))
-					return pass
-				)
-				.setPill('category', {
-					prefixes: ['category:']
-					callback: (model,value) ->
-						pillRegex = queryEngine.createSafeRegex(value)
-						pass = pillRegex.test(model.get('category'))
-						return pass
-				})
-				.setSearchString('category:1 about')
-				.add(models)
-
-			# Check the result
-			actual = liveCollection.toJSON()
-			expected = [modelsObject.jquery, modelsObject.history]
-			assert.deepEqual actual, expected
+				# Check the result
+				actual = liveCollection.toJSON()
+				expected = [modelsObject.jquery, modelsObject.history]
+				assert.deepEqual actual, expected
 
 
 	describe 'events', (describe,it) ->
