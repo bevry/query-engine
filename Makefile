@@ -1,16 +1,13 @@
-test:
-	node ./node_modules/mocha/bin/mocha
-
-test-debug:
-	node ./node_modules/mocha/bin/mocha --debug-brk
-
-test-global:
-	mocha
-
 compile:
-	./node_modules/.bin/coffee -c lib/query-engine.coffee
+	./node_modules/.bin/coffee -o out/ -c src/
 
 dev:
-	./node_modules/.bin/coffee -w -c lib/query-engine.coffee
+	./node_modules/.bin/coffee -w -o out/ -c src/
 
-.PHONY: test test-debug test-global compile dev
+test:
+	node ./out/test/everything.test.js
+
+test-debug:
+	node --debug-brk ./out/test/everything.test.js
+
+.PHONY: compile dev test test-debug

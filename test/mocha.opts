@@ -1,5 +1,0 @@
---reporter spec
---ui bdd
---ignore-leaks
---growl
---compilers coffee:coffee-script

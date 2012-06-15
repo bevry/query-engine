@@ -1,6 +1,6 @@
 # Requires
-_ = window? and window._  or  require('underscore')
-Backbone = window? and window.Backbone  or  require('backbone')
+_ = if module? then require('underscore') else @_
+Backbone = if module? then require('backbone') else @Backbone
 
 
 # Util
@@ -189,6 +189,8 @@ class QueryCollection extends Backbone.Collection
 		@setQueries(@options.queries)
 		@setPills(@options.pills)
 		@setSearchString(@options.searchString)
+
+		# No need to set parent collection, as if it is an option, it has already been set
 
 		# Initliase live events if we use them
 		@live()
@@ -478,14 +480,18 @@ class QueryCollection extends Backbone.Collection
 		@
 
 	# Create Child Collection
-	createChildCollection: ->
-		collection = new (@collection or QueryCollection)().setParentCollection(@)
+	createChildCollection: (models,options) ->
+		options or= {}
+		options.parentCollection = @
+		collection = new (options.collection or @collection or QueryCollection)(models,options)
 		collection.comparator ?= @comparator  if @comparator
 		return collection
 
 	# Create Live Child Collection
-	createLiveChildCollection: ->
-		collection = @createChildCollection().live(true)
+	createLiveChildCollection: (models,options) ->
+		options or= {}
+		options.live = true
+		collection = @createChildCollection(models,options)
 		return collection
 
 	# Find All
@@ -973,7 +979,7 @@ class Query
 # Exports
 
 # Prepare
-exports = {
+queryEngine =
 	safeRegex: util.safeRegex
 	createRegex: util.createRegex
 	createSafeRegex: util.createSafeRegex
@@ -992,11 +998,6 @@ exports = {
 		models = util.toArray(models)
 		collection = new QueryCollection(models,options).live(true)
 		return collection
-}
 
-# Export
-if module? and module.exports?
-	module.exports = exports
-else if window?
-	window.queryEngine = exports
-
+# Export for node.js and the browser
+if module? then (module.exports = queryEngine) else (@queryEngine = queryEngine)

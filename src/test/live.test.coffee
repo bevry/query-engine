@@ -1,7 +1,9 @@
 # Requires
-queryEngine = require(__dirname+'/../lib/query-engine.js')
-assert = require('assert')
-Backbone = require('backbone')
+queryEngine = require?(__dirname+'/../lib/query-engine.js') or @queryEngine
+assert = require?('assert') or @assert
+Backbone = require?('backbone') or @Backbone
+joe = require('joe') or @joe
+{describe} = joe
 
 
 # =====================================
