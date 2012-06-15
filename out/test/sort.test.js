@@ -94,9 +94,9 @@
     })
   };
 
-  generateTestSuite = function(collectionName, docs) {
-    return describe(collectionName, function() {
-      describe('sortArray', function() {
+  generateTestSuite = function(describe, it, collectionName, docs) {
+    return describe(collectionName, function(describe, it) {
+      describe('sortArray', function(describe, it) {
         it('numeric-function', function() {
           var actual, expected;
           actual = docs.sortArray(function(a, b) {
@@ -130,7 +130,7 @@
           return assert.deepEqual(actual, expected.toJSON());
         });
       });
-      return describe('sortCollection', function() {
+      return describe('sortCollection', function(describe, it) {
         it('numeric-function', function() {
           var actual, expected;
           actual = docs.sortCollection(function(a, b) {
@@ -186,13 +186,13 @@
     });
   };
 
-  describe('sort', function() {
+  describe('sort', function(describe, it) {
     var key, value, _results;
     _results = [];
     for (key in store) {
       if (!__hasProp.call(store, key)) continue;
       value = store[key];
-      _results.push(generateTestSuite(key, value));
+      _results.push(generateTestSuite(describe, it, key, value));
     }
     return _results;
   });

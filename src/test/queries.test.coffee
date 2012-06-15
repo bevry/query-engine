@@ -88,8 +88,8 @@ store =
 # Tests
 
 # Generate Test Suite
-generateTestSuite = (name,docs) ->
-	describe name, ->
+generateTestSuite = (describe, it, name,docs) ->
+	describe name, (describe,it) ->
 		it 'beginsWith', ->
 			actual = docs.findAll title: $beginsWith: 'Index'
 			expected = queryEngine.createCollection 'index': docs.get('index')
@@ -241,9 +241,9 @@ generateTestSuite = (name,docs) ->
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
 # Generate Suites
-describe 'queries', ->
+describe 'queries', (describe,it) ->
 	for own key, value of store
-		generateTestSuite key, value
+		generateTestSuite describe, it, key, value
 
 # Return
 null

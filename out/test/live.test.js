@@ -89,8 +89,8 @@
     date: yesterday
   };
 
-  describe('live', function() {
-    describe('queries', function() {
+  describe('live', function(describe, it) {
+    describe('queries', function(describe, it) {
       it('should only keep jquery related models', function() {
         var actual, expected, liveCollection;
         liveCollection = queryEngine.createLiveCollection().setQuery('only jquery related', {
@@ -150,7 +150,7 @@
         return assert.deepEqual(actual, expected);
       });
     });
-    describe('events', function() {
+    describe('events', function(describe, it) {
       var liveCollection;
       liveCollection = queryEngine.createLiveCollection();
       it('when query is called on our liveCollection, it should successfully filter our models', function() {
@@ -200,7 +200,7 @@
         return assert.deepEqual(actual, expected);
       });
     });
-    return describe('parent collections', function() {
+    return describe('parent collections', function(describe, it) {
       var childCollection, parentCollection;
       parentCollection = queryEngine.createCollection(models);
       childCollection = parentCollection.createLiveChildCollection();

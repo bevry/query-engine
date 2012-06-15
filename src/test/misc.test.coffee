@@ -9,9 +9,9 @@ joe = require('joe') or @joe
 # =====================================
 # Configuration
 
-describe 'misc', ->
+describe 'misc', (describe,it) ->
 
-	describe 'collection property', ->
+	describe 'collection property', (describe,it) ->
 
 		it 'when specificied, should create child collections of the property type', ->
 			# Define a custom collection

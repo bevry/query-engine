@@ -94,8 +94,8 @@
     })
   };
 
-  generateTestSuite = function(name, docs) {
-    return describe(name, function() {
+  generateTestSuite = function(describe, it, name, docs) {
+    return describe(name, function(describe, it) {
       it('beginsWith', function() {
         var actual, expected;
         actual = docs.findAll({
@@ -460,13 +460,13 @@
     });
   };
 
-  describe('queries', function() {
+  describe('queries', function(describe, it) {
     var key, value, _results;
     _results = [];
     for (key in store) {
       if (!__hasProp.call(store, key)) continue;
       value = store[key];
-      _results.push(generateTestSuite(key, value));
+      _results.push(generateTestSuite(describe, it, key, value));
     }
     return _results;
   });

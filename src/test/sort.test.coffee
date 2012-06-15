@@ -88,9 +88,9 @@ store =
 # Tests
 
 # Generate Test Suite
-generateTestSuite = (collectionName,docs) ->
-	describe collectionName, ->
-		describe 'sortArray', ->
+generateTestSuite = (describe, it, collectionName, docs) ->
+	describe collectionName, (describe,it) ->
+		describe 'sortArray', (describe,it) ->
 			it 'numeric-function', ->
 				actual = docs.sortArray (a,b) -> return b.position - a.position
 				expected = queryEngine.createCollection [docs.get('history'),docs.get('jquery'),docs.get('index')]
@@ -111,7 +111,7 @@ generateTestSuite = (collectionName,docs) ->
 				expected = queryEngine.createCollection [docs.get('history'),docs.get('index'),docs.get('jquery')]
 				assert.deepEqual(actual, expected.toJSON())
 
-		describe 'sortCollection', ->
+		describe 'sortCollection', (describe,it) ->
 			it 'numeric-function', ->
 				actual = docs.sortCollection (a,b) -> return b.get('position') - a.get('position')
 				expected = queryEngine.createCollection [docs.get('history'),docs.get('jquery'),docs.get('index')]
@@ -144,9 +144,9 @@ generateTestSuite = (collectionName,docs) ->
 				assert.deepEqual(actual.toJSON(), expected.toJSON())
 
 # Generate Suites
-describe 'sort', ->
+describe 'sort', (describe,it) ->
 	for own key, value of store
-		generateTestSuite(key,value)
+		generateTestSuite(describe,it,key,value)
 
 # Return
 null

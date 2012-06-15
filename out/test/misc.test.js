@@ -14,8 +14,8 @@
 
   describe = joe.describe;
 
-  describe('misc', function() {
-    return describe('collection property', function() {
+  describe('misc', function(describe, it) {
+    return describe('collection property', function(describe, it) {
       return it('when specificied, should create child collections of the property type', function() {
         var MyQueryCollection, myChildCollection, myQueryCollection;
         MyQueryCollection = (function(_super) {

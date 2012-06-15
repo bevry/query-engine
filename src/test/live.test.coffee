@@ -81,9 +81,9 @@ pokemonModel =
 # Tests
 
 
-describe 'live', ->
+describe 'live', (describe,it) ->
 
-	describe 'queries', ->
+	describe 'queries', (describe,it) ->
 		# Perform a query to find only the items that have the tag "jquery"
 		it 'should only keep jquery related models', ->
 			# Perform the query
@@ -160,7 +160,7 @@ describe 'live', ->
 			assert.deepEqual actual, expected
 
 
-	describe 'events', ->
+	describe 'events', (describe,it) ->
 		# Create a liveCollection
 		liveCollection = queryEngine.createLiveCollection()
 
@@ -232,7 +232,7 @@ describe 'live', ->
 			assert.deepEqual(actual, expected)
 
 
-	describe 'parent collections', ->
+	describe 'parent collections', (describe,it) ->
 		# Create a parentCollection with the models
 		parentCollection = queryEngine.createCollection(models)
 
