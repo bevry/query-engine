@@ -197,7 +197,7 @@ describe 'live', (describe,it) ->
 				# Perform the query
 				liveCollection = queryEngine.createLiveCollection()
 					.setPill('tag', {
-						combinedType: 'AND'
+						logicalOperator: 'AND'
 						prefixes: ['tag:']
 						callback: (model,value) ->
 							pass = value in model.get('tags')

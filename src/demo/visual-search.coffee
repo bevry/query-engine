@@ -86,17 +86,13 @@ editors.code.getSession().setValue """
 			logicalOperator: 'AND'
 			prefixes: ['tag:']
 			callback: (model,value) ->
-				for tag in model.get('tags')
-					searchRegex = queryEngine.createSafeRegex(value)
-					pass = searchRegex.test(tag)
-					break  if pass
+				pass = value in model.get('tags')
 				return pass
 		})
 		.setPill('title', {
 			prefixes: ['title:']
 			callback: (model,value) ->
-				valueRegex = queryEngine.createSafeRegex(value)
-				pass = valueRegex.test(model.get('title'))
+				pass = model.get('title') is value
 				return pass
 		})
 		.setFilter('search', (model,searchString) ->
@@ -106,11 +102,33 @@ editors.code.getSession().setValue """
 		)
 		.query()
 
-	# Setup Search
-	$searchbar = $('#searchbar').val('tag:node.js')
-	$searchbar.off('keyup').on 'keyup', (event) ->
-		searchString = $(this).val()
-		window.updateResults  projectSearchCollection.setSearchString(searchString).query()
+	# Setup Visual Search
+	$searchbar = $('#searchbar').empty()
+	$visualsearch = $('<div>').appendTo($searchbar)
+	visualsearch = window.VS.init({
+		container: $visualsearch
+		callbacks:
+			search: (searchString, searchCollection) ->
+				window.updateResults  projectSearchCollection.setSearchString(searchString).query()
+
+			facetMatches: (callback) ->
+				pills = projectSearchCollection.getPills()
+				pillNames = _.keys(pills)
+				callback(pillNames)
+
+			valueMatches: (facet, searchTerm, callback) ->
+				switch facet
+					when 'id'
+						ids = []
+						ids.push(String(model.id))  for model in projectCollection.models
+						callback(ids)
+					when 'tag'
+						callback  _.uniq  _.flatten  projectCollection.pluck('tags')
+					when 'title'
+						callback  projectCollection.pluck('title')
+	})
+	visualsearch.searchBox.value('tag:"node.js"');
+
 
 	# Return our project collection
 	return projectSearchCollection

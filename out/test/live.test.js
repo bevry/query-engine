@@ -177,7 +177,7 @@
         it('should support pill searches with AND pills', function() {
           var actual, expected, liveCollection;
           liveCollection = queryEngine.createLiveCollection().setPill('tag', {
-            combinedType: 'AND',
+            logicalOperator: 'AND',
             prefixes: ['tag:'],
             callback: function(model, value) {
               var pass;

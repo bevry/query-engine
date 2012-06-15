@@ -722,9 +722,9 @@ class Pill
 	# The discovered values of the pill within the search
 	values: null # Array of Strings
 
-	# Combine Type
-	# If this pill exists multiple times in our search string, how should it be handled
-	combinedType: 'OR'
+	# Logical Operator
+	# If this pill exists multiple times in our search string, this the style of combination to use
+	logicalOperator: 'OR'
 
 	# Constructor
 	# Construct our regular expression and apply our properties
@@ -733,7 +733,7 @@ class Pill
 		pill or= {}
 		@callback = pill.callback
 		@prefixes = pill.prefixes
-		@combinedType = pill.combinedType  if pill.combinedType?
+		@logicalOperator = pill.logicalOperator  if pill.logicalOperator?
 
 		# Sanitize the prefixes
 		safePrefixes = []
@@ -778,18 +778,18 @@ class Pill
 
 		# Extract the pill information from the query
 		if @values?.length
-			if @combinedType is 'OR'
+			if @logicalOperator is 'OR'
 				pass = false
 				for value in @values
 					pass = @callback(model,value)
 					break  if pass
-			else if @combinedType is 'AND'
-				pass = true
+			else if @logicalOperator is 'AND'
+				pass = false
 				for value in @values
 					pass = @callback(model,value)
 					break  unless pass
 			else
-				throw new Error('Unkown combined type')
+				throw new Error('Unkown logical operator type')
 		else
 			pass = null
 
@@ -846,13 +846,13 @@ class Query
 
 			# The $and operator lets you use boolean and in a query. You give $and an array of expressions, all of which must match to satisfy the query.
 			if selectorName is '$and'
-				match = true
+				match = false
 				queryGroup = util.toArrayGroup(selectorValue)
 				unless queryGroup.length then throw new Error('Query called with an empty $and statement')
 				for query in queryGroup
 					query = new Query(query)
-					unless query.test(model)
-						match = false
+					match = query.test(model)
+					break  unless match
 
 			# String, Number, Boolean
 			if _.isString(selectorValue) or _.isNumber(selectorValue) or _.isBoolean(selectorValue)

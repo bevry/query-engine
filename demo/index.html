@@ -6,7 +6,7 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 
 	<!-- Information -->
-	<title>Query-Engine Search Demo</title>
+	<title>Query-Engine Demo</title>
 
 	<!-- Styles -->
 	<style>
@@ -34,10 +34,6 @@
 		.result.pad {
 			float:right;
 		}
-		#searchbar {
-			width:100%;
-			margin-bottom:1em;
-		}
 	</style>
 </head>
 <body>
@@ -46,33 +42,18 @@
 	<div class="header">
 		<h1><a href="https://github.com/bevry/query-engine">Query Engine</a></h1>
 		<p>Query-Engine is a <a href="http://www.mongodb.org/display/DOCS/Advanced+Queries">NoSQL</a> and <a href="http://www.mongodb.org/">MongoDb</a> compliant query engine. It can run on the server-side with <a href="http://nodejs.org/">Node.js</a>, or on the client-side within web browsers.</p>
-
-		<!-- Search Bar -->
-		<input type="text" id="searchbar"/>
 	</div>
 
-	<!-- Content -->
-	<div class="content">
-		<div class="pad code">
-			<h2>Code:</h2>
-			<pre id="code" class="editor code"></pre>
-		</div>
-		<div class="pad result">
-			<h2>Result:</h2>
-			<pre id="result" class="editor result"></pre>
-		</div>
-	</div>
+	<p>
+		<a href="code.html">code demo</a>
+	</p>
 
-	<!-- Scripts -->
-	<script src="lib/coffeescript.js"></script>
-	<script src="lib/jquery.js"></script>
-	<script src="lib/underscore.js"></script>
-	<script src="lib/backbone.js"></script>
-	<script src="lib/js2coffee.js"></script>
-	<script src="lib/ace/ace.js"></script>
-	<script src="lib/ace/mode-coffee.js"></script>
-	<script src="../out/lib/query-engine.js"></script>
-	<script src="../out/demo/search.js"></script>
+	<p>
+		<a href="search.html">search demo</a>
+	</p>
 
+	<p>
+		<a href="visual-search.html">visual search demo</a>
+	</p>
 </body>
 </html>

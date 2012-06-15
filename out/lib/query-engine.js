@@ -618,15 +618,15 @@
 
     Pill.prototype.values = null;
 
-    Pill.prototype.combinedType = 'OR';
+    Pill.prototype.logicalOperator = 'OR';
 
     function Pill(pill) {
       var prefix, regexString, safePrefixes, safePrefixesStr, _i, _len, _ref;
       pill || (pill = {});
       this.callback = pill.callback;
       this.prefixes = pill.prefixes;
-      if (pill.combinedType != null) {
-        this.combinedType = pill.combinedType;
+      if (pill.logicalOperator != null) {
+        this.logicalOperator = pill.logicalOperator;
       }
       safePrefixes = [];
       _ref = this.prefixes;
@@ -657,7 +657,7 @@
     Pill.prototype.test = function(model) {
       var pass, value, _i, _j, _len, _len1, _ref, _ref1, _ref2;
       if ((_ref = this.values) != null ? _ref.length : void 0) {
-        if (this.combinedType === 'OR') {
+        if (this.logicalOperator === 'OR') {
           pass = false;
           _ref1 = this.values;
           for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
@@ -667,8 +667,8 @@
               break;
             }
           }
-        } else if (this.combinedType === 'AND') {
-          pass = true;
+        } else if (this.logicalOperator === 'AND') {
+          pass = false;
           _ref2 = this.values;
           for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
             value = _ref2[_j];
@@ -678,7 +678,7 @@
             }
           }
         } else {
-          throw new Error('Unkown combined type');
+          throw new Error('Unkown logical operator type');
         }
       } else {
         pass = null;
@@ -750,7 +750,7 @@
           }
         }
         if (selectorName === '$and') {
-          match = true;
+          match = false;
           queryGroup = util.toArrayGroup(selectorValue);
           if (!queryGroup.length) {
             throw new Error('Query called with an empty $and statement');
@@ -758,8 +758,9 @@
           for (_k = 0, _len2 = queryGroup.length; _k < _len2; _k++) {
             query = queryGroup[_k];
             query = new Query(query);
-            if (!query.test(model)) {
-              match = false;
+            match = query.test(model);
+            if (!match) {
+              break;
             }
           }
         }
