@@ -109,6 +109,14 @@ editors.code.getSession().setValue """
 		container: $visualsearch
 		callbacks:
 			search: (searchString, searchCollection) ->
+				searchString = ""
+				searchCollection.forEach (pill) ->
+					category = pill.get("category")
+					value = pill.get("value")
+					if category isnt "text"
+						searchString += " " + category + ":\\"" + value + "\\""
+					else
+						searchString += " " + value
 				window.updateResults  projectSearchCollection.setSearchString(searchString).query()
 
 			facetMatches: (callback) ->
