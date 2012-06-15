@@ -5,7 +5,7 @@ dev:
 	./node_modules/.bin/coffee -w -o out/ -c src/
 
 test:
-	node ./out/test/everything.test.js
+	node ./out/test/everything.test.js --joe-reporter=list
 
 test-debug:
 	node --debug-brk ./out/test/everything.test.js
