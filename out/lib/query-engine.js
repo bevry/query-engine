@@ -647,7 +647,7 @@
       values = [];
       while (match = this.regex.exec(searchString)) {
         values.push(match[2].trim().replace(/(^['"]\s*|\s*['"]$)/g, ''));
-        cleanedSearchString = searchString.replace(match[0], '').trim();
+        cleanedSearchString = cleanedSearchString.replace(match[0], '').trim();
       }
       this.searchString = searchString;
       this.values = values;

@@ -761,7 +761,7 @@ class Pill
 		# Extract information
 		while match = @regex.exec(searchString)
 			values.push match[2].trim().replace(/(^['"]\s*|\s*['"]$)/g, '')
-			cleanedSearchString = searchString.replace(match[0],'').trim()
+			cleanedSearchString = cleanedSearchString.replace(match[0],'').trim()
 
 		# Apply
 		@searchString = searchString

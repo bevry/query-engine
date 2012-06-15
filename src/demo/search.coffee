@@ -100,6 +100,7 @@ editors.code.getSession().setValue """
 				return pass
 		})
 		.setFilter('search', (model,searchString) ->
+			return true  unless searchString?
 			searchRegex = queryEngine.createSafeRegex(searchString)
 			pass = searchRegex.test(model.get('description'))
 			return pass
