@@ -1,5 +1,17 @@
 ## History
 
+- v1.2.0 June 16, 2012
+	- You can now pass the standard `models`, and `options` arguments to `QueryCollection::createChildCollection` and `QueryCollection::createLiveChildCollection`
+	- If `options.collection` is specified when creating a child collection, it will be used as the child collectiont type
+	- Restructured directories and files
+	- Cleaned up demos and added two new demos: [search](http://bevry.github.com/query-engine/demo/search.html) and [visual search](http://bevry.github.com/query-engine/demo/visual-search.html)
+	- Updated search string syntax to be compliant with [Visual Search's](http://documentcloud.github.com/visualsearch/) search string syntax
+		- Adds support for quotes when using pills, e.g. `user:"Benjamin Lupton"`
+		- Adds support for using pills of the same name multiple times, e.g. `tag:node tag:query`
+			- Whether this ORs or ANDs is customisable via the pill's `logicalOperator` which can be `AND` or `OR` (defaults to `OR`)
+	- Moved tests to [Joe](https://github.com/bevry/joe)
+	- Added browser tests
+
 - v1.1.14 June 5, 2012
 	- Fixed using arrays in `queryEngine.generateComparator`
 

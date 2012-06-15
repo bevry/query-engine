@@ -3,6 +3,9 @@
 .travis*
 *.md
 Makefile
+
+src/
+out/demo/
+out/test/
 demo/
-test/
-lib/*.coffee
+test-web/

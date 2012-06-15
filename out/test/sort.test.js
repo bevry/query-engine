@@ -9,7 +9,7 @@
 
   Backbone = (typeof require === "function" ? require('backbone') : void 0) || this.Backbone;
 
-  joe = require('joe') || this.joe;
+  joe = (typeof require === "function" ? require('joe') : void 0) || this.joe;
 
   describe = joe.describe;
 
