@@ -42,7 +42,7 @@ QueryEngine provides extensive Querying, Filtering, and Searching abilities for 
 	``` html
 	<script src="http://documentcloud.github.com/underscore/underscore-min.js"></script>
 	<script src="http://documentcloud.github.com/backbone/backbone-min.js"></script>
-	<script src="http://raw.github.com/bevry/query-engine/master/lib/query-engine.js"></script>
+	<script src="http://raw.github.com/bevry/query-engine/master/out/lib/query-engine.js"></script>
 	```
 
 2. Access QueryEngine via the `window.queryEngine` variable
