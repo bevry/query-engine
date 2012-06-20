@@ -1,5 +1,12 @@
 ## History
 
+- v1.2.1 June 21, 2012
+	- Added `QueryCollection::findAllLive(query,[comparator])` shortcut for `QueryCollection::createLiveChildCollection().setQuery('find',query).setComparator(comparator).query()`
+	- `QueryCollection::findAll` and `QueryCollection::findOne` now support an optional `comparator` argument as the second argument
+	- QueryEngine comparators are now supported for
+		- comparators passed through options
+		- comparator prototype property on your own custom `QueryCollection` instance
+
 - v1.2.0 June 16, 2012
 	- You can now pass the standard `models`, and `options` arguments to `QueryCollection::createChildCollection` and `QueryCollection::createLiveChildCollection`
 	- If `options.collection` is specified when creating a child collection, it will be used as the child collectiont type

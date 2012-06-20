@@ -312,6 +312,26 @@ describe 'live', (describe,it) ->
 		# Create a parentCollection with the models
 		parentCollection = queryEngine.createCollection(models)
 
+		# Perform a query to find only the items that have the tag "jquery"
+		it 'should work with findAllLive with query', ->
+			# Perform the query
+			childCollection = parentCollection.findAllLive({tags: $has: ['jquery']})
+
+			# Check the result
+			actual = childCollection.toJSON()
+			expected = [modelsObject.jquery, modelsObject.history]
+			assert.deepEqual actual, expected
+
+		# Perform a query to find only the items that have the tag "jquery"
+		it 'should work with findAllLive with query and comparator', ->
+			# Perform the query
+			childCollection = parentCollection.findAllLive({tags: $has: ['jquery']}, {position:-1})
+
+			# Check the result
+			actual = childCollection.toJSON()
+			expected = [modelsObject.history, modelsObject.jquery]
+			assert.deepEqual actual, expected
+
 		# Create a childCollection from the parentCollection
 		childCollection = parentCollection.createLiveChildCollection()
 

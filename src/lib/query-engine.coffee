@@ -188,7 +188,8 @@ class QueryCollection extends Backbone.Collection
 		@setFilters(@options.filters)
 		@setQueries(@options.queries)
 		@setPills(@options.pills)
-		@setSearchString(@options.searchString)
+		@setSearchString(@options.searchString)  if @options.searchString?
+		@setComparator(@comparator)  if @comparator?  # @options.comparator is shortcutted here by Backbone
 
 		# No need to set parent collection, as if it is an option, it has already been set
 
@@ -483,8 +484,9 @@ class QueryCollection extends Backbone.Collection
 	createChildCollection: (models,options) ->
 		options or= {}
 		options.parentCollection = @
-		collection = new (options.collection or @collection or QueryCollection)(models,options)
-		collection.comparator ?= @comparator  if @comparator
+		options.collection ?= @collection or QueryCollection
+		options.comparator ?= options.collection::comparator or @comparator
+		collection = new (options.collection)(models,options)
 		return collection
 
 	# Create Live Child Collection
@@ -495,17 +497,18 @@ class QueryCollection extends Backbone.Collection
 		return collection
 
 	# Find All
-	findAll: (query) ->
-		collection = @createChildCollection()
-			.setQuery('find',query)
-			.query()
+	findAll: (query,comparator) ->
+		collection = @createChildCollection([],{comparator,queries:find:query}).query()
+		return collection
+
+	# Find All Live
+	findAllLive: (query,comparator) ->
+		collection = @createLiveChildCollection([],{comparator,queries:find:query}).query()
 		return collection
 
 	# Find One
-	findOne: (query) ->
-		collection = @createChildCollection()
-			.setQuery('find',query)
-			.query()
+	findOne: (query,comparator) ->
+		collection = @createChildCollection([],{comparator,queries:find:query}).query()
 		if collection and collection.length
 			return collection.models[0]
 		else

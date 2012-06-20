@@ -191,7 +191,12 @@
       this.setFilters(this.options.filters);
       this.setQueries(this.options.queries);
       this.setPills(this.options.pills);
-      this.setSearchString(this.options.searchString);
+      if (this.options.searchString != null) {
+        this.setSearchString(this.options.searchString);
+      }
+      if (this.comparator != null) {
+        this.setComparator(this.comparator);
+      }
       this.live();
       return this;
     };
@@ -426,12 +431,13 @@
       var collection;
       options || (options = {});
       options.parentCollection = this;
-      collection = new (options.collection || this.collection || QueryCollection)(models, options);
-      if (this.comparator) {
-        if (collection.comparator == null) {
-          collection.comparator = this.comparator;
-        }
+      if (options.collection == null) {
+        options.collection = this.collection || QueryCollection;
       }
+      if (options.comparator == null) {
+        options.comparator = options.collection.prototype.comparator || this.comparator;
+      }
+      collection = new options.collection(models, options);
       return collection;
     };
 
@@ -443,15 +449,36 @@
       return collection;
     };
 
-    QueryCollection.prototype.findAll = function(query) {
+    QueryCollection.prototype.findAll = function(query, comparator) {
       var collection;
-      collection = this.createChildCollection().setQuery('find', query).query();
+      collection = this.createChildCollection([], {
+        comparator: comparator,
+        queries: {
+          find: query
+        }
+      }).query();
       return collection;
     };
 
-    QueryCollection.prototype.findOne = function(query) {
+    QueryCollection.prototype.findAllLive = function(query, comparator) {
       var collection;
-      collection = this.createChildCollection().setQuery('find', query).query();
+      collection = this.createLiveChildCollection([], {
+        comparator: comparator,
+        queries: {
+          find: query
+        }
+      }).query();
+      return collection;
+    };
+
+    QueryCollection.prototype.findOne = function(query, comparator) {
+      var collection;
+      collection = this.createChildCollection([], {
+        comparator: comparator,
+        queries: {
+          find: query
+        }
+      }).query();
       if (collection && collection.length) {
         return collection.models[0];
       } else {

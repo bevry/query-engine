@@ -264,6 +264,30 @@
     return describe('parent collections', function(describe, it) {
       var childCollection, parentCollection;
       parentCollection = queryEngine.createCollection(models);
+      it('should work with findAllLive with query', function() {
+        var actual, childCollection, expected;
+        childCollection = parentCollection.findAllLive({
+          tags: {
+            $has: ['jquery']
+          }
+        });
+        actual = childCollection.toJSON();
+        expected = [modelsObject.jquery, modelsObject.history];
+        return assert.deepEqual(actual, expected);
+      });
+      it('should work with findAllLive with query and comparator', function() {
+        var actual, childCollection, expected;
+        childCollection = parentCollection.findAllLive({
+          tags: {
+            $has: ['jquery']
+          }
+        }, {
+          position: -1
+        });
+        actual = childCollection.toJSON();
+        expected = [modelsObject.history, modelsObject.jquery];
+        return assert.deepEqual(actual, expected);
+      });
       childCollection = parentCollection.createLiveChildCollection();
       it('when query is called on our childCollection, it should successfully filter our parentCollection', function() {
         var actual, expected;
