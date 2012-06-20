@@ -603,7 +603,7 @@ class QueryCollection extends Backbone.Collection
 	# We should check if the model now passes our own tests, and if so add it to our own
 	# and if it doesn't then we should remove the model from our own
 	onParentChange: (model) ->
-		pass = @test(model) and @getParentCollection().test(model)
+		pass = @test(model)
 		if pass
 			@safeAdd(model)
 		else
