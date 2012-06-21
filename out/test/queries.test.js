@@ -597,6 +597,22 @@
         });
         return assert.deepEqual(actual.toJSON(), expected.toJSON());
       });
+      it('paging: limit+offset+page (via findAll)', function() {
+        var actual, expected;
+        actual = docs.findAll({
+          id: {
+            $exists: true
+          }
+        }, null, {
+          limit: 1,
+          offset: 1,
+          page: 2
+        });
+        expected = queryEngine.createCollection({
+          'history': docs.get('history')
+        });
+        return assert.deepEqual(actual.toJSON(), expected.toJSON());
+      });
       return it('paging: offset', function() {
         var actual, expected;
         actual = docs.createChildCollection().query({
