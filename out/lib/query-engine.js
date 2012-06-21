@@ -960,7 +960,7 @@
             }
           }
           if (selectorValue.$bte) {
-            if (modelValueExists && selectorValue.$bt[0] <= modelValue && modelValue <= selectorValue.$bt[1]) {
+            if (modelValueExists && selectorValue.$bte[0] <= modelValue && modelValue <= selectorValue.$bte[1]) {
               match = true;
             }
           }

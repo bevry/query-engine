@@ -354,6 +354,31 @@
         });
         return assert.deepEqual(actual.toJSON(), expected.toJSON());
       });
+      it('$bt', function() {
+        var actual, expected;
+        actual = docs.findAll({
+          position: {
+            $bt: [1, 3]
+          }
+        });
+        expected = queryEngine.createCollection({
+          'jquery': docs.get('jquery')
+        });
+        return assert.deepEqual(actual.toJSON(), expected.toJSON());
+      });
+      it('$bte', function() {
+        var actual, expected;
+        actual = docs.findAll({
+          position: {
+            $bte: [2, 3]
+          }
+        });
+        expected = queryEngine.createCollection({
+          'jquery': docs.get('jquery'),
+          'history': docs.get('history')
+        });
+        return assert.deepEqual(actual.toJSON(), expected.toJSON());
+      });
       it('$gt', function() {
         var actual, expected;
         actual = docs.findAll({

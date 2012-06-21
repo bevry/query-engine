@@ -1047,7 +1047,7 @@ class Query
 				# Query-Engine Specific
 				# between or equal to
 				if selectorValue.$bte
-					if modelValueExists and selectorValue.$bt[0] <= modelValue and modelValue <= selectorValue.$bt[1]
+					if modelValueExists and selectorValue.$bte[0] <= modelValue and modelValue <= selectorValue.$bte[1]
 						match = true
 
 			# Matched

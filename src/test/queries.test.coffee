@@ -195,6 +195,16 @@ generateTestSuite = (describe, it, name,docs) ->
 			expected = queryEngine.createCollection 'history': docs.get('history')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
+		it '$bt', ->
+			actual = docs.findAll position: $bt: [1,3]
+			expected = queryEngine.createCollection 'jquery': docs.get('jquery')
+			assert.deepEqual actual.toJSON(), expected.toJSON()
+
+		it '$bte', ->
+			actual = docs.findAll position: $bte: [2,3]
+			expected = queryEngine.createCollection 'jquery': docs.get('jquery'), 'history': docs.get('history')
+			assert.deepEqual actual.toJSON(), expected.toJSON()
+
 		it '$gt', ->
 			actual = docs.findAll position: $gt: 2
 			expected = queryEngine.createCollection 'history': docs.get('history')
