@@ -826,39 +826,37 @@ class Query
 			modelValueExists = typeof modelValue isnt 'undefined'
 			modelValue = false  unless modelValueExists
 
-			# The $nor operator lets you use a boolean or expression to do queries. You give $nor a list of expressions, none of which can satisfy the query.
-			if selectorName is '$nor'
-				match = true
-				queryGroup = util.toArrayGroup(selectorValue)
-				unless queryGroup.length then throw new Error('Query called with an empty $nor statement')
-				for query in queryGroup
-					query = new Query(query)
-					if query.test(model)
-						match = false
-						break
-
 			# The $or operator lets you use a boolean or expression to do queries. You give $or a list of expressions, any of which can satisfy the query.
-			if selectorName is '$or'
+			# The $nor operator is the opposite of $or (pass if they all don't match the query)
+			if selectorName in ['$or','$nor']
 				queryGroup = util.toArrayGroup(selectorValue)
-				unless queryGroup.length then throw new Error('Query called with an empty $or statement')
+				unless queryGroup.length then throw new Error("Query called with an empty #{selectorName} statement")
+				# Match if at least one item passes
 				for query in queryGroup
 					query = new Query(query)
 					if query.test(model)
 						match = true
 						break
+				# If we are $nor, then invert
+				if selectorName is '$nor'
+					match = !match
+
 
 			# The $and operator lets you use boolean and in a query. You give $and an array of expressions, all of which must match to satisfy the query.
-			if selectorName is '$and'
-				match = false
+			# The $not operator is the opposite of $and (pass if only one doesn't match the query)
+			else if selectorName in ['$and','$not']
 				queryGroup = util.toArrayGroup(selectorValue)
-				unless queryGroup.length then throw new Error('Query called with an empty $and statement')
+				unless queryGroup.length then throw new Error("Query called with an empty #{selectorName} statement")
 				for query in queryGroup
 					query = new Query(query)
 					match = query.test(model)
 					break  unless match
+				# If we are $not, then inver
+				if selectorName is '$not'
+					match = !match
 
 			# String, Number, Boolean
-			if _.isString(selectorValue) or _.isNumber(selectorValue) or _.isBoolean(selectorValue)
+			else if _.isString(selectorValue) or _.isNumber(selectorValue) or _.isBoolean(selectorValue)
 				if modelValueExists and modelValue is selectorValue
 					match = true
 

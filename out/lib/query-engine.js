@@ -731,7 +731,7 @@
     }
 
     Query.prototype.test = function(model) {
-      var $beginsWith, $beginsWithValue, $endWithValue, $endsWith, $size, empty, match, matchAll, matchAny, modelId, modelValue, modelValueExists, query, queryGroup, selectorName, selectorValue, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _m, _ref;
+      var $beginsWith, $beginsWithValue, $endWithValue, $endsWith, $size, empty, match, matchAll, matchAny, modelId, modelValue, modelValueExists, query, queryGroup, selectorName, selectorValue, _i, _j, _k, _l, _len, _len1, _len2, _len3, _ref;
       matchAll = true;
       matchAny = false;
       empty = true;
@@ -747,51 +747,39 @@
         if (!modelValueExists) {
           modelValue = false;
         }
-        if (selectorName === '$nor') {
-          match = true;
+        if (selectorName === '$or' || selectorName === '$nor') {
           queryGroup = util.toArrayGroup(selectorValue);
           if (!queryGroup.length) {
-            throw new Error('Query called with an empty $nor statement');
+            throw new Error("Query called with an empty " + selectorName + " statement");
           }
           for (_i = 0, _len = queryGroup.length; _i < _len; _i++) {
             query = queryGroup[_i];
-            query = new Query(query);
-            if (query.test(model)) {
-              match = false;
-              break;
-            }
-          }
-        }
-        if (selectorName === '$or') {
-          queryGroup = util.toArrayGroup(selectorValue);
-          if (!queryGroup.length) {
-            throw new Error('Query called with an empty $or statement');
-          }
-          for (_j = 0, _len1 = queryGroup.length; _j < _len1; _j++) {
-            query = queryGroup[_j];
             query = new Query(query);
             if (query.test(model)) {
               match = true;
               break;
             }
           }
-        }
-        if (selectorName === '$and') {
-          match = false;
+          if (selectorName === '$nor') {
+            match = !match;
+          }
+        } else if (selectorName === '$and' || selectorName === '$not') {
           queryGroup = util.toArrayGroup(selectorValue);
           if (!queryGroup.length) {
-            throw new Error('Query called with an empty $and statement');
+            throw new Error("Query called with an empty " + selectorName + " statement");
           }
-          for (_k = 0, _len2 = queryGroup.length; _k < _len2; _k++) {
-            query = queryGroup[_k];
+          for (_j = 0, _len1 = queryGroup.length; _j < _len1; _j++) {
+            query = queryGroup[_j];
             query = new Query(query);
             match = query.test(model);
             if (!match) {
               break;
             }
           }
-        }
-        if (_.isString(selectorValue) || _.isNumber(selectorValue) || _.isBoolean(selectorValue)) {
+          if (selectorName === '$not') {
+            match = !match;
+          }
+        } else if (_.isString(selectorValue) || _.isNumber(selectorValue) || _.isBoolean(selectorValue)) {
           if (modelValueExists && modelValue === selectorValue) {
             match = true;
           }
@@ -813,8 +801,8 @@
             if (!_.isArray($beginsWith)) {
               $beginsWith = [$beginsWith];
             }
-            for (_l = 0, _len3 = $beginsWith.length; _l < _len3; _l++) {
-              $beginsWithValue = $beginsWith[_l];
+            for (_k = 0, _len2 = $beginsWith.length; _k < _len2; _k++) {
+              $beginsWithValue = $beginsWith[_k];
               if (modelValue.substr(0, $beginsWithValue.length) === $beginsWithValue) {
                 match = true;
                 break;
@@ -826,8 +814,8 @@
             if (!_.isArray($endsWith)) {
               $endsWith = [$endsWith];
             }
-            for (_m = 0, _len4 = $endsWith.length; _m < _len4; _m++) {
-              $endWithValue = $endsWith[_m];
+            for (_l = 0, _len3 = $endsWith.length; _l < _len3; _l++) {
+              $endWithValue = $endsWith[_l];
               if (modelValue.substr($endWithValue.length * -1) === $endWithValue) {
                 match = true;
                 break;
