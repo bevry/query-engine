@@ -37,6 +37,7 @@ store =
 			category: 1
 			date: today
 			good: true
+			obj: {a:1,b:2}
 		'jquery':
 			id: 'jquery'
 			title: 'jQuery'
@@ -65,6 +66,7 @@ store =
 			category: 1
 			date: today
 			good: true
+			obj: {a:1,b:2}
 		'jquery': new Backbone.Model
 			id: 'jquery'
 			title: 'jQuery'
@@ -193,6 +195,11 @@ generateTestSuite = (describe, it, name,docs) ->
 		it '$size', ->
 			actual = docs.findAll tags: $size: 3
 			expected = queryEngine.createCollection 'history': docs.get('history')
+			assert.deepEqual actual.toJSON(), expected.toJSON()
+
+		it '$eq', ->
+			actual = docs.findAll obj: $eq: {a:1,b:2}
+			expected = queryEngine.createCollection 'index': docs.get('index')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
 		it '$bt', ->

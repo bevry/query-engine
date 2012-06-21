@@ -39,7 +39,11 @@
         position: 1,
         category: 1,
         date: today,
-        good: true
+        good: true,
+        obj: {
+          a: 1,
+          b: 2
+        }
       },
       'jquery': {
         id: 'jquery',
@@ -70,7 +74,11 @@
         position: 1,
         category: 1,
         date: today,
-        good: true
+        good: true,
+        obj: {
+          a: 1,
+          b: 2
+        }
       }),
       'jquery': new Backbone.Model({
         id: 'jquery',
@@ -351,6 +359,21 @@
         });
         expected = queryEngine.createCollection({
           'history': docs.get('history')
+        });
+        return assert.deepEqual(actual.toJSON(), expected.toJSON());
+      });
+      it('$eq', function() {
+        var actual, expected;
+        actual = docs.findAll({
+          obj: {
+            $eq: {
+              a: 1,
+              b: 2
+            }
+          }
+        });
+        expected = queryEngine.createCollection({
+          'index': docs.get('index')
         });
         return assert.deepEqual(actual.toJSON(), expected.toJSON());
       });
