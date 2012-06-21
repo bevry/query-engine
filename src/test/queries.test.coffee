@@ -147,6 +147,11 @@ generateTestSuite = (describe, it, name,docs) ->
 			expected = queryEngine.createCollection()
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
+		it '$not', ->
+			actual = docs.findAll $not: [{id: 'index'}, {position: 1}]
+			expected = queryEngine.createCollection 'jquery': docs.get('jquery'), 'history': docs.get('history')
+			assert.deepEqual actual.toJSON(), expected.toJSON()
+
 		it '$or', ->
 			actual = docs.findAll $or: [{id: 'index'}, {position: 2}]
 			expected = queryEngine.createCollection 'index': docs.get('index'), 'jquery': docs.get('jquery')

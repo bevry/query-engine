@@ -228,6 +228,23 @@
         expected = queryEngine.createCollection();
         return assert.deepEqual(actual.toJSON(), expected.toJSON());
       });
+      it('$not', function() {
+        var actual, expected;
+        actual = docs.findAll({
+          $not: [
+            {
+              id: 'index'
+            }, {
+              position: 1
+            }
+          ]
+        });
+        expected = queryEngine.createCollection({
+          'jquery': docs.get('jquery'),
+          'history': docs.get('history')
+        });
+        return assert.deepEqual(actual.toJSON(), expected.toJSON());
+      });
       it('$or', function() {
         var actual, expected;
         actual = docs.findAll({
