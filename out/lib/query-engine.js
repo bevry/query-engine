@@ -723,7 +723,7 @@
     }
 
     Query.prototype.test = function(model) {
-      var $beginsWith, $beginsWithValue, $endWithValue, $endsWith, $size, empty, match, matchAll, matchAny, modelId, modelValue, modelValueExists, query, queryGroup, selectorName, selectorValue, _i, _j, _k, _l, _len, _len1, _len2, _len3, _ref;
+      var $beginsWith, $beginsWithValue, $endWithValue, $endsWith, $mod, $size, empty, match, matchAll, matchAny, modelId, modelValue, modelValueExists, query, queryGroup, selectorName, selectorValue, _i, _j, _k, _l, _len, _len1, _len2, _len3, _ref;
       matchAll = true;
       matchAny = false;
       empty = true;
@@ -862,6 +862,16 @@
               match = true;
             }
           }
+          if (selectorValue.$like) {
+            if (_.isString(modelValue) && modelValue.toLowerCase().indexOf(selectorValue.$like.toLowerCase()) !== -1) {
+              match = true;
+            }
+          }
+          if (selectorValue.$likeSensitive) {
+            if (_.isString(modelValue) && modelValue.indexOf(selectorValue.$likeSensitive) !== -1) {
+              match = true;
+            }
+          }
           if (selectorValue.$exists) {
             if (selectorValue.$exists) {
               if (modelValueExists === true) {
@@ -874,7 +884,23 @@
             }
           }
           if (selectorValue.$mod) {
-            match = false;
+            if (modelValueExists) {
+              $mod = selectorValue.$mod;
+              if (!_.isArray($mod)) {
+                $mod = [$mod];
+              }
+              if ($mod.length === 1) {
+                $mod.push(0);
+              }
+              if ((modelValue % $mod[0]) === $mod[1]) {
+                match = true;
+              }
+            }
+          }
+          if (selectorValue.$eq) {
+            if (modelValueExists && _.isEqual(modelValue, selectorValue.$eq)) {
+              match = true;
+            }
           }
           if (selectorValue.$ne) {
             if (modelValueExists && modelValue !== selectorValue.$ne) {
@@ -891,6 +917,11 @@
               match = true;
             }
           }
+          if (selectorValue.$bt) {
+            if (modelValueExists && selectorValue.$bt[0] < modelValue && modelValue < selectorValue.$bt[1]) {
+              match = true;
+            }
+          }
           if (selectorValue.$lte) {
             if (modelValueExists && modelValue <= selectorValue.$lte) {
               match = true;
@@ -898,6 +929,11 @@
           }
           if (selectorValue.$gte) {
             if (modelValueExists && modelValue >= selectorValue.$gte) {
+              match = true;
+            }
+          }
+          if (selectorValue.$bte) {
+            if (modelValueExists && selectorValue.$bt[0] <= modelValue && modelValue <= selectorValue.$bt[1]) {
               match = true;
             }
           }

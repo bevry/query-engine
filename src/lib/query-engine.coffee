@@ -841,7 +841,6 @@ class Query
 				if selectorName is '$nor'
 					match = !match
 
-
 			# The $and operator lets you use boolean and in a query. You give $and an array of expressions, all of which must match to satisfy the query.
 			# The $not operator is the opposite of $and (pass if only one doesn't match the query)
 			else if selectorName in ['$and','$not']
@@ -854,6 +853,7 @@ class Query
 				# If we are $not, then inver
 				if selectorName is '$not'
 					match = !match
+
 
 			# String, Number, Boolean
 			else if _.isString(selectorValue) or _.isNumber(selectorValue) or _.isBoolean(selectorValue)
@@ -941,6 +941,18 @@ class Query
 					if typeof modelValue is selectorValue.$type
 						match = true
 
+				# Query-Engine Specific
+				# The $like operator checks if selectorValue string exists within the modelValue string (case insensitive)
+				if selectorValue.$like
+					if _.isString(modelValue) and modelValue.toLowerCase().indexOf(selectorValue.$like.toLowerCase()) isnt -1
+						match = true
+
+				# Query-Engine Specific
+				# The $likeSensitive operator checks if selectorValue string exists within the modelValue string (case sensitive)
+				if selectorValue.$likeSensitive
+					if _.isString(modelValue) and modelValue.indexOf(selectorValue.$likeSensitive) isnt -1
+						match = true
+
 				# Check for existence (or lack thereof) of a field.
 				if selectorValue.$exists
 					if selectorValue.$exists
@@ -952,7 +964,18 @@ class Query
 
 				# The $mod operator allows you to do fast modulo queries to replace a common case for where clauses.
 				if selectorValue.$mod
-					match = false
+					if modelValueExists
+						$mod = selectorValue.$mod
+						$mod = [$mod]  unless _.isArray($mod)
+						$mod.push(0)  if $mod.length is 1
+						if (modelValue % $mod[0]) is $mod[1]
+							match = true
+
+				# Query-Engine Specific
+				# Use $eq for deep equals
+				if selectorValue.$eq
+					if modelValueExists and _.isEqual(modelValue,selectorValue.$eq)
+						match = true
 
 				# Use $ne for "not equals".
 				if selectorValue.$ne
@@ -969,6 +992,12 @@ class Query
 					if modelValueExists and modelValue > selectorValue.$gt
 						match = true
 
+				# Query-Engine Specific
+				# between
+				if selectorValue.$bt
+					if modelValueExists and selectorValue.$bt[0] < modelValue and modelValue < selectorValue.$bt[1]
+						match = true
+
 				# less than or equal to
 				if selectorValue.$lte
 					if modelValueExists and modelValue <= selectorValue.$lte
@@ -977,6 +1006,12 @@ class Query
 				# greater than or equal to
 				if selectorValue.$gte
 					if modelValueExists and modelValue >= selectorValue.$gte
+						match = true
+
+				# Query-Engine Specific
+				# between or equal to
+				if selectorValue.$bte
+					if modelValueExists and selectorValue.$bt[0] <= modelValue and modelValue <= selectorValue.$bt[1]
 						match = true
 
 			# Matched
