@@ -197,6 +197,20 @@ generateTestSuite = (describe, it, name,docs) ->
 			expected = queryEngine.createCollection 'history': docs.get('history')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
+		it '$like', ->
+			actual = docs.findAll content: $like: 'INDEX'
+			expected = queryEngine.createCollection 'index': docs.get('index')
+			assert.deepEqual actual.toJSON(), expected.toJSON()
+
+		it '$likeSensitive', ->
+			actual = docs.findAll content: $likeSensitive: 'INDEX'
+			expected = queryEngine.createCollection()
+			assert.deepEqual actual.toJSON(), expected.toJSON()
+
+			actual = docs.findAll content: $likeSensitive: 'index'
+			expected = queryEngine.createCollection 'index': docs.get('index')
+			assert.deepEqual actual.toJSON(), expected.toJSON()
+
 		it '$eq', ->
 			actual = docs.findAll obj: $eq: {a:1,b:2}
 			expected = queryEngine.createCollection 'index': docs.get('index')

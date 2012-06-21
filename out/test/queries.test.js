@@ -362,6 +362,37 @@
         });
         return assert.deepEqual(actual.toJSON(), expected.toJSON());
       });
+      it('$like', function() {
+        var actual, expected;
+        actual = docs.findAll({
+          content: {
+            $like: 'INDEX'
+          }
+        });
+        expected = queryEngine.createCollection({
+          'index': docs.get('index')
+        });
+        return assert.deepEqual(actual.toJSON(), expected.toJSON());
+      });
+      it('$likeSensitive', function() {
+        var actual, expected;
+        actual = docs.findAll({
+          content: {
+            $likeSensitive: 'INDEX'
+          }
+        });
+        expected = queryEngine.createCollection();
+        assert.deepEqual(actual.toJSON(), expected.toJSON());
+        actual = docs.findAll({
+          content: {
+            $likeSensitive: 'index'
+          }
+        });
+        expected = queryEngine.createCollection({
+          'index': docs.get('index')
+        });
+        return assert.deepEqual(actual.toJSON(), expected.toJSON());
+      });
       it('$eq', function() {
         var actual, expected;
         actual = docs.findAll({
