@@ -410,6 +410,18 @@
         });
         return assert.deepEqual(actual.toJSON(), expected.toJSON());
       });
+      it('$mod', function() {
+        var actual, expected;
+        actual = docs.findAll({
+          position: {
+            $mod: [2, 0]
+          }
+        });
+        expected = queryEngine.createCollection({
+          'jquery': docs.get('jquery')
+        });
+        return assert.deepEqual(actual.toJSON(), expected.toJSON());
+      });
       it('$eq', function() {
         var actual, expected;
         actual = docs.findAll({

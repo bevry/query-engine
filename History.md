@@ -1,5 +1,9 @@
 ## History
 
+- v1.2.2 June 21, 2012
+	- Added `$like`, `$likeSensitive`, `$bt`, `$bte`, `$eq`, `$mod`, and `$not` queries
+	- Added paging
+
 - v1.2.1 June 21, 2012
 	- Added `QueryCollection::findAllLive(query,[comparator])` shortcut for `QueryCollection::createLiveChildCollection().setQuery('find',query).setComparator(comparator).query()`
 	- `QueryCollection::findAll` and `QueryCollection::findOne` now support an optional `comparator` argument as the second argument

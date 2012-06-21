@@ -216,6 +216,11 @@ generateTestSuite = (describe, it, name,docs) ->
 			expected = queryEngine.createCollection 'index': docs.get('index')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
+		it '$mod', ->
+			actual = docs.findAll position: $mod: [2,0]
+			expected = queryEngine.createCollection 'jquery': docs.get('jquery')
+			assert.deepEqual actual.toJSON(), expected.toJSON()
+
 		it '$eq', ->
 			actual = docs.findAll obj: $eq: {a:1,b:2}
 			expected = queryEngine.createCollection 'index': docs.get('index')
