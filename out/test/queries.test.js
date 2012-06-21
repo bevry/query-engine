@@ -447,7 +447,7 @@
         expected = docs;
         return assert.deepEqual(actual.toJSON(), expected.toJSON());
       });
-      return it('findOne', function() {
+      it('findOne', function() {
         var actual, expected;
         actual = docs.findOne({
           tags: {
@@ -455,6 +455,61 @@
           }
         });
         expected = docs.get('jquery');
+        return assert.deepEqual(actual.toJSON(), expected.toJSON());
+      });
+      it('paging: limit', function() {
+        var actual, expected;
+        actual = docs.createChildCollection().query({
+          limit: 1
+        });
+        expected = queryEngine.createCollection({
+          'index': docs.get('index')
+        });
+        return assert.deepEqual(actual.toJSON(), expected.toJSON());
+      });
+      it('paging: limit+page', function() {
+        var actual, expected;
+        actual = docs.createChildCollection().query({
+          limit: 1,
+          page: 2
+        });
+        expected = queryEngine.createCollection({
+          'jquery': docs.get('jquery')
+        });
+        return assert.deepEqual(actual.toJSON(), expected.toJSON());
+      });
+      it('paging: limit+offset', function() {
+        var actual, expected;
+        actual = docs.createChildCollection().query({
+          limit: 1,
+          offset: 1
+        });
+        expected = queryEngine.createCollection({
+          'jquery': docs.get('jquery')
+        });
+        return assert.deepEqual(actual.toJSON(), expected.toJSON());
+      });
+      it('paging: limit+offset+page', function() {
+        var actual, expected;
+        actual = docs.createChildCollection().query({
+          limit: 1,
+          offset: 1,
+          page: 2
+        });
+        expected = queryEngine.createCollection({
+          'history': docs.get('history')
+        });
+        return assert.deepEqual(actual.toJSON(), expected.toJSON());
+      });
+      return it('paging: offset', function() {
+        var actual, expected;
+        actual = docs.createChildCollection().query({
+          offset: 1
+        });
+        expected = queryEngine.createCollection({
+          'jquery': docs.get('jquery'),
+          'history': docs.get('history')
+        });
         return assert.deepEqual(actual.toJSON(), expected.toJSON());
       });
     });

@@ -356,9 +356,9 @@ class QueryCollection extends Backbone.Collection
 	setPaging: (paging) ->
 		# Prepare
 		paging = _.extend(@getPaging(), paging or {})
-		paging.page or= 1
-		paging.limit or= 0
-		paging.offset or= 0
+		paging.page or= null
+		paging.limit or= null
+		paging.offset or= null
 
 		# Apply paging
 		@options.paging = paging
@@ -499,9 +499,13 @@ class QueryCollection extends Backbone.Collection
 				models.push(model)
 
 		# Page our models
-		start = paging.offset * (paging.page or 1)
-		finish = if paging.limit then start + paging.limit else -1
-		models = models[start..finish]
+		start = paging.offset or 0
+		if paging.limit? and paging.limit > 0
+			start = start + paging.limit * ((paging.page or 1) - 1)
+			finish = start + paging.limit
+			models = models[start...finish]
+		else
+			models = models[start..]
 
 		# Reset our collection with the passing models
 		@reset(models)

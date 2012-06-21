@@ -335,9 +335,9 @@
 
     QueryCollection.prototype.setPaging = function(paging) {
       paging = _.extend(this.getPaging(), paging || {});
-      paging.page || (paging.page = 1);
-      paging.limit || (paging.limit = 0);
-      paging.offset || (paging.offset = 0);
+      paging.page || (paging.page = null);
+      paging.limit || (paging.limit = null);
+      paging.offset || (paging.offset = null);
       this.options.paging = paging;
       return this;
     };
@@ -435,9 +435,14 @@
           return models.push(model);
         }
       });
-      start = paging.offset * (paging.page || 1);
-      finish = paging.limit ? start + paging.limit : -1;
-      models = models.slice(start, finish + 1 || 9e9);
+      start = paging.offset || 0;
+      if ((paging.limit != null) && paging.limit > 0) {
+        start = start + paging.limit * ((paging.page || 1) - 1);
+        finish = start + paging.limit;
+        models = models.slice(start, finish);
+      } else {
+        models = models.slice(start);
+      }
       this.reset(models);
       return this;
     };

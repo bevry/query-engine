@@ -240,6 +240,31 @@ generateTestSuite = (describe, it, name,docs) ->
 			expected = docs.get('jquery')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
+		it 'paging: limit', ->
+			actual = docs.createChildCollection().query({limit:1})
+			expected = queryEngine.createCollection 'index': docs.get('index')
+			assert.deepEqual actual.toJSON(), expected.toJSON()
+
+		it 'paging: limit+page', ->
+			actual = docs.createChildCollection().query({limit:1,page:2})
+			expected = queryEngine.createCollection 'jquery': docs.get('jquery')
+			assert.deepEqual actual.toJSON(), expected.toJSON()
+
+		it 'paging: limit+offset', ->
+			actual = docs.createChildCollection().query({limit:1,offset:1})
+			expected = queryEngine.createCollection 'jquery': docs.get('jquery')
+			assert.deepEqual actual.toJSON(), expected.toJSON()
+
+		it 'paging: limit+offset+page', ->
+			actual = docs.createChildCollection().query({limit:1,offset:1,page:2})
+			expected = queryEngine.createCollection 'history': docs.get('history')
+			assert.deepEqual actual.toJSON(), expected.toJSON()
+
+		it 'paging: offset', ->
+			actual = docs.createChildCollection().query({offset:1})
+			expected = queryEngine.createCollection 'jquery': docs.get('jquery'), 'history': docs.get('history')
+			assert.deepEqual actual.toJSON(), expected.toJSON()
+
 # Generate Suites
 describe 'queries', (describe,it) ->
 	for own key, value of store
