@@ -182,12 +182,14 @@ class QueryCollection extends Backbone.Collection
 		@options.filters = _.extend({}, @options.filters or {})
 		@options.queries = _.extend({}, @options.queries or {})
 		@options.pills = _.extend({}, @options.pills or {})
+		@options.paging = _.extend({}, @options.paging or {})
 		@options.searchString or= null
 
 		# Initialise filters, queries and pills if we have them
 		@setFilters(@options.filters)
 		@setQueries(@options.queries)
 		@setPills(@options.pills)
+		@setPaging(@options.paging)
 		@setSearchString(@options.searchString)  if @options.searchString?
 		@setComparator(@comparator)  if @comparator?  # @options.comparator is shortcutted here by Backbone
 
@@ -232,7 +234,7 @@ class QueryCollection extends Backbone.Collection
 		else if filters[name]?
 			delete filters[name]
 
-		# Apply or delete the value
+		# Chain
 		@
 
 
@@ -343,6 +345,27 @@ class QueryCollection extends Backbone.Collection
 		# Chain
 		@
 
+	# ---------------------------------
+	# Paging: Getters and Setters
+
+	# Get Paging
+	getPaging: ->
+		@options.paging
+
+	# Set Paging
+	setPaging: (paging) ->
+		# Prepare
+		paging = _.extend(@getPaging(), paging or {})
+		paging.page or= 1
+		paging.limit or= 0
+		paging.offset or= 0
+
+		# Apply paging
+		@options.paging = paging
+
+		# Chain
+		@
+
 
 	# ---------------------------------
 	# Parent Collection: Getters and Setters
@@ -414,7 +437,7 @@ class QueryCollection extends Backbone.Collection
 
 
 	# ---------------------------------
-	# Generic API
+	# Sorting and Paging
 
 	# Set Comparator
 	setComparator: (comparator) ->
@@ -462,11 +485,12 @@ class QueryCollection extends Backbone.Collection
 
 	# Query
 	# Reset our collection with the new rules that we are using
-	query: ->
+	query: (paging) ->
 		# Prepare
 		me = @
 		models = []
 		collection = @getParentCollection() or @
+		paging or= @getPaging()
 
 		# Cycle through the parent collection finding passing models
 		collection.each (model) ->
@@ -474,11 +498,19 @@ class QueryCollection extends Backbone.Collection
 			if pass
 				models.push(model)
 
+		# Page our models
+		start = paging.offset * (paging.page or 1)
+		finish = if paging.limit then start + paging.limit else -1
+		models = models[start..finish]
+
 		# Reset our collection with the passing models
 		@reset(models)
 
 		# Chain
 		@
+
+	# ---------------------------------
+	# Generic API
 
 	# Create Child Collection
 	createChildCollection: (models,options) ->
@@ -497,18 +529,18 @@ class QueryCollection extends Backbone.Collection
 		return collection
 
 	# Find All
-	findAll: (query,comparator) ->
-		collection = @createChildCollection([],{comparator,queries:find:query}).query()
+	findAll: (query,comparator,paging) ->
+		collection = @createChildCollection([],{comparator,paging,queries:find:query}).query()
 		return collection
 
 	# Find All Live
-	findAllLive: (query,comparator) ->
-		collection = @createLiveChildCollection([],{comparator,queries:find:query}).query()
+	findAllLive: (query,comparator,paging) ->
+		collection = @createLiveChildCollection([],{comparator,paging,queries:find:query}).query()
 		return collection
 
 	# Find One
-	findOne: (query,comparator) ->
-		collection = @createChildCollection([],{comparator,queries:find:query}).query()
+	findOne: (query,comparator,paging) ->
+		collection = @createChildCollection([],{comparator,paging,queries:find:query}).query()
 		if collection and collection.length
 			return collection.models[0]
 		else

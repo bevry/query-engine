@@ -183,10 +183,12 @@
       this.options.filters = _.extend({}, this.options.filters || {});
       this.options.queries = _.extend({}, this.options.queries || {});
       this.options.pills = _.extend({}, this.options.pills || {});
+      this.options.paging = _.extend({}, this.options.paging || {});
       (_base = this.options).searchString || (_base.searchString = null);
       this.setFilters(this.options.filters);
       this.setQueries(this.options.queries);
       this.setPills(this.options.pills);
+      this.setPaging(this.options.paging);
       if (this.options.searchString != null) {
         this.setSearchString(this.options.searchString);
       }
@@ -327,6 +329,19 @@
       return this;
     };
 
+    QueryCollection.prototype.getPaging = function() {
+      return this.options.paging;
+    };
+
+    QueryCollection.prototype.setPaging = function(paging) {
+      paging = _.extend(this.getPaging(), paging || {});
+      paging.page || (paging.page = 1);
+      paging.limit || (paging.limit = 0);
+      paging.offset || (paging.offset = 0);
+      this.options.paging = paging;
+      return this;
+    };
+
     QueryCollection.prototype.hasParentCollection = function() {
       return this.options.parentCollection != null;
     };
@@ -407,11 +422,12 @@
       return arr;
     };
 
-    QueryCollection.prototype.query = function() {
-      var collection, me, models;
+    QueryCollection.prototype.query = function(paging) {
+      var collection, finish, me, models, start;
       me = this;
       models = [];
       collection = this.getParentCollection() || this;
+      paging || (paging = this.getPaging());
       collection.each(function(model) {
         var pass;
         pass = me.test(model);
@@ -419,6 +435,9 @@
           return models.push(model);
         }
       });
+      start = paging.offset * (paging.page || 1);
+      finish = paging.limit ? start + paging.limit : -1;
+      models = models.slice(start, finish + 1 || 9e9);
       this.reset(models);
       return this;
     };
@@ -445,10 +464,11 @@
       return collection;
     };
 
-    QueryCollection.prototype.findAll = function(query, comparator) {
+    QueryCollection.prototype.findAll = function(query, comparator, paging) {
       var collection;
       collection = this.createChildCollection([], {
         comparator: comparator,
+        paging: paging,
         queries: {
           find: query
         }
@@ -456,10 +476,11 @@
       return collection;
     };
 
-    QueryCollection.prototype.findAllLive = function(query, comparator) {
+    QueryCollection.prototype.findAllLive = function(query, comparator, paging) {
       var collection;
       collection = this.createLiveChildCollection([], {
         comparator: comparator,
+        paging: paging,
         queries: {
           find: query
         }
@@ -467,10 +488,11 @@
       return collection;
     };
 
-    QueryCollection.prototype.findOne = function(query, comparator) {
+    QueryCollection.prototype.findOne = function(query, comparator, paging) {
       var collection;
       collection = this.createChildCollection([], {
         comparator: comparator,
+        paging: paging,
         queries: {
           find: query
         }
