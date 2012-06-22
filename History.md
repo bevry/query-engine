@@ -20,7 +20,7 @@
 		- Adds support for quotes when using pills, e.g. `user:"Benjamin Lupton"`
 		- Adds support for using pills of the same name multiple times, e.g. `tag:node tag:query`
 			- Whether this ORs or ANDs is customisable via the pill's `logicalOperator` which can be `AND` or `OR` (defaults to `OR`)
-	- Moved tests to [Joe](https://github.com/bevry/joe)
+	- Moved tests from Mocha to [Joe](https://github.com/bevry/joe)
 	- Added browser tests
 
 - v1.1.14 June 5, 2012
