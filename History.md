@@ -1,5 +1,8 @@
 ## History
 
+- v1.2.3 July 18, 2012
+	- Fixed strings in some environments being split into arrays when using `$has` and `$in`
+
 - v1.2.2 June 21, 2012
 	- Added `$like`, `$likeSensitive`, `$bt`, `$bte`, `$eq`, `$mod`, and `$not` queries
 	- Added paging

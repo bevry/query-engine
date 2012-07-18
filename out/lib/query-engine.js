@@ -10,6 +10,58 @@
   Backbone = typeof module !== "undefined" && module !== null ? require('backbone') : this.Backbone;
 
   util = {
+    isEqual: function(value1, value2) {
+      return _.isEqual(value1, value2);
+    },
+    toString: function(value) {
+      return Object.prototype.toString.call(value);
+    },
+    isPlainObject: function(value) {
+      return util.isObject(value) && value.__proto__ === Object.prototype;
+    },
+    isObject: function(value) {
+      return value && typeof value === 'object';
+    },
+    isError: function(value) {
+      return value instanceof Error;
+    },
+    isDate: function(value) {
+      return util.toString(value) === '[object Date]';
+    },
+    isArguments: function(value) {
+      return util.toString(value) === '[object Arguments]';
+    },
+    isFunction: function(value) {
+      return util.toString(value) === '[object Function]';
+    },
+    isRegExp: function(value) {
+      return util.toString(value) === '[object RegExp]';
+    },
+    isArray: function(value) {
+      if (Array.isArray != null) {
+        return Array.isArray(value);
+      } else {
+        return util.toString(value) === '[object Array]';
+      }
+    },
+    isNumber: function(value) {
+      return typeof value === 'number' || util.toString(value) === '[object Number]';
+    },
+    isString: function(value) {
+      return typeof value === 'string' || util.toString(value) === '[object String]';
+    },
+    isBoolean: function(value) {
+      return value === true || value === false || util.toString(value) === '[object Boolean]';
+    },
+    isNull: function(value) {
+      return value === null;
+    },
+    isUndefined: function(value) {
+      return typeof value === 'undefined';
+    },
+    isEmpty: function(value) {
+      return value != null;
+    },
     safeRegex: function(str) {
       return (str || '').replace('(.)', '\\$1');
     },
@@ -23,9 +75,9 @@
       var item, key, result;
       result = [];
       if (value) {
-        if (_.isArray(value)) {
+        if (util.isArray(value)) {
           result = value;
-        } else if (_.isObject(value)) {
+        } else if (util.isObject(value)) {
           for (key in value) {
             if (!__hasProp.call(value, key)) continue;
             item = value[key];
@@ -41,9 +93,9 @@
       var item, key, obj, result;
       result = [];
       if (value) {
-        if (_.isArray(value)) {
+        if (util.isArray(value)) {
           result = value;
-        } else if (_.isObject(value)) {
+        } else if (util.isObject(value)) {
           for (key in value) {
             if (!__hasProp.call(value, key)) continue;
             item = value[key];
@@ -62,9 +114,9 @@
       generateFunction = function(comparator) {
         if (!comparator) {
           throw new Error('Cannot sort without a comparator');
-        } else if (_.isFunction(comparator)) {
+        } else if (util.isFunction(comparator)) {
           return comparator;
-        } else if (_.isArray(comparator)) {
+        } else if (util.isArray(comparator)) {
           return function(a, b) {
             var comparison, key, value, _i, _len;
             comparison = 0;
@@ -77,7 +129,7 @@
             }
             return comparison;
           };
-        } else if (_.isObject(comparator)) {
+        } else if (util.isObject(comparator)) {
           return function(a, b) {
             var aValue, bValue, comparison, key, value, _ref, _ref1;
             comparison = 0;
@@ -428,6 +480,11 @@
       models = [];
       collection = this.getParentCollection() || this;
       paging || (paging = this.getPaging());
+      start = paging.offset || 0;
+      if ((paging.limit != null) && paging.limit > 0) {
+        start = start + paging.limit * ((paging.page || 1) - 1);
+        finish = start + paging.limit;
+      }
       collection.each(function(model) {
         var pass;
         pass = me.test(model);
@@ -798,26 +855,26 @@
           if (selectorName === '$not') {
             match = !match;
           }
-        } else if (_.isString(selectorValue) || _.isNumber(selectorValue) || _.isBoolean(selectorValue)) {
+        } else if (util.isString(selectorValue) || util.isNumber(selectorValue) || util.isBoolean(selectorValue)) {
           if (modelValueExists && modelValue === selectorValue) {
             match = true;
           }
-        } else if (_.isArray(selectorValue)) {
+        } else if (util.isArray(selectorValue)) {
           if (modelValueExists && (new Hash(modelValue)).isSame(selectorValue)) {
             match = true;
           }
-        } else if (_.isDate(selectorValue)) {
+        } else if (util.isDate(selectorValue)) {
           if (modelValueExists && modelValue.toString() === selectorValue.toString()) {
             match = true;
           }
-        } else if (_.isRegExp(selectorValue)) {
+        } else if (util.isRegExp(selectorValue)) {
           if (modelValueExists && selectorValue.test(modelValue)) {
             match = true;
           }
-        } else if (_.isObject(selectorValue)) {
+        } else if (util.isObject(selectorValue)) {
           $beginsWith = selectorValue.$beginsWith || selectorValue.$startsWith || null;
-          if ($beginsWith && modelValueExists && _.isString(modelValue)) {
-            if (!_.isArray($beginsWith)) {
+          if ($beginsWith && modelValueExists && util.isString(modelValue)) {
+            if (!util.isArray($beginsWith)) {
               $beginsWith = [$beginsWith];
             }
             for (_k = 0, _len2 = $beginsWith.length; _k < _len2; _k++) {
@@ -829,8 +886,8 @@
             }
           }
           $endsWith = selectorValue.$endsWith || selectorValue.$finishesWith || null;
-          if ($endsWith && modelValueExists && _.isString(modelValue)) {
-            if (!_.isArray($endsWith)) {
+          if ($endsWith && modelValueExists && util.isString(modelValue)) {
+            if (!util.isArray($endsWith)) {
               $endsWith = [$endsWith];
             }
             for (_l = 0, _len3 = $endsWith.length; _l < _len3; _l++) {
@@ -890,12 +947,12 @@
             }
           }
           if (selectorValue.$like) {
-            if (_.isString(modelValue) && modelValue.toLowerCase().indexOf(selectorValue.$like.toLowerCase()) !== -1) {
+            if (util.isString(modelValue) && modelValue.toLowerCase().indexOf(selectorValue.$like.toLowerCase()) !== -1) {
               match = true;
             }
           }
           if (selectorValue.$likeSensitive) {
-            if (_.isString(modelValue) && modelValue.indexOf(selectorValue.$likeSensitive) !== -1) {
+            if (util.isString(modelValue) && modelValue.indexOf(selectorValue.$likeSensitive) !== -1) {
               match = true;
             }
           }
@@ -913,7 +970,7 @@
           if (selectorValue.$mod) {
             if (modelValueExists) {
               $mod = selectorValue.$mod;
-              if (!_.isArray($mod)) {
+              if (!util.isArray($mod)) {
                 $mod = [$mod];
               }
               if ($mod.length === 1) {
@@ -925,7 +982,7 @@
             }
           }
           if (selectorValue.$eq) {
-            if (modelValueExists && _.isEqual(modelValue, selectorValue.$eq)) {
+            if (modelValueExists && util.isEqual(modelValue, selectorValue.$eq)) {
               match = true;
             }
           }

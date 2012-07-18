@@ -6,6 +6,87 @@ Backbone = if module? then require('backbone') else @Backbone
 # Util
 # Contains our utility functions
 util =
+
+	# ---------------------------------
+	# Underscore Aliases
+
+	# Is Equal
+	isEqual: (value1,value2) ->
+		return _.isEqual(value1,value2)
+
+
+	# ---------------------------------
+	# Types, from bal-util: https://github.com/balupton/bal-util
+	# We use these instead of the underscore versions, as sometimes the underscore versions lie!
+
+	# Is an item a string
+	toString: (value) ->
+		return Object::toString.call(value)
+
+	# Checks to see if a value is an object and only an object
+	isPlainObject: (value) ->
+		return util.isObject(value) and value.__proto__ is Object.prototype
+
+	# Checks to see if a value is an object
+	isObject: (value) ->
+		# null and undefined are objects, hence the truthy check
+		return value and typeof value is 'object'
+
+	# Checks to see if a value is an error
+	isError: (value) ->
+		return value instanceof Error
+
+	# Checks to see if a value is a date
+	isDate: (value) ->
+		return util.toString(value) is '[object Date]'
+
+	# Checks to see if a value is an arguments object
+	isArguments: (value) ->
+		return util.toString(value) is '[object Arguments]'
+
+	# Checks to see if a value is a function
+	isFunction: (value) ->
+		return util.toString(value) is '[object Function]'
+
+	# Checks to see if a value is an regex
+	isRegExp: (value) ->
+		return util.toString(value) is '[object RegExp]'
+
+	# Checks to see if a value is an array
+	isArray: (value) ->
+		if Array.isArray?
+			return Array.isArray(value)
+		else
+			return util.toString(value) is '[object Array]'
+
+	# Checks to see if a valule is a number
+	isNumber: (value) ->
+		return typeof value is 'number' or util.toString(value) is '[object Number]'
+
+	# Checks to see if a value is a string
+	isString: (value) ->
+		return typeof value is 'string' or util.toString(value) is '[object String]'
+
+	# Checks to see if a valule is a boolean
+	isBoolean: (value) ->
+		return value is true or value is false or util.toString(value) is '[object Boolean]'
+
+	# Checks to see if a value is null
+	isNull: (value) ->
+		return value is null
+
+	# Checks to see if a value is undefined
+	isUndefined: (value) ->
+		return typeof value is 'undefined'
+
+	# Checks to see if a value is empty
+	isEmpty: (value) ->
+		return value?
+
+
+	# ---------------------------------
+	# Other
+
 	# Safe Regex
 	# Santitize a string for the use inside a regular expression
 	safeRegex: (str) ->
@@ -28,9 +109,9 @@ util =
 
 		# Determine the correct type
 		if value
-			if _.isArray(value)
+			if util.isArray(value)
 				result = value
-			else if _.isObject(value)
+			else if util.isObject(value)
 				for own key,item of value
 					result.push(item)
 			else
@@ -46,9 +127,9 @@ util =
 
 		# Determine the correct type
 		if value
-			if _.isArray(value)
+			if util.isArray(value)
 				result = value
-			else if _.isObject(value)
+			else if util.isObject(value)
 				for own key,item of value
 					obj = {}
 					obj[key] = item
@@ -65,9 +146,9 @@ util =
 		generateFunction = (comparator) ->
 			unless comparator
 				throw new Error('Cannot sort without a comparator')
-			else if _.isFunction(comparator)
+			else if util.isFunction(comparator)
 				return comparator
-			else if _.isArray(comparator)
+			else if util.isArray(comparator)
 				return (a,b) ->
 					comparison = 0
 					for value,key in comparator
@@ -75,7 +156,7 @@ util =
 						return comparison  if comparison
 					# Return likey 0
 					return comparison
-			else if _.isObject(comparator)
+			else if util.isObject(comparator)
 				return (a,b) ->
 					comparison = 0
 					for own key,value of comparator
@@ -492,6 +573,12 @@ class QueryCollection extends Backbone.Collection
 		collection = @getParentCollection() or @
 		paging or= @getPaging()
 
+		# Page our models
+		start = paging.offset or 0
+		if paging.limit? and paging.limit > 0
+			start = start + paging.limit * ((paging.page or 1) - 1)
+			finish = start + paging.limit
+
 		# Cycle through the parent collection finding passing models
 		collection.each (model) ->
 			pass = me.test(model)
@@ -892,31 +979,31 @@ class Query
 
 
 			# String, Number, Boolean
-			else if _.isString(selectorValue) or _.isNumber(selectorValue) or _.isBoolean(selectorValue)
+			else if util.isString(selectorValue) or util.isNumber(selectorValue) or util.isBoolean(selectorValue)
 				if modelValueExists and modelValue is selectorValue
 					match = true
 
 			# Array
-			else if _.isArray(selectorValue)
+			else if util.isArray(selectorValue)
 				if modelValueExists and (new Hash modelValue).isSame(selectorValue)
 					match = true
 
 			# Date
-			else if _.isDate(selectorValue)
+			else if util.isDate(selectorValue)
 				if modelValueExists and modelValue.toString() is selectorValue.toString()
 					match = true
 
 			# Regular Expression
-			else if _.isRegExp(selectorValue)
+			else if util.isRegExp(selectorValue)
 				if modelValueExists and selectorValue.test(modelValue)
 					match = true
 
 			# Conditional Operators
-			else if _.isObject(selectorValue)
+			else if util.isObject(selectorValue)
 				# The $beginsWith operator checks if the value begins with a particular value or values if an array was passed
 				$beginsWith = selectorValue.$beginsWith or selectorValue.$startsWith or null
-				if $beginsWith and modelValueExists and _.isString(modelValue)
-					$beginsWith = [$beginsWith]  unless _.isArray($beginsWith)
+				if $beginsWith and modelValueExists and util.isString(modelValue)
+					$beginsWith = [$beginsWith]  unless util.isArray($beginsWith)
 					for $beginsWithValue in $beginsWith
 						if modelValue.substr(0,$beginsWithValue.length) is $beginsWithValue
 							match = true
@@ -924,8 +1011,8 @@ class Query
 
 				# The $endsWith operator checks if the value ends with a particular value or values if an array was passed
 				$endsWith = selectorValue.$endsWith or selectorValue.$finishesWith or null
-				if $endsWith and modelValueExists and _.isString(modelValue)
-					$endsWith = [$endsWith]  unless _.isArray($endsWith)
+				if $endsWith and modelValueExists and util.isString(modelValue)
+					$endsWith = [$endsWith]  unless util.isArray($endsWith)
 					for $endWithValue in $endsWith
 						if modelValue.substr($endWithValue.length*-1) is $endWithValue
 							match = true
@@ -980,13 +1067,13 @@ class Query
 				# Query-Engine Specific
 				# The $like operator checks if selectorValue string exists within the modelValue string (case insensitive)
 				if selectorValue.$like
-					if _.isString(modelValue) and modelValue.toLowerCase().indexOf(selectorValue.$like.toLowerCase()) isnt -1
+					if util.isString(modelValue) and modelValue.toLowerCase().indexOf(selectorValue.$like.toLowerCase()) isnt -1
 						match = true
 
 				# Query-Engine Specific
 				# The $likeSensitive operator checks if selectorValue string exists within the modelValue string (case sensitive)
 				if selectorValue.$likeSensitive
-					if _.isString(modelValue) and modelValue.indexOf(selectorValue.$likeSensitive) isnt -1
+					if util.isString(modelValue) and modelValue.indexOf(selectorValue.$likeSensitive) isnt -1
 						match = true
 
 				# Check for existence (or lack thereof) of a field.
@@ -1002,7 +1089,7 @@ class Query
 				if selectorValue.$mod
 					if modelValueExists
 						$mod = selectorValue.$mod
-						$mod = [$mod]  unless _.isArray($mod)
+						$mod = [$mod]  unless util.isArray($mod)
 						$mod.push(0)  if $mod.length is 1
 						if (modelValue % $mod[0]) is $mod[1]
 							match = true
@@ -1010,7 +1097,7 @@ class Query
 				# Query-Engine Specific
 				# Use $eq for deep equals
 				if selectorValue.$eq
-					if modelValueExists and _.isEqual(modelValue,selectorValue.$eq)
+					if modelValueExists and util.isEqual(modelValue,selectorValue.$eq)
 						match = true
 
 				# Use $ne for "not equals".
