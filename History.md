@@ -1,5 +1,9 @@
 ## History
 
+- v1.2.4 July 23, 2012
+	- Fixed trickling of change events from parent collection to child collections
+		- Before if a distant parent collection had a change event that removed or added the model from that event, that change would not be reflected in a distant child collection
+
 - v1.2.3 July 18, 2012
 	- Fixed strings in some environments being split into arrays when using `$has` and `$in`
 

@@ -634,7 +634,7 @@
 
     QueryCollection.prototype.onParentChange = function(model) {
       var pass;
-      pass = this.test(model) && this.getParentCollection().test(model);
+      pass = this.test(model) && this.getParentCollection().hasModel(model);
       if (pass) {
         this.safeAdd(model);
       } else {

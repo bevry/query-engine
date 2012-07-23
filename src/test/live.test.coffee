@@ -412,6 +412,36 @@ describe 'live', (describe,it) ->
 			expected = []
 			assert.deepEqual(actual, expected)
 
+	describe 'parent collections: many levels', (describe,it) ->
+		# Create a parentCollection with the models
+		parentCollection = queryEngine.createCollection(models)
+
+		# Create the child collections
+		childCollectionLevel2 = parentCollection.findAllLive({tags: $has: ['jquery']})
+		childCollectionLevel3 = childCollectionLevel2.findAllLive({tags: $has: ['html5']})
+		childCollectionLevel4 = childCollectionLevel3.findAllLive({category: 1})
+
+		# a change that removes from a parent collection should have the model removed from child collections
+		it 'removes triggered by changes trickle through children correctly', ->
+			# Perform a change on the history model
+			parentCollection.where(id:'history')[0].set({'tags':['html5','history']})
+
+			# Check our childCollection
+			actual = childCollectionLevel4.toJSON()
+			expected = []
+			assert.deepEqual(actual, expected)
+
+		# a change that adds to a parent collection should have the model added to child collections (if tests pass)
+		it 'additions triggered by changes trickle through children correctly', ->
+			# Reset the change
+			parentCollection.where(id:'history')[0].set({'tags':['jquery','html5','history']})
+
+			# Check our childCollection
+			actual = childCollectionLevel4.toJSON()
+			expected = [modelsObject.history]
+			assert.deepEqual(actual, expected)
+
+
 
 
 # Return
