@@ -59,7 +59,7 @@ util =
 		else
 			return util.toString(value) is '[object Array]'
 
-	# Checks to see if a valule is a number
+	# Checks to see if a value is a number
 	isNumber: (value) ->
 		return typeof value is 'number' or util.toString(value) is '[object Number]'
 
@@ -67,7 +67,7 @@ util =
 	isString: (value) ->
 		return typeof value is 'string' or util.toString(value) is '[object String]'
 
-	# Checks to see if a valule is a boolean
+	# Checks to see if a value is a boolean
 	isBoolean: (value) ->
 		return value is true or value is false or util.toString(value) is '[object Boolean]'
 
@@ -79,9 +79,18 @@ util =
 	isUndefined: (value) ->
 		return typeof value is 'undefined'
 
+	# Checks to see if a value is defined
+	isDefined: (value) ->
+		return typeof value isnt 'undefined'
+
 	# Checks to see if a value is empty
 	isEmpty: (value) ->
 		return value?
+
+	# Checks to see if the value is comparable (date or number)
+	isComparable: (value) ->
+		return util.isNumber(value) or util.isDate(value)
+
 
 
 	# ---------------------------------
@@ -998,6 +1007,11 @@ class Query
 				if modelValueExists and selectorValue.test(modelValue)
 					match = true
 
+			# Null
+			else if util.isNull(selectorValue)
+				if modelValue is selectorValue
+					match = true
+
 			# Conditional Operators
 			else if util.isObject(selectorValue)
 				# The $beginsWith operator checks if the value begins with a particular value or values if an array was passed
@@ -1019,14 +1033,14 @@ class Query
 							break
 
 				# The $all operator is similar to $in, but instead of matching any value in the specified array all values in the array must be matched.
-				if selectorValue.$all
+				if selectorValue.$all?
 					if modelValueExists
 						if (new Hash modelValue).hasAll(selectorValue.$all)
 							match = true
 
 				# The $in operator is analogous to the SQL IN modifier, allowing you to specify an array of possible matches.
 				# The target field's value can also be an array; if so then the document matches if any of the elements of the array's value matches any of the $in field's values
-				if selectorValue.$in
+				if selectorValue.$in?
 					if modelValueExists
 						if (new Hash modelValue).hasIn(selectorValue.$in)
 							match = true
@@ -1035,27 +1049,27 @@ class Query
 
 				# Query-Engine Specific
 				# The $has operator checks if any of the selectorValue values exist within our model's value
-				if selectorValue.$has
+				if selectorValue.$has?
 					if modelValueExists
 						if (new Hash modelValue).hasIn(selectorValue.$has)
 							match = true
 
 				# Query-Engine Specific
 				# The $hasAll operator checks if all of the selectorValue values exist within our model's value
-				if selectorValue.$hasAll
+				if selectorValue.$hasAll?
 					if modelValueExists
 						if (new Hash modelValue).hasIn(selectorValue.$hasAll)
 							match = true
 
 				# The $nin operator is similar to $in except that it selects objects for which the specified field does not have any value in the specified array.
-				if selectorValue.$nin
+				if selectorValue.$nin?
 					if modelValueExists
 						if (new Hash modelValue).hasIn(selectorValue.$nin) is false and (new Hash selectorValue.$nin).hasIn(selectorValue) is false
 							match = true
 
 				# The $size operator matches any array with the specified number of elements. The following example would match the object {a:["foo"]}, since that array has just one element:
 				$size = selectorValue.$size or selectorValue.$length
-				if $size
+				if $size?
 					if modelValue.length? and modelValue.length is $size
 						match = true
 
@@ -1066,18 +1080,18 @@ class Query
 
 				# Query-Engine Specific
 				# The $like operator checks if selectorValue string exists within the modelValue string (case insensitive)
-				if selectorValue.$like
+				if selectorValue.$like?
 					if util.isString(modelValue) and modelValue.toLowerCase().indexOf(selectorValue.$like.toLowerCase()) isnt -1
 						match = true
 
 				# Query-Engine Specific
 				# The $likeSensitive operator checks if selectorValue string exists within the modelValue string (case sensitive)
-				if selectorValue.$likeSensitive
+				if selectorValue.$likeSensitive?
 					if util.isString(modelValue) and modelValue.indexOf(selectorValue.$likeSensitive) isnt -1
 						match = true
 
 				# Check for existence (or lack thereof) of a field.
-				if selectorValue.$exists
+				if selectorValue.$exists?
 					if selectorValue.$exists
 						if modelValueExists is true
 							match = true
@@ -1086,7 +1100,7 @@ class Query
 							match = true
 
 				# The $mod operator allows you to do fast modulo queries to replace a common case for where clauses.
-				if selectorValue.$mod
+				if selectorValue.$mod?
 					if modelValueExists
 						$mod = selectorValue.$mod
 						$mod = [$mod]  unless util.isArray($mod)
@@ -1096,45 +1110,45 @@ class Query
 
 				# Query-Engine Specific
 				# Use $eq for deep equals
-				if selectorValue.$eq
-					if modelValueExists and util.isEqual(modelValue,selectorValue.$eq)
+				if util.isDefined(selectorValue.$eq)
+					if util.isEqual(modelValue,selectorValue.$eq)
 						match = true
 
 				# Use $ne for "not equals".
-				if selectorValue.$ne
-					if modelValueExists and modelValue isnt selectorValue.$ne
+				if util.isDefined(selectorValue.$ne)
+					if modelValue isnt selectorValue.$ne
 						match = true
 
 				# less than
-				if selectorValue.$lt
-					if modelValueExists and modelValue < selectorValue.$lt
+				if selectorValue.$lt?
+					if util.isComparable(modelValue) and modelValue < selectorValue.$lt
 						match = true
 
 				# greater than
-				if selectorValue.$gt
-					if modelValueExists and modelValue > selectorValue.$gt
+				if selectorValue.$gt?
+					if util.isComparable(modelValue) and modelValue > selectorValue.$gt
 						match = true
 
 				# Query-Engine Specific
 				# between
-				if selectorValue.$bt
-					if modelValueExists and selectorValue.$bt[0] < modelValue and modelValue < selectorValue.$bt[1]
+				if selectorValue.$bt?
+					if util.isComparable(modelValue) and selectorValue.$bt[0] < modelValue and modelValue < selectorValue.$bt[1]
 						match = true
 
 				# less than or equal to
-				if selectorValue.$lte
-					if modelValueExists and modelValue <= selectorValue.$lte
+				if selectorValue.$lte?
+					if util.isComparable(modelValue) and modelValue <= selectorValue.$lte
 						match = true
 
 				# greater than or equal to
-				if selectorValue.$gte
-					if modelValueExists and modelValue >= selectorValue.$gte
+				if selectorValue.$gte?
+					if util.isComparable(modelValue) and modelValue >= selectorValue.$gte
 						match = true
 
 				# Query-Engine Specific
 				# between or equal to
-				if selectorValue.$bte
-					if modelValueExists and selectorValue.$bte[0] <= modelValue and modelValue <= selectorValue.$bte[1]
+				if selectorValue.$bte?
+					if util.isComparable(modelValue) and selectorValue.$bte[0] <= modelValue and modelValue <= selectorValue.$bte[1]
 						match = true
 
 			# Matched

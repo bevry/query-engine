@@ -1,5 +1,8 @@
 ## History
 
+- v1.2.5 July 24, 2012
+	- Query Engine now handles `null` values correctly
+
 - v1.2.4 July 23, 2012
 	- Fixed trickling of change events from parent collection to child collections
 		- Before if a distant parent collection had a change event that removed or added the model from that event, that change would not be reflected in a distant child collection

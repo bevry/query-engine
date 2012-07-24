@@ -59,8 +59,14 @@
     isUndefined: function(value) {
       return typeof value === 'undefined';
     },
+    isDefined: function(value) {
+      return typeof value !== 'undefined';
+    },
     isEmpty: function(value) {
       return value != null;
+    },
+    isComparable: function(value) {
+      return util.isNumber(value) || util.isDate(value);
     },
     safeRegex: function(str) {
       return (str || '').replace('(.)', '\\$1');
@@ -871,6 +877,10 @@
           if (modelValueExists && selectorValue.test(modelValue)) {
             match = true;
           }
+        } else if (util.isNull(selectorValue)) {
+          if (modelValue === selectorValue) {
+            match = true;
+          }
         } else if (util.isObject(selectorValue)) {
           $beginsWith = selectorValue.$beginsWith || selectorValue.$startsWith || null;
           if ($beginsWith && modelValueExists && util.isString(modelValue)) {
@@ -898,14 +908,14 @@
               }
             }
           }
-          if (selectorValue.$all) {
+          if (selectorValue.$all != null) {
             if (modelValueExists) {
               if ((new Hash(modelValue)).hasAll(selectorValue.$all)) {
                 match = true;
               }
             }
           }
-          if (selectorValue.$in) {
+          if (selectorValue.$in != null) {
             if (modelValueExists) {
               if ((new Hash(modelValue)).hasIn(selectorValue.$in)) {
                 match = true;
@@ -914,21 +924,21 @@
               }
             }
           }
-          if (selectorValue.$has) {
+          if (selectorValue.$has != null) {
             if (modelValueExists) {
               if ((new Hash(modelValue)).hasIn(selectorValue.$has)) {
                 match = true;
               }
             }
           }
-          if (selectorValue.$hasAll) {
+          if (selectorValue.$hasAll != null) {
             if (modelValueExists) {
               if ((new Hash(modelValue)).hasIn(selectorValue.$hasAll)) {
                 match = true;
               }
             }
           }
-          if (selectorValue.$nin) {
+          if (selectorValue.$nin != null) {
             if (modelValueExists) {
               if ((new Hash(modelValue)).hasIn(selectorValue.$nin) === false && (new Hash(selectorValue.$nin)).hasIn(selectorValue) === false) {
                 match = true;
@@ -936,7 +946,7 @@
             }
           }
           $size = selectorValue.$size || selectorValue.$length;
-          if ($size) {
+          if ($size != null) {
             if ((modelValue.length != null) && modelValue.length === $size) {
               match = true;
             }
@@ -946,17 +956,17 @@
               match = true;
             }
           }
-          if (selectorValue.$like) {
+          if (selectorValue.$like != null) {
             if (util.isString(modelValue) && modelValue.toLowerCase().indexOf(selectorValue.$like.toLowerCase()) !== -1) {
               match = true;
             }
           }
-          if (selectorValue.$likeSensitive) {
+          if (selectorValue.$likeSensitive != null) {
             if (util.isString(modelValue) && modelValue.indexOf(selectorValue.$likeSensitive) !== -1) {
               match = true;
             }
           }
-          if (selectorValue.$exists) {
+          if (selectorValue.$exists != null) {
             if (selectorValue.$exists) {
               if (modelValueExists === true) {
                 match = true;
@@ -967,7 +977,7 @@
               }
             }
           }
-          if (selectorValue.$mod) {
+          if (selectorValue.$mod != null) {
             if (modelValueExists) {
               $mod = selectorValue.$mod;
               if (!util.isArray($mod)) {
@@ -981,43 +991,43 @@
               }
             }
           }
-          if (selectorValue.$eq) {
-            if (modelValueExists && util.isEqual(modelValue, selectorValue.$eq)) {
+          if (util.isDefined(selectorValue.$eq)) {
+            if (util.isEqual(modelValue, selectorValue.$eq)) {
               match = true;
             }
           }
-          if (selectorValue.$ne) {
-            if (modelValueExists && modelValue !== selectorValue.$ne) {
+          if (util.isDefined(selectorValue.$ne)) {
+            if (modelValue !== selectorValue.$ne) {
               match = true;
             }
           }
-          if (selectorValue.$lt) {
-            if (modelValueExists && modelValue < selectorValue.$lt) {
+          if (selectorValue.$lt != null) {
+            if (util.isComparable(modelValue) && modelValue < selectorValue.$lt) {
               match = true;
             }
           }
-          if (selectorValue.$gt) {
-            if (modelValueExists && modelValue > selectorValue.$gt) {
+          if (selectorValue.$gt != null) {
+            if (util.isComparable(modelValue) && modelValue > selectorValue.$gt) {
               match = true;
             }
           }
-          if (selectorValue.$bt) {
-            if (modelValueExists && selectorValue.$bt[0] < modelValue && modelValue < selectorValue.$bt[1]) {
+          if (selectorValue.$bt != null) {
+            if (util.isComparable(modelValue) && selectorValue.$bt[0] < modelValue && modelValue < selectorValue.$bt[1]) {
               match = true;
             }
           }
-          if (selectorValue.$lte) {
-            if (modelValueExists && modelValue <= selectorValue.$lte) {
+          if (selectorValue.$lte != null) {
+            if (util.isComparable(modelValue) && modelValue <= selectorValue.$lte) {
               match = true;
             }
           }
-          if (selectorValue.$gte) {
-            if (modelValueExists && modelValue >= selectorValue.$gte) {
+          if (selectorValue.$gte != null) {
+            if (util.isComparable(modelValue) && modelValue >= selectorValue.$gte) {
               match = true;
             }
           }
-          if (selectorValue.$bte) {
-            if (modelValueExists && selectorValue.$bte[0] <= modelValue && modelValue <= selectorValue.$bte[1]) {
+          if (selectorValue.$bte != null) {
+            if (util.isComparable(modelValue) && selectorValue.$bte[0] <= modelValue && modelValue <= selectorValue.$bte[1]) {
               match = true;
             }
           }

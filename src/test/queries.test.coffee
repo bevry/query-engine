@@ -26,64 +26,45 @@ yesterday.setDate(today.getDate()-1)
 # Data
 
 # Store
-store =
-	associatedStandard: queryEngine.createCollection
-		'index':
-			id: 'index'
-			title: 'Index Page'
-			content: 'this is the index page'
-			tags: []
-			position: 1
-			category: 1
-			date: today
-			good: true
-			obj: {a:1,b:2}
-		'jquery':
-			id: 'jquery'
-			title: 'jQuery'
-			content: 'this is about jQuery'
-			tags: ['jquery']
-			position: 2
-			category: 1
-			date: yesterday
-			good: false
-		'history':
-			id: 'history'
-			title: 'History.js'
-			content: 'this is about History.js'
-			tags: ['jquery','html5','history']
-			position: 3
-			category: 1
-			date: tomorrow
+modelsObject =
+	'index':
+		id: 'index'
+		title: 'Index Page'
+		content: 'this is the index page'
+		tags: []
+		position: 1
+		positionNullable: null
+		category: 1
+		date: today
+		good: true
+		obj: {a:1,b:2}
+	'jquery':
+		id: 'jquery'
+		title: 'jQuery'
+		content: 'this is about jQuery'
+		tags: ['jquery']
+		position: 2
+		positionNullable: 2
+		category: 1
+		date: yesterday
+		good: false
+	'history':
+		id: 'history'
+		title: 'History.js'
+		content: 'this is about History.js'
+		tags: ['jquery','html5','history']
+		position: 3
+		positionNullable: 3
+		category: 1
+		date: tomorrow
 
-	associatedModels: queryEngine.createCollection
-		'index': new Backbone.Model
-			id: 'index'
-			title: 'Index Page'
-			content: 'this is the index page'
-			tags: []
-			position: 1
-			category: 1
-			date: today
-			good: true
-			obj: {a:1,b:2}
-		'jquery': new Backbone.Model
-			id: 'jquery'
-			title: 'jQuery'
-			content: 'this is about jQuery'
-			tags: ['jquery']
-			position: 2
-			category: 1
-			date: yesterday
-			good: false
-		'history': new Backbone.Model
-			id: 'history'
-			title: 'History.js'
-			content: 'this is about History.js'
-			tags: ['jquery','html5','history']
-			position: 3
-			category: 1
-			date: tomorrow
+store =
+	associatedStandard: queryEngine.createCollection(modelsObject)
+	associatedModels: queryEngine.createCollection(
+		'index': new Backbone.Model(modelsObject.index)
+		'jquery': new Backbone.Model(modelsObject.jquery)
+		'history': new Backbone.Model(modelsObject.history)
+	)
 
 
 # =====================================
@@ -281,35 +262,56 @@ generateTestSuite = (describe, it, name,docs) ->
 			expected = docs.get('jquery')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
-		it 'paging: limit', ->
-			actual = docs.createChildCollection().query({limit:1})
-			expected = queryEngine.createCollection 'index': docs.get('index')
-			assert.deepEqual actual.toJSON(), expected.toJSON()
 
-		it 'paging: limit+page', ->
-			actual = docs.createChildCollection().query({limit:1,page:2})
-			expected = queryEngine.createCollection 'jquery': docs.get('jquery')
-			assert.deepEqual actual.toJSON(), expected.toJSON()
+		describe 'nullable', (describe,it) ->
 
-		it 'paging: limit+offset', ->
-			actual = docs.createChildCollection().query({limit:1,offset:1})
-			expected = queryEngine.createCollection 'jquery': docs.get('jquery')
-			assert.deepEqual actual.toJSON(), expected.toJSON()
+			it "null values should show up when searching for them", ->
+				actual = docs.findAll(positionNullable: null)
+				expected = queryEngine.createCollection('index': docs.get('index'))
+				assert.deepEqual actual.toJSON(), expected.toJSON()
 
-		it 'paging: limit+offset+page', ->
-			actual = docs.createChildCollection().query({limit:1,offset:1,page:2})
-			expected = queryEngine.createCollection 'history': docs.get('history')
-			assert.deepEqual actual.toJSON(), expected.toJSON()
+			it "null values shouldn't show up in greater than or equal to comparisons", ->
+				actual = docs.findAll(positionNullable: $gte: 0)
+				expected = queryEngine.createCollection 'jquery': docs.get('jquery'), 'history': docs.get('history')
+				assert.deepEqual actual.toJSON(), expected.toJSON()
 
-		it 'paging: limit+offset+page (via findAll)', ->
-			actual = docs.findAll({id: $exists: true}, null, {limit:1,offset:1,page:2})
-			expected = queryEngine.createCollection 'history': docs.get('history')
-			assert.deepEqual actual.toJSON(), expected.toJSON()
+			it "null values shouldn't show up in less than comparisons", ->
+				actual = docs.findAll(positionNullable: $lte: 3)
+				expected = queryEngine.createCollection 'jquery': docs.get('jquery'), 'history': docs.get('history')
+				assert.deepEqual actual.toJSON(), expected.toJSON()
 
-		it 'paging: offset', ->
-			actual = docs.createChildCollection().query({offset:1})
-			expected = queryEngine.createCollection 'jquery': docs.get('jquery'), 'history': docs.get('history')
-			assert.deepEqual actual.toJSON(), expected.toJSON()
+
+		describe 'paging', (describe,it) ->
+
+			it 'limit', ->
+				actual = docs.createChildCollection().query({limit:1})
+				expected = queryEngine.createCollection 'index': docs.get('index')
+				assert.deepEqual actual.toJSON(), expected.toJSON()
+
+			it 'limit+page', ->
+				actual = docs.createChildCollection().query({limit:1,page:2})
+				expected = queryEngine.createCollection 'jquery': docs.get('jquery')
+				assert.deepEqual actual.toJSON(), expected.toJSON()
+
+			it 'limit+offset', ->
+				actual = docs.createChildCollection().query({limit:1,offset:1})
+				expected = queryEngine.createCollection 'jquery': docs.get('jquery')
+				assert.deepEqual actual.toJSON(), expected.toJSON()
+
+			it 'limit+offset+page', ->
+				actual = docs.createChildCollection().query({limit:1,offset:1,page:2})
+				expected = queryEngine.createCollection 'history': docs.get('history')
+				assert.deepEqual actual.toJSON(), expected.toJSON()
+
+			it 'limit+offset+page (via findAll)', ->
+				actual = docs.findAll({id: $exists: true}, null, {limit:1,offset:1,page:2})
+				expected = queryEngine.createCollection 'history': docs.get('history')
+				assert.deepEqual actual.toJSON(), expected.toJSON()
+
+			it 'offset', ->
+				actual = docs.createChildCollection().query({offset:1})
+				expected = queryEngine.createCollection 'jquery': docs.get('jquery'), 'history': docs.get('history')
+				assert.deepEqual actual.toJSON(), expected.toJSON()
 
 # Generate Suites
 describe 'queries', (describe,it) ->
