@@ -1,5 +1,9 @@
 ## History
 
+- v1.2.6 July 24, 2012
+	- When a pill value receives `true`, `false`, or `null` as a string we will convert it to the non-string equivalent
+	- `safeRegex` will now handle the non-string values of `true`, `false` and `null` properly
+
 - v1.2.5 July 24, 2012
 	- Query Engine now handles `null` values correctly
 

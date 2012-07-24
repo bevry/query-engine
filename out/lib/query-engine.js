@@ -69,7 +69,15 @@
       return util.isNumber(value) || util.isDate(value);
     },
     safeRegex: function(str) {
-      return (str || '').replace('(.)', '\\$1');
+      if (str === false) {
+        return 'false';
+      } else if (str === true) {
+        return 'true';
+      } else if (str === null) {
+        return 'null';
+      } else {
+        return (str || '').replace('(.)', '\\$1');
+      }
     },
     createRegex: function(str) {
       return new RegExp(str, 'ig');
@@ -753,11 +761,25 @@
     }
 
     Pill.prototype.setSearchString = function(searchString) {
-      var cleanedSearchString, match, values;
+      var cleanedSearchString, match, value, values;
       cleanedSearchString = searchString;
       values = [];
       while (match = this.regex.exec(searchString)) {
-        values.push(match[2].trim().replace(/(^['"]\s*|\s*['"]$)/g, ''));
+        value = match[2].trim().replace(/(^['"]\s*|\s*['"]$)/g, '');
+        switch (value) {
+          case 'true':
+          case 'TRUE':
+            value = true;
+            break;
+          case 'false':
+          case 'FALSE':
+            value = false;
+            break;
+          case 'null':
+          case 'NULL':
+            value = null;
+        }
+        values.push(value);
         cleanedSearchString = cleanedSearchString.replace(match[0], '').trim();
       }
       this.searchString = searchString;

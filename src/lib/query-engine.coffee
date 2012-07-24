@@ -99,7 +99,14 @@ util =
 	# Safe Regex
 	# Santitize a string for the use inside a regular expression
 	safeRegex: (str) ->
-		return (str or '').replace('(.)','\\$1')
+		if str is false
+			return 'false'
+		else if str is true
+			return 'true'
+		else if str is null
+			return 'null'
+		else
+			return (str or '').replace('(.)','\\$1')
 
 	# Create Regex
 	# Convert a string into a regular expression
@@ -895,7 +902,15 @@ class Pill
 
 		# Extract information
 		while match = @regex.exec(searchString)
-			values.push match[2].trim().replace(/(^['"]\s*|\s*['"]$)/g, '')
+			value = match[2].trim().replace(/(^['"]\s*|\s*['"]$)/g, '')
+			switch value
+				when 'true','TRUE'
+					value = true
+				when 'false','FALSE'
+					value = false
+				when 'null','NULL'
+					value = null
+			values.push(value)
 			cleanedSearchString = cleanedSearchString.replace(match[0],'').trim()
 
 		# Apply

@@ -27,6 +27,7 @@ modelsObject =
 		content: 'welcome home'
 		tags: []
 		position: 1
+		positionNullable: null
 		category: 1
 		date: today
 	jquery:
@@ -35,6 +36,7 @@ modelsObject =
 		content: 'this is about jQuery'
 		tags: ['jquery']
 		position: 2
+		positionNullable: 2
 		category: 1
 		date: yesterday
 	history:
@@ -43,6 +45,7 @@ modelsObject =
 		content: 'this is about History.js'
 		tags: ['jquery','html5','history']
 		position: 3
+		positionNullable: 3
 		category: 1
 		date: tomorrow
 	docpad:
@@ -130,6 +133,25 @@ describe 'live', (describe,it) ->
 							return pass
 					})
 					.setSearchString('id:index')
+					.add(models)
+
+				# Check the result
+				actual = liveCollection.toJSON()
+				expected = [modelsObject.index]
+				assert.deepEqual actual, expected
+
+			# With spacing
+			it 'should support pill searches with null', ->
+				# Perform the query
+				liveCollection = queryEngine.createLiveCollection()
+					.setPill('positionNullable', {
+						prefixes: ['positionNullable:']
+						callback: (model,value) ->
+							pillRegex = queryEngine.createSafeRegex(value)
+							pass = pillRegex.test(model.get('positionNullable'))
+							return pass
+					})
+					.setSearchString('positionNullable:null')
 					.add(models)
 
 				# Check the result
