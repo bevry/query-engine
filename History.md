@@ -1,5 +1,8 @@
 ## History
 
+- v1.2.7 August 10, 2012
+	- Re-added markdown files to npm distribution as they are required for the npm website
+
 - v1.2.6 July 24, 2012
 	- When a pill value receives `true`, `false`, or `null` as a string we will convert it to the non-string equivalent
 	- `safeRegex` will now handle the non-string values of `true`, `false` and `null` properly
