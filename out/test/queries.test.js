@@ -524,6 +524,18 @@
         });
         return assert.deepEqual(actual.toJSON(), expected.toJSON());
       });
+      it('$has-false', function() {
+        var actual, expected;
+        actual = docs.findAll({
+          good: {
+            $has: false
+          }
+        });
+        expected = queryEngine.createCollection({
+          'jquery': docs.get('jquery')
+        });
+        return assert.deepEqual(actual.toJSON(), expected.toJSON());
+      });
       it('all', function() {
         var actual, expected;
         actual = docs;
