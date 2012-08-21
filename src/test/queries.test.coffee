@@ -251,7 +251,12 @@ generateTestSuite = (describe, it, name,docs) ->
 			actual = docs.findAll date: $lte: today
 			expected = queryEngine.createCollection 'index': docs.get('index'), 'jquery': docs.get('jquery')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
-
+			
+		it '$has-false', ->
+			actual = docs.findAll good: $has: false
+			expected = queryEngine.createCollection 'jquery': docs.get('jquery')
+			assert.deepEqual actual.toJSON(), expected.toJSON()
+		
 		it 'all', ->
 			actual = docs
 			expected = docs

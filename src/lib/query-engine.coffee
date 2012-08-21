@@ -124,7 +124,8 @@ util =
 		result = []
 
 		# Determine the correct type
-		if value
+		valueExists = typeof value isnt 'undefined'
+		if valueExists
 			if util.isArray(value)
 				result = value
 			else if util.isObject(value)
@@ -142,7 +143,8 @@ util =
 		result = []
 
 		# Determine the correct type
-		if value
+		valueExists = typeof value isnt 'undefined'
+		if valueExists
 			if util.isArray(value)
 				result = value
 			else if util.isObject(value)

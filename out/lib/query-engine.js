@@ -86,9 +86,10 @@
       return util.createRegex(util.safeRegex(str));
     },
     toArray: function(value) {
-      var item, key, result;
+      var item, key, result, valueExists;
       result = [];
-      if (value) {
+      valueExists = typeof value !== 'undefined';
+      if (valueExists) {
         if (util.isArray(value)) {
           result = value;
         } else if (util.isObject(value)) {
@@ -104,9 +105,10 @@
       return result;
     },
     toArrayGroup: function(value) {
-      var item, key, obj, result;
+      var item, key, obj, result, valueExists;
       result = [];
-      if (value) {
+      valueExists = typeof value !== 'undefined';
+      if (valueExists) {
         if (util.isArray(value)) {
           result = value;
         } else if (util.isObject(value)) {
