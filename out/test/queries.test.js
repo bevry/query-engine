@@ -320,12 +320,49 @@
         var actual, expected;
         actual = docs.findAll({
           tags: {
-            $in: ['jquery']
+            $in: 'jquery'
           }
         });
         expected = queryEngine.createCollection({
           'jquery': docs.get('jquery'),
           'history': docs.get('history')
+        });
+        return assert.deepEqual(actual.toJSON(), expected.toJSON());
+      });
+      it('$in-false', function() {
+        var actual, expected;
+        actual = docs.findAll({
+          good: {
+            $in: false
+          }
+        });
+        expected = queryEngine.createCollection({
+          'jquery': docs.get('jquery')
+        });
+        return assert.deepEqual(actual.toJSON(), expected.toJSON());
+      });
+      it('$in-null', function() {
+        var actual, expected;
+        actual = docs.findAll({
+          positionNullable: {
+            $in: [null]
+          }
+        });
+        expected = queryEngine.createCollection({
+          'index': docs.get('index')
+        });
+        return assert.deepEqual(actual.toJSON(), expected.toJSON());
+      });
+      it('$in-array', function() {
+        var actual, expected;
+        actual = docs.findAll({
+          positionNullable: {
+            $in: [null, 2]
+          }
+        });
+        expected = queryEngine.createCollection({
+          'index': docs.get('index'),
+          'jquery': docs.get('jquery')
         });
         return assert.deepEqual(actual.toJSON(), expected.toJSON());
       });
@@ -524,15 +561,16 @@
         });
         return assert.deepEqual(actual.toJSON(), expected.toJSON());
       });
-      it('$has-false', function() {
+      it('$has', function() {
         var actual, expected;
         actual = docs.findAll({
-          good: {
-            $has: false
+          tags: {
+            $has: 'jquery'
           }
         });
         expected = queryEngine.createCollection({
-          'jquery': docs.get('jquery')
+          'jquery': docs.get('jquery'),
+          'history': docs.get('history')
         });
         return assert.deepEqual(actual.toJSON(), expected.toJSON());
       });

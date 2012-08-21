@@ -74,189 +74,204 @@ store =
 generateTestSuite = (describe, it, name,docs) ->
 	describe name, (describe,it) ->
 		it 'beginsWith', ->
-			actual = docs.findAll title: $beginsWith: 'Index'
+			actual = docs.findAll(title: $beginsWith: 'Index')
 			expected = queryEngine.createCollection 'index': docs.get('index')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
 		it 'endsWidth', ->
-			actual = docs.findAll title: $endsWith: '.js'
+			actual = docs.findAll(title: $endsWith: '.js')
 			expected = queryEngine.createCollection 'history': docs.get('history')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
 		it 'string', ->
-			actual = docs.findAll id: 'index'
+			actual = docs.findAll(id: 'index')
 			expected = queryEngine.createCollection 'index': docs.get('index')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
 		it 'number', ->
-			actual = docs.findAll position: 3
+			actual = docs.findAll(position: 3)
 			expected = queryEngine.createCollection 'history': docs.get('history')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
 		it 'date', ->
-			actual = docs.findAll date: today
+			actual = docs.findAll(date: today)
 			expected = queryEngine.createCollection 'index': docs.get('index')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
 		it 'regex', ->
-			actual = docs.findAll id: /^[hj]/
+			actual = docs.findAll(id: /^[hj]/)
 			expected = queryEngine.createCollection 'jquery': docs.get('jquery'), 'history': docs.get('history')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
 		it 'joint', ->
-			actual = docs.findAll id: 'index', category: 1
+			actual = docs.findAll(id: 'index', category: 1)
 			expected = queryEngine.createCollection 'index': docs.get('index')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
 		it 'boolean-true', ->
-			actual = docs.findAll good: true
+			actual = docs.findAll(good: true)
 			expected = queryEngine.createCollection 'index': docs.get('index')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
 		it 'boolean-false', ->
-			actual = docs.findAll good: false
+			actual = docs.findAll(good: false)
 			expected = queryEngine.createCollection 'jquery': docs.get('jquery')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
 		it '$and', ->
-			actual = docs.findAll $and: [{id: 'index'}, {position: 1}]
+			actual = docs.findAll($and: [{id: 'index'}, {position: 1}])
 			expected = queryEngine.createCollection 'index': docs.get('index')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
 		it '$and-none', ->
-			actual = docs.findAll $and: [{random:Math.random()}]
+			actual = docs.findAll($and: [{random:Math.random()}])
 			expected = queryEngine.createCollection()
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
 		it '$not', ->
-			actual = docs.findAll $not: [{id: 'index'}, {position: 1}]
+			actual = docs.findAll($not: [{id: 'index'}, {position: 1}])
 			expected = queryEngine.createCollection 'jquery': docs.get('jquery'), 'history': docs.get('history')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
 		it '$or', ->
-			actual = docs.findAll $or: [{id: 'index'}, {position: 2}]
+			actual = docs.findAll($or: [{id: 'index'}, {position: 2}])
 			expected = queryEngine.createCollection 'index': docs.get('index'), 'jquery': docs.get('jquery')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
 		it '$or-object', ->
-			actual = docs.findAll $or: {id: 'index', position: 2}
+			actual = docs.findAll($or: {id: 'index', position: 2})
 			expected = queryEngine.createCollection 'index': docs.get('index'), 'jquery': docs.get('jquery')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
 		it '$or-none', ->
-			actual = docs.findAll $or: [{random:Math.random()}]
+			actual = docs.findAll($or: [{random:Math.random()}])
 			expected = queryEngine.createCollection()
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
 		it '$nor', ->
-			actual = docs.findAll $nor: [{id: 'index'}, {position: 2}]
+			actual = docs.findAll($nor: [{id: 'index'}, {position: 2}])
 			expected = queryEngine.createCollection 'history': docs.get('history')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
 		it '$nor-none', ->
-			actual = docs.findAll $nor: [{random:Math.random()}]
+			actual = docs.findAll($nor: [{random:Math.random()}])
 			expected = docs
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
 		it '$ne', ->
-			actual = docs.findAll id: $ne: 'index'
+			actual = docs.findAll(id: $ne: 'index')
 			expected = queryEngine.createCollection 'jquery': docs.get('jquery'), 'history': docs.get('history')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
 		it '$all', ->
-			actual = docs.findAll tags: $all: ['jquery']
+			actual = docs.findAll(tags: $all: ['jquery'])
 			expected = queryEngine.createCollection 'jquery': docs.get('jquery')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
 		it '$in', ->
-			actual = docs.findAll tags: $in: ['jquery']
+			actual = docs.findAll(tags: $in: 'jquery')
 			expected = queryEngine.createCollection 'jquery': docs.get('jquery'), 'history': docs.get('history')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
+		it '$in-false', ->
+			actual = docs.findAll(good: $in: false)
+			expected = queryEngine.createCollection 'jquery': docs.get('jquery')
+			assert.deepEqual actual.toJSON(), expected.toJSON()
+
+		it '$in-null', ->
+			actual = docs.findAll(positionNullable: $in: [null])
+			expected = queryEngine.createCollection 'index': docs.get('index')
+			assert.deepEqual actual.toJSON(), expected.toJSON()
+
+		it '$in-array', ->
+			actual = docs.findAll(positionNullable: $in: [null,2])
+			expected = queryEngine.createCollection 'index': docs.get('index'), 'jquery': docs.get('jquery')
+			assert.deepEqual actual.toJSON(), expected.toJSON()
+
 		it '$nin', ->
-			actual = docs.findAll tags: $nin: ['history']
+			actual = docs.findAll(tags: $nin: ['history'])
 			expected = queryEngine.createCollection 'index': docs.get('index'), 'jquery': docs.get('jquery')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
 		it '$size', ->
-			actual = docs.findAll tags: $size: 3
+			actual = docs.findAll(tags: $size: 3)
 			expected = queryEngine.createCollection 'history': docs.get('history')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
 		it '$like', ->
-			actual = docs.findAll content: $like: 'INDEX'
+			actual = docs.findAll(content: $like: 'INDEX')
 			expected = queryEngine.createCollection 'index': docs.get('index')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
 		it '$likeSensitive', ->
-			actual = docs.findAll content: $likeSensitive: 'INDEX'
+			actual = docs.findAll(content: $likeSensitive: 'INDEX')
 			expected = queryEngine.createCollection()
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
-			actual = docs.findAll content: $likeSensitive: 'index'
+			actual = docs.findAll(content: $likeSensitive: 'index')
 			expected = queryEngine.createCollection 'index': docs.get('index')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
 		it '$mod', ->
-			actual = docs.findAll position: $mod: [2,0]
+			actual = docs.findAll(position: $mod: [2,0])
 			expected = queryEngine.createCollection 'jquery': docs.get('jquery')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
 		it '$eq', ->
-			actual = docs.findAll obj: $eq: {a:1,b:2}
+			actual = docs.findAll(obj: $eq: {a:1,b:2})
 			expected = queryEngine.createCollection 'index': docs.get('index')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
 		it '$bt', ->
-			actual = docs.findAll position: $bt: [1,3]
+			actual = docs.findAll(position: $bt: [1,3])
 			expected = queryEngine.createCollection 'jquery': docs.get('jquery')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
 		it '$bte', ->
-			actual = docs.findAll position: $bte: [2,3]
+			actual = docs.findAll(position: $bte: [2,3])
 			expected = queryEngine.createCollection 'jquery': docs.get('jquery'), 'history': docs.get('history')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
 		it '$gt', ->
-			actual = docs.findAll position: $gt: 2
+			actual = docs.findAll(position: $gt: 2)
 			expected = queryEngine.createCollection 'history': docs.get('history')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
 		it '$gt-date', ->
-			actual = docs.findAll date: $gt: today
+			actual = docs.findAll(date: $gt: today)
 			expected = queryEngine.createCollection 'history': docs.get('history')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
 		it '$gte', ->
-			actual = docs.findAll position: $gte: 2
+			actual = docs.findAll(position: $gte: 2)
 			expected = queryEngine.createCollection 'jquery': docs.get('jquery'), 'history': docs.get('history')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
 		it '$lt', ->
-			actual = docs.findAll position: $lt: 2
+			actual = docs.findAll(position: $lt: 2)
 			expected = queryEngine.createCollection 'index': docs.get('index')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
 		it '$lt-date', ->
-			actual = docs.findAll date: $lt: today
+			actual = docs.findAll(date: $lt: today)
 			expected = queryEngine.createCollection 'jquery': docs.get('jquery')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
 		it '$lte', ->
-			actual = docs.findAll position: $lte: 2
+			actual = docs.findAll(position: $lte: 2)
 			expected = queryEngine.createCollection 'index': docs.get('index'), 'jquery': docs.get('jquery')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
 
 		it '$lte-date', ->
-			actual = docs.findAll date: $lte: today
+			actual = docs.findAll(date: $lte: today)
 			expected = queryEngine.createCollection 'index': docs.get('index'), 'jquery': docs.get('jquery')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
-			
-		it '$has-false', ->
-			actual = docs.findAll good: $has: false
-			expected = queryEngine.createCollection 'jquery': docs.get('jquery')
+
+		it '$has', ->
+			actual = docs.findAll(tags: $has: 'jquery')
+			expected = queryEngine.createCollection 'jquery': docs.get('jquery'), 'history': docs.get('history')
 			assert.deepEqual actual.toJSON(), expected.toJSON()
-		
+
 		it 'all', ->
 			actual = docs
 			expected = docs
