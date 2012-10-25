@@ -588,8 +588,10 @@
       this.options.live = enabled;
       if (enabled) {
         this.on('change', this.onChange);
+        this.on('reset', this.onReset);
       } else {
         this.off('change', this.onChange);
+        this.off('reset', this.onReset);
       }
       parentCollection = this.getParentCollection();
       if (parentCollection != null) {
@@ -643,6 +645,14 @@
           this.sortCollection();
         }
       }
+      return this;
+    };
+
+    QueryCollection.prototype.onReset = function(models) {
+      var _this = this;
+      models.each(function(model) {
+        return _this.trigger('add', model, _this);
+      });
       return this;
     };
 

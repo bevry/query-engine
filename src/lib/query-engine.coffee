@@ -669,10 +669,12 @@ class QueryCollection extends Backbone.Collection
 		# Subscribe to change events on our existing models
 		if enabled
 			@on('change',@onChange)
+			@on('reset',@onReset)
 			# onChange will do our resort
 			# we do not need a onAdd for our resort, as backbone already does this
 		else
 			@off('change',@onChange)
+			@off('reset',@onReset)
 
 		# Subscribe the live events on our parent collection (if we have one)
 		parentCollection = @getParentCollection()
@@ -739,6 +741,13 @@ class QueryCollection extends Backbone.Collection
 			@safeRemove(model)
 		else
 			@sortCollection()  if @comparator
+		@
+
+	# Fired when our collection is reset
+	# We should fire the add event for each of our models
+	onReset: (models) ->
+		models.each (model) =>
+			@trigger('add',model,@)
 		@
 
 	# Fired when a model in our parent collection changes
