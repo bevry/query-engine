@@ -877,6 +877,9 @@ class Criteria
 			pass = me.testModel(model,criteria)
 			passed.push(model)  if pass
 
+		# Sort
+		passed.sort(comparator)  if comparator
+
 		# Page our models
 		start = paging.offset or 0
 		if paging.limit? and paging.limit > 0
@@ -885,9 +888,6 @@ class Criteria
 			passed = passed[start...finish]
 		else
 			passed = passed[start..]
-
-		# Sort
-		passed.sort(comparator)  if comparator
 
 		# Return
 		return passed
@@ -1311,6 +1311,7 @@ queryEngine =
 	Backbone: Backbone
 	Hash: Hash
 	QueryCollection: QueryCollection
+	Criteria: Criteria
 	Query: Query
 	Pill: Pill
 	createCollection: (models,options) ->

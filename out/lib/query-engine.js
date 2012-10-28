@@ -795,6 +795,9 @@
           passed.push(model);
         }
       }
+      if (comparator) {
+        passed.sort(comparator);
+      }
       start = paging.offset || 0;
       if ((paging.limit != null) && paging.limit > 0) {
         start = start + paging.limit * ((paging.page || 1) - 1);
@@ -802,9 +805,6 @@
         passed = passed.slice(start, finish);
       } else {
         passed = passed.slice(start);
-      }
-      if (comparator) {
-        passed.sort(comparator);
       }
       return passed;
     };
@@ -1235,6 +1235,7 @@
     Backbone: Backbone,
     Hash: Hash,
     QueryCollection: QueryCollection,
+    Criteria: Criteria,
     Query: Query,
     Pill: Pill,
     createCollection: function(models, options) {
