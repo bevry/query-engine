@@ -446,14 +446,13 @@ class QueryCollection extends Backbone.Collection
 		# Prepare
 		if args.length
 			if args.length is 1 and args[0] instanceof Criteria
-				criteria = criteria.options
+				criteria = args[0].options
 			else
 				[query,comparator,paging] = args
 				criteria = {comparator, paging, queries:find:query}
 
 		# Create child collection
-		passed = @testModels(@models,criteria)
-		collection = @createChildCollection(passed,criteria)
+		collection = @createChildCollection(@models,criteria)  # will test on adding of models
 
 		# Return
 		return collection
@@ -463,14 +462,13 @@ class QueryCollection extends Backbone.Collection
 		# Prepare
 		if args.length
 			if args.length is 1 and args[0] instanceof Criteria
-				criteria = criteria.options
+				criteria = args[0].options
 			else
 				[query,comparator,paging] = args
 				criteria = {comparator, paging, queries:find:query}
 
 		# Create child collection
-		passed = @testModels(@models,criteria)
-		collection = @createLiveChildCollection(passed,criteria)
+		collection = @createLiveChildCollection(@models,criteria)  # will test on adding of models
 
 		# Return
 		return collection
@@ -480,7 +478,7 @@ class QueryCollection extends Backbone.Collection
 		# Prepare
 		if args.length
 			if args.length is 1 and args[0] instanceof Criteria
-				criteria = criteria.options
+				criteria = args[0].options
 			else
 				[query,comparator,paging] = args
 				criteria = {comparator, paging, queries:find:query}
@@ -496,9 +494,18 @@ class QueryCollection extends Backbone.Collection
 
 	# Query
 	# Reset our collection with the new rules that we are using
-	query: (criteria) ->
+	query: (args...) ->
 		# Prepare
-		passed = @testModels(@models, criteria)
+		if args.length is 1
+			if args[0] instanceof Criteria
+				criteria = args[0].options
+			else
+				criteria = {paging:args[0]}
+
+		# Test
+		collection = @getParentCollection() or @
+		models = collection.models
+		passed = @testModels(models, criteria)
 
 		# Reset
 		@reset(passed)
@@ -863,6 +870,7 @@ class Criteria
 		passed = []
 		models ?= @models
 		paging = criteria.paging ? @getPaging()
+		comparator = criteria.comparator ? @getComparator()
 
 		# Cycle through the parent collection finding passing models
 		for model in models
@@ -879,7 +887,6 @@ class Criteria
 			passed = passed[start..]
 
 		# Sort
-		comparator = @getComparator()
 		passed.sort(comparator)  if comparator
 
 		# Return

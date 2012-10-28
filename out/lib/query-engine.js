@@ -389,11 +389,11 @@
     };
 
     QueryCollection.prototype.findAll = function() {
-      var args, collection, comparator, criteria, paging, passed, query;
+      var args, collection, comparator, criteria, paging, query;
       args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       if (args.length) {
         if (args.length === 1 && args[0] instanceof Criteria) {
-          criteria = criteria.options;
+          criteria = args[0].options;
         } else {
           query = args[0], comparator = args[1], paging = args[2];
           criteria = {
@@ -405,17 +405,16 @@
           };
         }
       }
-      passed = this.testModels(this.models, criteria);
-      collection = this.createChildCollection(passed, criteria);
+      collection = this.createChildCollection(this.models, criteria);
       return collection;
     };
 
     QueryCollection.prototype.findAllLive = function() {
-      var args, collection, comparator, criteria, paging, passed, query;
+      var args, collection, comparator, criteria, paging, query;
       args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       if (args.length) {
         if (args.length === 1 && args[0] instanceof Criteria) {
-          criteria = criteria.options;
+          criteria = args[0].options;
         } else {
           query = args[0], comparator = args[1], paging = args[2];
           criteria = {
@@ -427,8 +426,7 @@
           };
         }
       }
-      passed = this.testModels(this.models, criteria);
-      collection = this.createLiveChildCollection(passed, criteria);
+      collection = this.createLiveChildCollection(this.models, criteria);
       return collection;
     };
 
@@ -437,7 +435,7 @@
       args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       if (args.length) {
         if (args.length === 1 && args[0] instanceof Criteria) {
-          criteria = criteria.options;
+          criteria = args[0].options;
         } else {
           query = args[0], comparator = args[1], paging = args[2];
           criteria = {
@@ -457,9 +455,21 @@
       }
     };
 
-    QueryCollection.prototype.query = function(criteria) {
-      var passed;
-      passed = this.testModels(this.models, criteria);
+    QueryCollection.prototype.query = function() {
+      var args, collection, criteria, models, passed;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      if (args.length === 1) {
+        if (args[0] instanceof Criteria) {
+          criteria = args[0].options;
+        } else {
+          criteria = {
+            paging: args[0]
+          };
+        }
+      }
+      collection = this.getParentCollection() || this;
+      models = collection.models;
+      passed = this.testModels(models, criteria);
       this.reset(passed);
       return this;
     };
@@ -767,7 +777,7 @@
     };
 
     Criteria.prototype.testModels = function(models, criteria) {
-      var comparator, finish, me, model, paging, pass, passed, start, _i, _len, _ref;
+      var comparator, finish, me, model, paging, pass, passed, start, _i, _len, _ref, _ref1;
       if (criteria == null) {
         criteria = {};
       }
@@ -777,6 +787,7 @@
         models = this.models;
       }
       paging = (_ref = criteria.paging) != null ? _ref : this.getPaging();
+      comparator = (_ref1 = criteria.comparator) != null ? _ref1 : this.getComparator();
       for (_i = 0, _len = models.length; _i < _len; _i++) {
         model = models[_i];
         pass = me.testModel(model, criteria);
@@ -792,7 +803,6 @@
       } else {
         passed = passed.slice(start);
       }
-      comparator = this.getComparator();
       if (comparator) {
         passed.sort(comparator);
       }
