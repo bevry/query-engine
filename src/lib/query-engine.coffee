@@ -452,7 +452,7 @@ class QueryCollection extends Backbone.Collection
 				criteria = {comparator, paging, queries:find:query}
 
 		# Create child collection
-		collection = @createChildCollection(@models,criteria)  # will test on adding of models
+		collection = @createChildCollection([],criteria).query()
 
 		# Return
 		return collection
@@ -468,7 +468,7 @@ class QueryCollection extends Backbone.Collection
 				criteria = {comparator, paging, queries:find:query}
 
 		# Create child collection
-		collection = @createLiveChildCollection(@models,criteria)  # will test on adding of models
+		collection = @createLiveChildCollection([],criteria).query()
 
 		# Return
 		return collection

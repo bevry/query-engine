@@ -308,7 +308,6 @@
       });
       childCollection = parentCollection.createLiveChildCollection();
       it('when query is called on our childCollection, it should successfully filter our parentCollection', function() {
-        debugger;
         var actual, expected;
         childCollection.setQuery('only jquery related', {
           tags: {

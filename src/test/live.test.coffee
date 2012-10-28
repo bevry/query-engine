@@ -371,7 +371,6 @@ describe 'live', (describe,it) ->
 		# test childCollection query
 		it 'when query is called on our childCollection, it should successfully filter our parentCollection', ->
 			# Create a childCollection, with some rules, and query the parentCollection
-			debugger
 			childCollection
 				.setQuery('only jquery related', {
 					tags:

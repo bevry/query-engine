@@ -405,7 +405,7 @@
           };
         }
       }
-      collection = this.createChildCollection(this.models, criteria);
+      collection = this.createChildCollection([], criteria).query();
       return collection;
     };
 
@@ -426,7 +426,7 @@
           };
         }
       }
-      collection = this.createLiveChildCollection(this.models, criteria);
+      collection = this.createLiveChildCollection([], criteria).query();
       return collection;
     };
 

@@ -304,7 +304,15 @@ generateTestSuite = (describe, it, name,docs) ->
 				assert.deepEqual actual.toJSON(), expected.toJSON()
 
 			it 'limit+offset+page (via findAll)', ->
-				actual = docs.findAll({id: $exists: true}, null, {limit:1,offset:1,page:2})
+				debugger
+				actual = docs.findAll(
+					# Query
+					{id: $exists: true},
+					# Comparator
+					null,
+					# Paging
+					{limit:1,offset:1,page:2}
+				)
 				expected = queryEngine.createCollection 'history': docs.get('history')
 				assert.deepEqual actual.toJSON(), expected.toJSON()
 

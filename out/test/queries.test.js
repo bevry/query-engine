@@ -624,6 +624,7 @@
           return assert.deepEqual(actual.toJSON(), expected.toJSON());
         });
         it('limit+offset+page (via findAll)', function() {
+          debugger;
           var actual, expected;
           actual = docs.findAll({
             id: {
