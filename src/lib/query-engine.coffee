@@ -273,13 +273,19 @@ class QueryCollection extends Backbone.Collection
 	initialize: (models,options) ->
 		# Prepare
 		me = @
+		@options ?= {}
+		_.extend(@options, options)
 
-		# Criteria
-		@applyCriteria(options)
+		# Proxy Criteria
+		for own key,value of Criteria::
+			@[key] ?= value
 
 		# Comparator
 		@setComparator(@comparator)  if @comparator?
 		# @options.comparator is shortcutted here by Backbone
+
+		# Criteria
+		@applyCriteria(options)
 
 		# Parent Collection
 		# No need to set parent collection, as if it is an option, it has already been set
@@ -291,6 +297,24 @@ class QueryCollection extends Backbone.Collection
 		# Chain
 		@
 
+
+	# ---------------------------------
+	# Comparator: Getters and Setters
+
+	# Get Comparator
+	getComparator: ->
+		return @comparator
+
+	# Set Comparator
+	setComparator: (comparator) ->
+		# Prepare comparator
+		comparator = util.generateComparator(comparator)
+
+		# Apply it
+		@comparator = comparator
+
+		# Chain
+		@
 
 	# ---------------------------------
 	# Parent Collection: Getters and Setters
@@ -380,17 +404,6 @@ class QueryCollection extends Backbone.Collection
 	# ---------------------------------
 	# Sorting and Paging
 
-	# Set Comparator
-	setComparator: (comparator) ->
-		# Prepare comparator
-		comparator = util.generateComparator(comparator)
-
-		# Apply it
-		@comparator = comparator
-
-		# Chain
-		@
-
 	# Sort Collection
 	# Sorts our current collection by our comparator
 	sortCollection: (comparator) ->
@@ -398,10 +411,12 @@ class QueryCollection extends Backbone.Collection
 		if comparator
 			comparator = util.generateComparator(comparator)
 			@models.sort(comparator)
-		else if @comparator
-			@models.sort(@comparator)
 		else
-			throw new Error('You need a comparator to sort')
+			comparator = @getComparator()
+			if comparator
+				@models.sort(comparator)
+			else
+				throw new Error('You need a comparator to sort')
 
 		# Chain
 		return @
@@ -416,76 +431,77 @@ class QueryCollection extends Backbone.Collection
 		if comparator
 			comparator = util.generateComparator(comparator)
 			arr.sort(comparator)
-		else if @comparator
-			arr.sort(@comparator)
 		else
-			throw new Error('You need a comparator to sort')
+			comparator = @getComparator()
+			if comparator
+				arr.sort(comparator)
+			else
+				throw new Error('You need a comparator to sort')
 
 		# Return sorted array
 		return arr
 
 	# Find All
-	findAll: (query,comparator,paging) ->
+	findAll: (args...) ->
 		# Prepare
-		criteria = {comparator, paging, queries:find:query}
+		if args.length
+			if args.length is 1 and args[0] instanceof Criteria
+				criteria = criteria.options
+			else
+				[query,comparator,paging] = args
+				criteria = {comparator, paging, queries:find:query}
 
 		# Create child collection
-		collection = @createChildCollection([],criteria).query()
+		passed = @query(criteria,false)
+		collection = @createChildCollection(passed,criteria)
 
 		# Return
 		return collection
 
 	# Find All Live
-	findAllLive: (query,comparator,paging) ->
+	findAllLive: (args...) ->
 		# Prepare
-		criteria = {comparator, paging, queries:find:query}
+		if args.length
+			if args.length is 1 and args[0] instanceof Criteria
+				criteria = criteria.options
+			else
+				[query,comparator,paging] = args
+				criteria = {comparator, paging, queries:find:query}
 
 		# Create child collection
-		collection = @createLiveChildCollection([],criteria).query()
+		passed = @query(criteria,false)
+		collection = @createLiveChildCollection(passed,criteria)
 
 		# Return
 		return collection
 
 	# Find One
-	findOne: (query,comparator,paging) ->
+	findOne: (args...) ->
 		# Prepare
-		criteria = {comparator, paging, queries:find:query}
+		if args.length
+			if args.length is 1 and args[0] instanceof Criteria
+				criteria = criteria.options
+			else
+				[query,comparator,paging] = args
+				criteria = {comparator, paging, queries:find:query}
 
 		# Create child collection
-		models = @createChildCollection([],criteria).query().models
+		passed = @query(criteria,false)
 
 		# Return
-		if models?.length isnt 0
-			return models[0]
+		if passed?.length isnt 0
+			return passed[0]
 		else
 			return null
 
 	# Query
 	# Reset our collection with the new rules that we are using
-	query: (paging) ->
+	query: (criteria,reset=true) ->
 		# Prepare
-		me = @
-		models = []
-		collection = @getParentCollection() or @
-		paging or= @getPaging()
-
-		# Cycle through the parent collection finding passing models
-		collection.each (model) ->
-			pass = me.test(model)
-			if pass
-				models.push(model)
-
-		# Page our models
-		start = paging.offset or 0
-		if paging.limit? and paging.limit > 0
-			start = start + paging.limit * ((paging.page or 1) - 1)
-			finish = start + paging.limit
-			models = models[start...finish]
-		else
-			models = models[start..]
+		passed = @testModels(@models, criteria)
 
 		# Reset
-		@reset(models)
+		@reset(passed)  if reset
 
 		# Chain
 		@
@@ -610,29 +626,81 @@ class QueryCollection extends Backbone.Collection
 		@
 
 
-	# =================================
-	# Criteria
+
+# =================================
+# Criteria
+
+class Criteria
+
+	# Constructor
+	constructor: (options) ->
+		# Prepare
+		@options ?= {}
+		_.extend(@options, options)
+
+		# Chain
+		@
 
 	# Apply Criteria
 	applyCriteria: (options={}) =>
-		# Defaults
-		@options ?= {}
-		_.extend(@options, options)
+		# Apply
 		@options.filters = _.extend({}, @options.filters or {})
 		@options.queries = _.extend({}, @options.queries or {})
 		@options.pills = _.extend({}, @options.pills or {})
-		@options.paging = _.extend({}, @options.paging or {})
 		@options.searchString or= null
+		@options.paging = _.extend({}, @options.paging or {})
 
 		# Initialise filters, queries and pills if we have them
 		@setFilters(@options.filters)
 		@setQueries(@options.queries)
 		@setPills(@options.pills)
-		@setPaging(@options.paging)
 		@setSearchString(@options.searchString)  if @options.searchString?
+		@setPaging(@options.paging)
+		@setComparator(@options.comparator)  if @options.comparator?
 
 		# Chain
 		@
+
+	# ---------------------------------
+	# Paging: Getters and Setters
+
+	# Get Paging
+	getPaging: ->
+		return @options.paging
+
+	# Set Paging
+	setPaging: (paging) ->
+		# Prepare
+		paging = _.extend(@getPaging(), paging or {})
+		paging.page or= null
+		paging.limit or= null
+		paging.offset or= null
+
+		# Apply paging
+		@options.paging = paging
+
+		# Chain
+		@
+
+
+	# ---------------------------------
+	# Comparator: Getters and Setters
+
+	# Get Comparator
+	getComparator: ->
+		return @options.comparator
+
+	# Set Comparator
+	setComparator: (comparator) ->
+		# Prepare comparator
+		comparator = util.generateComparator(comparator)
+
+		# Apply it
+		@options.comparator = comparator
+
+		# Chain
+		@
+
 
 	# ---------------------------------
 	# Filters: Getters and Setters
@@ -766,7 +834,7 @@ class QueryCollection extends Backbone.Collection
 
 		# Apply the search string to each of our pills
 		# and for each applicable pill, clean up our search string
-		_.each pills, (pill,pillName) ->
+		for own pillName,pill of pills
 			cleanedSearchString = pill.setSearchString(cleanedSearchString)
 			return true
 
@@ -779,33 +847,41 @@ class QueryCollection extends Backbone.Collection
 
 
 	# ---------------------------------
-	# Paging: Getters and Setters
+	# Testing
 
-	# Get Paging
-	getPaging: ->
-		@options.paging
-
-	# Set Paging
-	setPaging: (paging) ->
-		# Prepare
-		paging = _.extend(@getPaging(), paging or {})
-		paging.page or= null
-		paging.limit or= null
-		paging.offset or= null
-
-		# Apply paging
-		@options.paging = paging
-
-		# Chain
-		@
-
-
-	# ---------------------------------
-	# Criterias
-
-	# Test everything against the model
-	test: (model,criteria={}) ->
+	# Test Model
+	test: (args...) -> return @testModel(args...)
+	testModel: (model,criteria={}) ->
 		passed = @testFilters(model,criteria.filters) and @testQueries(model,criteria.queries) and @testPills(model,criteria.pills)
+		return passed
+
+	# Test Models
+	testModels: (models,criteria={}) ->
+		# Prepare
+		me = @
+		passed = []
+		models ?= @models
+		paging = criteria.paging ? @getPaging()
+
+		# Cycle through the parent collection finding passing models
+		for model in models
+			pass = me.testModel(model,criteria)
+			passed.push(model)  if pass
+
+		# Page our models
+		start = paging.offset or 0
+		if paging.limit? and paging.limit > 0
+			start = start + paging.limit * ((paging.page or 1) - 1)
+			finish = start + paging.limit
+			passed = passed[start...finish]
+		else
+			passed = passed[start..]
+
+		# Sort
+		comparator = @getComparator()
+		passed.sort(comparator)  if comparator
+
+		# Return
 		return passed
 
 	# Perform the Filters against a Model
@@ -819,7 +895,7 @@ class QueryCollection extends Backbone.Collection
 		filters ?= @getFilters()
 
 		# Cycle
-		_.each filters, (filter,filterName) ->
+		for own filterName,filter of filters
 			if filter(model,cleanedSearchString) is false
 				passed = false
 				return false # break
@@ -837,7 +913,8 @@ class QueryCollection extends Backbone.Collection
 		queries ?= @getQueries()
 
 		# Cycle
-		_.each queries, (query,queryName) ->
+		for own queryName,query of queries
+			console.log(query)
 			if query.test(model) is false
 				passed = false
 				return false # break
@@ -857,7 +934,7 @@ class QueryCollection extends Backbone.Collection
 
 		# Cycle
 		if searchString?
-			_.each pills, (pill,pillName) ->
+			for own pillName,pill of pills
 				if pill.test(model) is false
 					passed = false
 					return false # break
