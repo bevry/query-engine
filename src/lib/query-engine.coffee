@@ -274,10 +274,8 @@ class QueryCollection extends Backbone.Collection
 		# Prepare
 		me = @
 
-		# Proxy Criteria
-		for own key,value of Criteria::
-			@[key] ?= value
-		Criteria::applyOptions.call(@,options)
+		# Criteria
+		@applyCriteria(options)
 
 		# Comparator
 		@setComparator(@comparator)  if @comparator?
@@ -428,19 +426,37 @@ class QueryCollection extends Backbone.Collection
 
 	# Find All
 	findAll: (query,comparator,paging) ->
-		collection = @createChildCollection([],{comparator,paging,queries:find:query}).query()
+		# Prepare
+		criteria = {comparator, paging, queries:find:query}
+
+		# Create child collection
+		collection = @createChildCollection([],criteria).query()
+
+		# Return
 		return collection
 
 	# Find All Live
 	findAllLive: (query,comparator,paging) ->
-		collection = @createLiveChildCollection([],{comparator,paging,queries:find:query}).query()
+		# Prepare
+		criteria = {comparator, paging, queries:find:query}
+
+		# Create child collection
+		collection = @createLiveChildCollection([],criteria).query()
+
+		# Return
 		return collection
 
 	# Find One
 	findOne: (query,comparator,paging) ->
-		collection = @createChildCollection([],{comparator,paging,queries:find:query}).query()
-		if collection and collection.length
-			return collection.models[0]
+		# Prepare
+		criteria = {comparator, paging, queries:find:query}
+
+		# Create child collection
+		models = @createChildCollection([],criteria).query().models
+
+		# Return
+		if models?.length isnt 0
+			return models[0]
 		else
 			return null
 
@@ -452,12 +468,6 @@ class QueryCollection extends Backbone.Collection
 		models = []
 		collection = @getParentCollection() or @
 		paging or= @getPaging()
-
-		# Page our models
-		start = paging.offset or 0
-		if paging.limit? and paging.limit > 0
-			start = start + paging.limit * ((paging.page or 1) - 1)
-			finish = start + paging.limit
 
 		# Cycle through the parent collection finding passing models
 		collection.each (model) ->
@@ -474,7 +484,7 @@ class QueryCollection extends Backbone.Collection
 		else
 			models = models[start..]
 
-		# Reset our collection with the passing models
+		# Reset
 		@reset(models)
 
 		# Chain
@@ -600,19 +610,11 @@ class QueryCollection extends Backbone.Collection
 		@
 
 
+	# =================================
+	# Criteria
 
-# Criteria
-# The Criteria is a container of all the things we can test a collection against
-class Criteria
-	# Prepare
-	options: null
-
-	# Constructor
-	constructor: (options) ->
-		@applyOptions(options)
-
-	# Options
-	applyOptions: (options={}) =>
+	# Apply Criteria
+	applyCriteria: (options={}) =>
 		# Defaults
 		@options ?= {}
 		_.extend(@options, options)
@@ -802,33 +804,19 @@ class Criteria
 	# Criterias
 
 	# Test everything against the model
-	test: (model) ->
-		passed = @testFilters(model) and @testQueries(model) and @testPills(model)
-		return passed
-
-	# Test models
-	testModels: (models) ->
-		passed = []
-		for model in models
-			passed.push(model)  if @test(model)
-		return passed
-
-	# Test collection
-	testCollection: (collection) ->
-		passed = []
-		for model in collection.models
-			passed.push(model)  if @test(model)
+	test: (model,criteria={}) ->
+		passed = @testFilters(model,criteria.filters) and @testQueries(model,criteria.queries) and @testPills(model,criteria.pills)
 		return passed
 
 	# Perform the Filters against a Model
 	# Filters work in allow-all, deny by exeception way
 	# So if there are no queries, everything should pass
 	# If there is one failed query however, it should fail
-	testFilters: (model) ->
+	testFilters: (model,filters) ->
 		# Prepare
 		passed = true
 		cleanedSearchString = @getCleanedSearchString()
-		filters = @getFilters()
+		filters ?= @getFilters()
 
 		# Cycle
 		_.each filters, (filter,filterName) ->
@@ -843,10 +831,10 @@ class Criteria
 	# Queries work in allow-all, deny by exeception way
 	# So if there are no queries, everything should pass
 	# If there is one failed query however, it should fail
-	testQueries: (model) ->
+	testQueries: (model,queries) ->
 		# Prepare
 		passed = true
-		queries = @getQueries()
+		queries ?= @getQueries()
 
 		# Cycle
 		_.each queries, (query,queryName) ->
@@ -861,11 +849,11 @@ class Criteria
 	# Pills work in allow-all, deny by exeception way
 	# So if there are no queries, everything should pass
 	# If there is one failed query however, it should fail
-	testPills: (model) ->
+	testPills: (model,pills) ->
 		# Prepare
 		passed = true
 		searchString = @getSearchString()
-		pills = @getPills()
+		pills ?= @getPills()
 
 		# Cycle
 		if searchString?
