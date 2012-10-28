@@ -271,11 +271,351 @@ class QueryCollection extends Backbone.Collection
 
 	# Constructor
 	initialize: (models,options) ->
-		# Bindings
-		_.bindAll(@, 'onChange', 'onParentChange', 'onParentRemove', 'onParentAdd', 'onParentReset')
+		# Prepare
+		me = @
 
+		# Proxy Criteria
+		for own key,value of Criteria::
+			@[key] ?= value
+		Criteria::applyOptions.call(@,options)
+
+		# Comparator
+		@setComparator(@comparator)  if @comparator?
+		# @options.comparator is shortcutted here by Backbone
+
+		# Parent Collection
+		# No need to set parent collection, as if it is an option, it has already been set
+
+		# Live
+		# Initliase live events if we use them
+		@live()
+
+		# Chain
+		@
+
+
+	# ---------------------------------
+	# Parent Collection: Getters and Setters
+
+	# Create Child Collection
+	createChildCollection: (models,options) ->
+		options or= {}
+		options.parentCollection = @
+		options.collection ?= @collection or QueryCollection
+		options.comparator ?= options.collection::comparator or @comparator
+		collection = new (options.collection)(models,options)
+		return collection
+
+	# Create Live Child Collection
+	createLiveChildCollection: (models,options) ->
+		options or= {}
+		options.live = true
+		collection = @createChildCollection(models,options)
+		return collection
+
+	# Has Parent Collection
+	hasParentCollection: ->
+		@options.parentCollection?
+
+	# Get Parent Collection
+	getParentCollection: ->
+		@options.parentCollection
+
+	# Set Parent Collection
+	setParentCollection: (parentCollection,skipCheck) ->
+		# Check
+		if !skipCheck and @options.parentCollection is parentCollection
+			return @ # nothing to do
+
+		# Apply
+		@options.parentCollection = parentCollection
+
+		# Live
+		@live()
+
+		# Chain
+		@
+
+
+	# ---------------------------------
+	# Helpers
+	# Used to assist our other functions
+
+	# Has Model
+	# Does this model exist within our collection?
+	hasModel: (model) ->
+		# Prepare
+		model or= {}
+
+		# Check by the model's id
+		if model.id? and @get(model.id)
+			exists = true
+		# Check by the model's cid
+		else if model.cid? and @getByCid(model.cid)
+			exists = true
+		# Otherwise fail
+		else
+			exists = false
+
+		# Return exists
+		return exists
+
+	# Safe Remove
+	# Remove an item from the collection, only if it exists within the collection
+	# Useful for bypassing the "already exists" warning
+	safeRemove: (model) ->
+		exists = @hasModel(model)
+		if exists
+			this.remove(model)
+		@
+
+	# Safe Add
+	# Add an item from the collection, only if it doesn't exist within the collection
+	# Useful for bypassing the "already exists" warning
+	safeAdd: (model) ->
+		exists = @hasModel(model)
+		unless exists
+			this.add(model)
+		@
+
+
+	# ---------------------------------
+	# Sorting and Paging
+
+	# Set Comparator
+	setComparator: (comparator) ->
+		# Prepare comparator
+		comparator = util.generateComparator(comparator)
+
+		# Apply it
+		@comparator = comparator
+
+		# Chain
+		@
+
+	# Sort Collection
+	# Sorts our current collection by our comparator
+	sortCollection: (comparator) ->
+		# Sort our collection
+		if comparator
+			comparator = util.generateComparator(comparator)
+			@models.sort(comparator)
+		else if @comparator
+			@models.sort(@comparator)
+		else
+			throw new Error('You need a comparator to sort')
+
+		# Chain
+		return @
+
+	# Sort Array
+	# Return the results as an array sorted by our comparator
+	sortArray: (comparator) ->
+		# Prepare
+		arr = @toJSON()
+
+		# Sort our collection
+		if comparator
+			comparator = util.generateComparator(comparator)
+			arr.sort(comparator)
+		else if @comparator
+			arr.sort(@comparator)
+		else
+			throw new Error('You need a comparator to sort')
+
+		# Return sorted array
+		return arr
+
+	# Find All
+	findAll: (query,comparator,paging) ->
+		collection = @createChildCollection([],{comparator,paging,queries:find:query}).query()
+		return collection
+
+	# Find All Live
+	findAllLive: (query,comparator,paging) ->
+		collection = @createLiveChildCollection([],{comparator,paging,queries:find:query}).query()
+		return collection
+
+	# Find One
+	findOne: (query,comparator,paging) ->
+		collection = @createChildCollection([],{comparator,paging,queries:find:query}).query()
+		if collection and collection.length
+			return collection.models[0]
+		else
+			return null
+
+	# Query
+	# Reset our collection with the new rules that we are using
+	query: (paging) ->
+		# Prepare
+		me = @
+		models = []
+		collection = @getParentCollection() or @
+		paging or= @getPaging()
+
+		# Page our models
+		start = paging.offset or 0
+		if paging.limit? and paging.limit > 0
+			start = start + paging.limit * ((paging.page or 1) - 1)
+			finish = start + paging.limit
+
+		# Cycle through the parent collection finding passing models
+		collection.each (model) ->
+			pass = me.test(model)
+			if pass
+				models.push(model)
+
+		# Page our models
+		start = paging.offset or 0
+		if paging.limit? and paging.limit > 0
+			start = start + paging.limit * ((paging.page or 1) - 1)
+			finish = start + paging.limit
+			models = models[start...finish]
+		else
+			models = models[start..]
+
+		# Reset our collection with the passing models
+		@reset(models)
+
+		# Chain
+		@
+
+
+	# ---------------------------------
+	# Live Functionality
+	# Used so we can live update the collection when modifications are made to our collection
+
+	# Live
+	live: (enabled) ->
+		# Prepare
+		enabled ?= @options.live
+
+		# Save live mode
+		@options.live = enabled
+
+		# Subscribe to change events on our existing models
+		if enabled
+			@on('change',@onChange)
+			# onChange will do our resort
+			# we do not need a onAdd for our resort, as backbone already does this
+		else
+			@off('change',@onChange)
+
+		# Subscribe the live events on our parent collection (if we have one)
+		parentCollection = @getParentCollection()
+		if parentCollection?
+			if enabled
+				parentCollection.on('change',@onParentChange)
+				parentCollection.on('remove',@onParentRemove)
+				parentCollection.on('add',@onParentAdd)
+				parentCollection.on('reset',@onParentReset)
+			else
+				parentCollection.off('change',@onParentChange)
+				parentCollection.off('remove',@onParentRemove)
+				parentCollection.off('add',@onParentAdd)
+				parentCollection.off('reset',@onParentReset)
+
+		# Chain
+		@
+
+	# Fired when we want to add some models to our own collection
+	# We should check if the models pass our tests, if so then we add them
+	add: (models, options) ->
+		# Prepare
+		options = if options then _.clone(options) else {}
+		models = if _.isArray(models) then models.slice() else [models]
+		passedModels = []
+
+		# Cycle through the models
+		for model in models
+			# Ensure we have a model
+			model = @_prepareModel(model,options)
+
+			# Only add passed models
+			if model and @test(model)
+				passedModels.push(model)
+
+		# Add the passed models
+		Backbone.Collection::add.apply(@,[passedModels,options])
+
+		# Chain
+		@
+
+	# Fired when we want to create a model
+	# We should check if the model passes our tests, if so then we add them
+	create: (model, options) ->
+		# Prepare
+		options = if options then _.clone(options) else {}
+		model = @_prepareModel(model,options)
+
+		# Check
+		if model and @test(model)
+			# It passed, so create the model
+			Backbone.Collection::create.apply(@,[model,options])
+
+		# Chain
+		@
+
+	# Fired when a model that is inside our own collection changes
+	# We should check if it still passes our tests
+	# and if it doesn't then we should remove the model
+	# We should perform a resort
+	onChange: (model) =>
+		pass = @test(model)
+		unless pass
+			@safeRemove(model)
+		else
+			@sortCollection()  if @comparator
+		@
+
+	# Fired when a model in our parent collection changes
+	# We should check if the model now passes our own tests, and if so add it to our own
+	# and if it doesn't then we should remove the model from our own
+	onParentChange: (model) =>
+		pass = @test(model) and @getParentCollection().hasModel(model)
+		if pass
+			@safeAdd(model)
+		else
+			@safeRemove(model)
+		@
+
+	# Fired when a model in our parent collection is removed
+	# We should remove it straight away from our own model
+	onParentRemove: (model) =>
+		@safeRemove(model)
+		@
+
+	# Fired when a model in our parent collection is added
+	# We should try and add it to our own collection
+	# Try as in, it will call _prepareModel and the tests happen there
+	onParentAdd: (model) =>
+		@safeAdd(model)
+		@
+
+	# Fired when our parent collection is reset
+	# We should reset our own collection when this happens with the parent collection's models
+	# For each model, it will trigger _prepareModel which will check if the model passes our tests
+	onParentReset: (model) =>
+		@reset(@getParentCollection().models)
+		@
+
+
+
+# Criteria
+# The Criteria is a container of all the things we can test a collection against
+class Criteria
+	# Prepare
+	options: null
+
+	# Constructor
+	constructor: (options) ->
+		@applyOptions(options)
+
+	# Options
+	applyOptions: (options={}) =>
 		# Defaults
-		@options = _.extend({}, @options or {}, options or {})
+		@options ?= {}
+		_.extend(@options, options)
 		@options.filters = _.extend({}, @options.filters or {})
 		@options.queries = _.extend({}, @options.queries or {})
 		@options.pills = _.extend({}, @options.pills or {})
@@ -288,16 +628,9 @@ class QueryCollection extends Backbone.Collection
 		@setPills(@options.pills)
 		@setPaging(@options.paging)
 		@setSearchString(@options.searchString)  if @options.searchString?
-		@setComparator(@comparator)  if @comparator?  # @options.comparator is shortcutted here by Backbone
-
-		# No need to set parent collection, as if it is an option, it has already been set
-
-		# Initliase live events if we use them
-		@live()
 
 		# Chain
 		@
-
 
 	# ---------------------------------
 	# Filters: Getters and Setters
@@ -442,6 +775,7 @@ class QueryCollection extends Backbone.Collection
 		# Chain
 		@
 
+
 	# ---------------------------------
 	# Paging: Getters and Setters
 
@@ -465,321 +799,26 @@ class QueryCollection extends Backbone.Collection
 
 
 	# ---------------------------------
-	# Parent Collection: Getters and Setters
-
-	# Has Parent Collection
-	hasParentCollection: ->
-		@options.parentCollection?
-
-	# Get Parent Collection
-	getParentCollection: ->
-		@options.parentCollection
-
-	# Set Parent Collection
-	setParentCollection: (parentCollection,skipCheck) ->
-		# Check
-		if !skipCheck and @options.parentCollection is parentCollection
-			return @ # nothing to do
-
-		# Apply
-		@options.parentCollection = parentCollection
-
-		# Live
-		@live()
-
-		# Chain
-		@
-
-
-	# ---------------------------------
-	# Helpers
-	# Used to assist our other functions
-
-	# Has Model
-	# Does this model exist within our collection?
-	hasModel: (model) ->
-		# Prepare
-		model or= {}
-
-		# Check by the model's id
-		if model.id? and @get(model.id)
-			exists = true
-		# Check by the model's cid
-		else if model.cid? and @getByCid(model.cid)
-			exists = true
-		# Otherwise fail
-		else
-			exists = false
-
-		# Return exists
-		return exists
-
-	# Safe Remove
-	# Remove an item from the collection, only if it exists within the collection
-	# Useful for bypassing the "already exists" warning
-	safeRemove: (model) ->
-		exists = @hasModel(model)
-		if exists
-			this.remove(model)
-		@
-
-	# Safe Add
-	# Add an item from the collection, only if it doesn't exist within the collection
-	# Useful for bypassing the "already exists" warning
-	safeAdd: (model) ->
-		exists = @hasModel(model)
-		unless exists
-			this.add(model)
-		@
-
-
-	# ---------------------------------
-	# Sorting and Paging
-
-	# Set Comparator
-	setComparator: (comparator) ->
-		# Prepare comparator
-		comparator = util.generateComparator(comparator)
-
-		# Apply it
-		@comparator = comparator
-
-		# Chain
-		@
-
-	# Sort Collection
-	# Sorts our current collection by our comparator
-	sortCollection: (comparator) ->
-		# Sort our collection
-		if comparator
-			comparator = util.generateComparator(comparator)
-			@models.sort(comparator)
-		else if @comparator
-			@models.sort(@comparator)
-		else
-			throw new Error('You need a comparator to sort')
-
-		# Chain
-		return @
-
-	# Sort Array
-	# Return the results as an array sorted by our comparator
-	sortArray: (comparator) ->
-		# Prepare
-		arr = @toJSON()
-
-		# Sort our collection
-		if comparator
-			comparator = util.generateComparator(comparator)
-			arr.sort(comparator)
-		else if @comparator
-			arr.sort(@comparator)
-		else
-			throw new Error('You need a comparator to sort')
-
-		# Return sorted array
-		return arr
-
-	# Query
-	# Reset our collection with the new rules that we are using
-	query: (paging) ->
-		# Prepare
-		me = @
-		models = []
-		collection = @getParentCollection() or @
-		paging or= @getPaging()
-
-		# Page our models
-		start = paging.offset or 0
-		if paging.limit? and paging.limit > 0
-			start = start + paging.limit * ((paging.page or 1) - 1)
-			finish = start + paging.limit
-
-		# Cycle through the parent collection finding passing models
-		collection.each (model) ->
-			pass = me.test(model)
-			if pass
-				models.push(model)
-
-		# Page our models
-		start = paging.offset or 0
-		if paging.limit? and paging.limit > 0
-			start = start + paging.limit * ((paging.page or 1) - 1)
-			finish = start + paging.limit
-			models = models[start...finish]
-		else
-			models = models[start..]
-
-		# Reset our collection with the passing models
-		@reset(models)
-
-		# Chain
-		@
-
-	# ---------------------------------
-	# Generic API
-
-	# Create Child Collection
-	createChildCollection: (models,options) ->
-		options or= {}
-		options.parentCollection = @
-		options.collection ?= @collection or QueryCollection
-		options.comparator ?= options.collection::comparator or @comparator
-		collection = new (options.collection)(models,options)
-		return collection
-
-	# Create Live Child Collection
-	createLiveChildCollection: (models,options) ->
-		options or= {}
-		options.live = true
-		collection = @createChildCollection(models,options)
-		return collection
-
-	# Find All
-	findAll: (query,comparator,paging) ->
-		collection = @createChildCollection([],{comparator,paging,queries:find:query}).query()
-		return collection
-
-	# Find All Live
-	findAllLive: (query,comparator,paging) ->
-		collection = @createLiveChildCollection([],{comparator,paging,queries:find:query}).query()
-		return collection
-
-	# Find One
-	findOne: (query,comparator,paging) ->
-		collection = @createChildCollection([],{comparator,paging,queries:find:query}).query()
-		if collection and collection.length
-			return collection.models[0]
-		else
-			return null
-
-
-	# ---------------------------------
-	# Live Functionality
-	# Used so we can live update the collection when modifications are made to our collection
-
-	# Live
-	live: (enabled) ->
-		# Prepare
-		enabled ?= @options.live
-
-		# Save live mode
-		@options.live = enabled
-
-		# Subscribe to change events on our existing models
-		if enabled
-			@on('change',@onChange)
-			# onChange will do our resort
-			# we do not need a onAdd for our resort, as backbone already does this
-		else
-			@off('change',@onChange)
-
-		# Subscribe the live events on our parent collection (if we have one)
-		parentCollection = @getParentCollection()
-		if parentCollection?
-			if enabled
-				parentCollection.on('change',@onParentChange)
-				parentCollection.on('remove',@onParentRemove)
-				parentCollection.on('add',@onParentAdd)
-				parentCollection.on('reset',@onParentReset)
-			else
-				parentCollection.off('change',@onParentChange)
-				parentCollection.off('remove',@onParentRemove)
-				parentCollection.off('add',@onParentAdd)
-				parentCollection.off('reset',@onParentReset)
-
-		# Chain
-		@
-
-	# Fired when we want to add some models to our own collection
-	# We should check if the models pass our tests, if so then we add them
-	add: (models, options) ->
-		# Prepare
-		options = if options then _.clone(options) else {}
-		models = if _.isArray(models) then models.slice() else [models]
-		passedModels = []
-
-		# Cycle through the models
-		for model in models
-			# Ensure we have a model
-			model = @_prepareModel(model,options)
-
-			# Only add passed models
-			if model and @test(model)
-				passedModels.push(model)
-
-		# Add the passed models
-		Backbone.Collection::add.apply(@,[passedModels,options])
-
-		# Chain
-		@
-
-	# Fired when we want to create a model
-	# We should check if the model passes our tests, if so then we add them
-	create: (model, options) ->
-		# Prepare
-		options = if options then _.clone(options) else {}
-		model = @_prepareModel(model,options)
-
-		# Check
-		if model and @test(model)
-			# It passed, so create the model
-			Backbone.Collection::create.apply(@,[model,options])
-
-		# Chain
-		@
-
-	# Fired when a model that is inside our own collection changes
-	# We should check if it still passes our tests
-	# and if it doesn't then we should remove the model
-	# We should perform a resort
-	onChange: (model) ->
-		pass = @test(model)
-		unless pass
-			@safeRemove(model)
-		else
-			@sortCollection()  if @comparator
-		@
-
-	# Fired when a model in our parent collection changes
-	# We should check if the model now passes our own tests, and if so add it to our own
-	# and if it doesn't then we should remove the model from our own
-	onParentChange: (model) ->
-		pass = @test(model) and @getParentCollection().hasModel(model)
-		if pass
-			@safeAdd(model)
-		else
-			@safeRemove(model)
-		@
-
-	# Fired when a model in our parent collection is removed
-	# We should remove it straight away from our own model
-	onParentRemove: (model) ->
-		@safeRemove(model)
-		@
-
-	# Fired when a model in our parent collection is added
-	# We should try and add it to our own collection
-	# Try as in, it will call _prepareModel and the tests happen there
-	onParentAdd: (model) ->
-		@safeAdd(model)
-		@
-
-	# Fired when our parent collection is reset
-	# We should reset our own collection when this happens with the parent collection's models
-	# For each model, it will trigger _prepareModel which will check if the model passes our tests
-	onParentReset: (model) ->
-		@reset(@getParentCollection().models)
-		@
-
-
-	# ---------------------------------
-	# Testers
+	# Criterias
 
 	# Test everything against the model
 	test: (model) ->
-		pass = @testFilters(model) and @testQueries(model) and @testPills(model)
-		return pass
+		passed = @testFilters(model) and @testQueries(model) and @testPills(model)
+		return passed
+
+	# Test models
+	testModels: (models) ->
+		passed = []
+		for model in models
+			passed.push(model)  if @test(model)
+		return passed
+
+	# Test collection
+	testCollection: (collection) ->
+		passed = []
+		for model in collection.models
+			passed.push(model)  if @test(model)
+		return passed
 
 	# Perform the Filters against a Model
 	# Filters work in allow-all, deny by exeception way
@@ -787,18 +826,18 @@ class QueryCollection extends Backbone.Collection
 	# If there is one failed query however, it should fail
 	testFilters: (model) ->
 		# Prepare
-		pass = true
+		passed = true
 		cleanedSearchString = @getCleanedSearchString()
 		filters = @getFilters()
 
 		# Cycle
 		_.each filters, (filter,filterName) ->
 			if filter(model,cleanedSearchString) is false
-				pass = false
+				passed = false
 				return false # break
 
 		# Return result
-		return pass
+		return passed
 
 	# Perform the Queries against a Model
 	# Queries work in allow-all, deny by exeception way
@@ -806,17 +845,17 @@ class QueryCollection extends Backbone.Collection
 	# If there is one failed query however, it should fail
 	testQueries: (model) ->
 		# Prepare
-		pass = true
+		passed = true
 		queries = @getQueries()
 
 		# Cycle
 		_.each queries, (query,queryName) ->
 			if query.test(model) is false
-				pass = false
+				passed = false
 				return false # break
 
 		# Return result
-		return pass
+		return passed
 
 	# Perform the Pills against a Model
 	# Pills work in allow-all, deny by exeception way
@@ -824,7 +863,7 @@ class QueryCollection extends Backbone.Collection
 	# If there is one failed query however, it should fail
 	testPills: (model) ->
 		# Prepare
-		pass = true
+		passed = true
 		searchString = @getSearchString()
 		pills = @getPills()
 
@@ -832,11 +871,11 @@ class QueryCollection extends Backbone.Collection
 		if searchString?
 			_.each pills, (pill,pillName) ->
 				if pill.test(model) is false
-					pass = false
+					passed = false
 					return false # break
 
 		# Return result
-		return pass
+		return passed
 
 
 # Pill
@@ -845,7 +884,7 @@ class QueryCollection extends Backbone.Collection
 # Pills must be coded manually, as otherwise that could be a security problem
 class Pill
 	# Callback
-	# Our pills tester function
+	# Our pills criteria function
 	callback: null # Function
 
 	# Regex
