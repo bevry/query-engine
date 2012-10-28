@@ -452,7 +452,7 @@ class QueryCollection extends Backbone.Collection
 				criteria = {comparator, paging, queries:find:query}
 
 		# Create child collection
-		passed = @query(criteria,false)
+		passed = @testModels(@models,criteria)
 		collection = @createChildCollection(passed,criteria)
 
 		# Return
@@ -469,7 +469,7 @@ class QueryCollection extends Backbone.Collection
 				criteria = {comparator, paging, queries:find:query}
 
 		# Create child collection
-		passed = @query(criteria,false)
+		passed = @testModels(@models,criteria)
 		collection = @createLiveChildCollection(passed,criteria)
 
 		# Return
@@ -486,7 +486,7 @@ class QueryCollection extends Backbone.Collection
 				criteria = {comparator, paging, queries:find:query}
 
 		# Create child collection
-		passed = @query(criteria,false)
+		passed = @testModels(@models,criteria)
 
 		# Return
 		if passed?.length isnt 0
@@ -496,12 +496,12 @@ class QueryCollection extends Backbone.Collection
 
 	# Query
 	# Reset our collection with the new rules that we are using
-	query: (criteria,reset=true) ->
+	query: (criteria) ->
 		# Prepare
 		passed = @testModels(@models, criteria)
 
 		# Reset
-		@reset(passed)  if reset
+		@reset(passed)
 
 		# Chain
 		@
@@ -766,7 +766,8 @@ class Criteria
 
 		# Apply or delete the value
 		if value?
-			value = new Query(value)  unless (value instanceof Query)
+			unless value instanceof Query
+				value = new Query(value)
 			queries[name] = value
 		else if queries[name]?
 			delete queries[name]
@@ -799,12 +800,13 @@ class Criteria
 		throw new Error('QueryCollection::setPill was called without both arguments')  if typeof value is 'undefined'
 
 		# Prepare
-		pills = @options.pills
-		searchString = @options.searchString
+		pills = @getPills()
+		searchString = @getSearchString()
 
 		# Apply or delete the value
 		if value?
-			value = new Pill(value)  unless (value instanceof Pill)
+			unless value instanceof Pill
+				value = new Pill(value)
 			if searchString
 				value.setSearchString(searchString)
 			pills[name] = value
@@ -836,7 +838,6 @@ class Criteria
 		# and for each applicable pill, clean up our search string
 		for own pillName,pill of pills
 			cleanedSearchString = pill.setSearchString(cleanedSearchString)
-			return true
 
 		# Apply
 		@options.searchString = searchString
@@ -914,7 +915,9 @@ class Criteria
 
 		# Cycle
 		for own queryName,query of queries
-			console.log(query)
+			unless query instanceof Query
+				query = new Query(query)
+				queries[queryName] = query
 			if query.test(model) is false
 				passed = false
 				return false # break
@@ -935,6 +938,10 @@ class Criteria
 		# Cycle
 		if searchString?
 			for own pillName,pill of pills
+				unless pill instanceof Pill
+					pill = new Pill(query)
+					pill.setSearchString(searchString)
+					pills[pillName] = pill
 				if pill.test(model) is false
 					passed = false
 					return false # break

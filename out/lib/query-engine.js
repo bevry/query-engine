@@ -405,7 +405,7 @@
           };
         }
       }
-      passed = this.query(criteria, false);
+      passed = this.testModels(this.models, criteria);
       collection = this.createChildCollection(passed, criteria);
       return collection;
     };
@@ -427,7 +427,7 @@
           };
         }
       }
-      passed = this.query(criteria, false);
+      passed = this.testModels(this.models, criteria);
       collection = this.createLiveChildCollection(passed, criteria);
       return collection;
     };
@@ -449,7 +449,7 @@
           };
         }
       }
-      passed = this.query(criteria, false);
+      passed = this.testModels(this.models, criteria);
       if ((passed != null ? passed.length : void 0) !== 0) {
         return passed[0];
       } else {
@@ -457,15 +457,10 @@
       }
     };
 
-    QueryCollection.prototype.query = function(criteria, reset) {
+    QueryCollection.prototype.query = function(criteria) {
       var passed;
-      if (reset == null) {
-        reset = true;
-      }
       passed = this.testModels(this.models, criteria);
-      if (reset) {
-        this.reset(passed);
-      }
+      this.reset(passed);
       return this;
     };
 
@@ -718,8 +713,8 @@
       if (typeof value === 'undefined') {
         throw new Error('QueryCollection::setPill was called without both arguments');
       }
-      pills = this.options.pills;
-      searchString = this.options.searchString;
+      pills = this.getPills();
+      searchString = this.getSearchString();
       if (value != null) {
         if (!(value instanceof Pill)) {
           value = new Pill(value);
@@ -750,7 +745,6 @@
         if (!__hasProp.call(pills, pillName)) continue;
         pill = pills[pillName];
         cleanedSearchString = pill.setSearchString(cleanedSearchString);
-        return true;
       }
       this.options.searchString = searchString;
       this.options.cleanedSearchString = cleanedSearchString;
@@ -832,7 +826,10 @@
       for (queryName in queries) {
         if (!__hasProp.call(queries, queryName)) continue;
         query = queries[queryName];
-        console.log(query);
+        if (!(query instanceof Query)) {
+          query = new Query(query);
+          queries[queryName] = query;
+        }
         if (query.test(model) === false) {
           passed = false;
           return false;
@@ -852,6 +849,11 @@
         for (pillName in pills) {
           if (!__hasProp.call(pills, pillName)) continue;
           pill = pills[pillName];
+          if (!(pill instanceof Pill)) {
+            pill = new Pill(query);
+            pill.setSearchString(searchString);
+            pills[pillName] = pill;
+          }
           if (pill.test(model) === false) {
             passed = false;
             return false;

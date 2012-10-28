@@ -104,7 +104,6 @@
         }).add(models);
         actual = liveCollection.toJSON();
         expected = [modelsObject.jquery, modelsObject.history];
-        console.log(actual,'----',expected);
         return assert.deepEqual(actual, expected);
       });
       it('should support searching', function() {
