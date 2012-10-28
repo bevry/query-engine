@@ -1,5 +1,15 @@
 ## History
 
+- v1.3.0 ...
+	- Improves memory utilisation
+	- Improves speed by 3-7x
+	- Moved query criteria out of `QueryCollection` into new `Criteria` class
+		- `QueryCollection` injects the `Criteria` prototype methods to stay backwards compatible
+		- Introduced `Criteria::testModels` which is the same as `query` but returns the results instead of applying them
+	- `QueryCollection` changes:
+		- `findAll`, `findAllLive`, `findOne` and `query` can now accept a `Criteria` object in addition to what they could accept before
+	- TODO: Need to add tests for using paging with comparators
+
 - v1.2.7 August 10, 2012
 	- Re-added markdown files to npm distribution as they are required for the npm website
 
