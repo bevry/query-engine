@@ -297,6 +297,7 @@ this.scanNewlines = false;
 this.unexpectedEOF = false;
 this.filename = f || "";
 this.lineno = l || 1;
+this.comments = [];
 }
 Tokenizer.prototype = {
 get done() {
@@ -336,12 +337,20 @@ return tt;
 },
 skip: function () {
 var input = this.source;
+var cstart;
+var clineno;
+var comments = [];
+var comment;
+var nlcount = 0;
 for (;;) {
 var ch = input[this.cursor++];
 var next = input[this.cursor];
 if (ch === '\n' && !this.scanNewlines) {
 this.lineno++;
+nlcount++;
 } else if (ch === '/' && next === '*') {
+cstart = this.cursor;
+clineno = this.lineno;
 this.cursor++;
 for (;;) {
 ch = input[this.cursor++];
@@ -351,6 +360,14 @@ if (ch === '*') {
 next = input[this.cursor];
 if (next === '/') {
 this.cursor++;
+comment = {
+type: "BLOCK_COMMENT",
+nlcount: nlcount,
+start:cstart-1, end:this.cursor, lineno:clineno, endlineno: this.lineno,
+value: input.substring(cstart+1,this.cursor-2)
+}
+this.comments.push(comment);
+nlcount = 0;
 break;
 }
 } else if (ch === '\n') {
@@ -358,12 +375,29 @@ this.lineno++;
 }
 }
 } else if (ch === '/' && next === '/') {
+cstart = this.cursor;
 this.cursor++;
 for (;;) {
 ch = input[this.cursor++];
-if (ch === undefined)
+if (ch === undefined) {
+comment = {
+type: "LINE_COMMENT",
+start: cstart, end:this.cursor,
+lineno: this.lineno, nlcount: nlcount,
+value: input.substring(cstart+1,this.cursor-1)
+};
+this.comments.push(comment);
 return;
+}
 if (ch === '\n') {
+comment = {
+type: "LINE_COMMENT",
+start: cstart, end:this.cursor,
+lineno: this.lineno, nlcount: nlcount,
+value: input.substring(cstart+1,this.cursor-1)
+};
+this.comments.push(comment);
+nlcount = 0;
 this.lineno++;
 break;
 }
@@ -1679,13 +1713,9 @@ if (typeof module != 'undefined') {
 module.exports = exports;
 };
 (function() {
-var Node, Typenames, Types, exports, narcissus, parser, tokens, _;
-var __slice = Array.prototype.slice, __indexOf = Array.prototype.indexOf || function(item) {
-for (var i = 0, l = this.length; i < l; i++) {
-if (this[i] === item) return i;
-}
-return -1;
-};
+var Node, Typenames, Types, exports, narcissus, parser, tokens, _,
+__indexOf = Array.prototype.indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
+__slice = Array.prototype.slice;
 narcissus = this.Narcissus || require('./narcissus_packed');
 _ = this._ || require('underscore');
 tokens = narcissus.definitions.tokens;
@@ -1701,26 +1731,12 @@ Node.prototype.last = function() {
 return this.children[this.children.length - 1];
 };
 Node.prototype.walk = function(options, fn, parent, list) {
-if (parent == null) {
-parent = null;
-}
-if (list == null) {
-list = null;
-}
-if (parent) {
-fn(parent, this, list);
-}
-if (options.last) {
-if (this.last() != null) {
-this.last().walk(options, fn, this);
-}
-}
-if (this.thenPart != null) {
-this.thenPart.walk(options, fn, this, 'thenPart');
-}
-if (this.elsePart != null) {
-this.elsePart.walk(options, fn, this, 'elsePart');
-}
+if (parent == null) parent = null;
+if (list == null) list = null;
+if (parent) fn(parent, this, list);
+if (options.last) if (this.last() != null) this.last().walk(options, fn, this);
+if (this.thenPart != null) this.thenPart.walk(options, fn, this, 'thenPart');
+if (this.elsePart != null) this.elsePart.walk(options, fn, this, 'elsePart');
 if (this.cases) {
 return _.each(this.cases, function(item) {
 return item.statements.walk(options, fn, item, 'cases');
@@ -1728,28 +1744,25 @@ return item.statements.walk(options, fn, item, 'cases');
 }
 };
 Node.prototype.clone = function(hash) {
-var i, _ref;
+var i;
 for (i in this) {
-if (i === 'tokenizer' || i === 'length' || i === 'filename') {
-continue;
-}
-if ((_ref = hash[i]) != null) {
-_ref;
-} else {
-hash[i] = this[i];
-};
+if (i === 'tokenizer' || i === 'length' || i === 'filename') continue;
+if (hash[i] == null) hash[i] = this[i];
 }
 return new Node(this.tokenizer, hash);
 };
-Node.prototype.toHash = function() {
+Node.prototype.toHash = function(done) {
 var hash, i, toHash;
+if (done == null) done = [];
 hash = {};
 toHash = function(what) {
-if (!what) {
-return null;
-}
+if (!what) return null;
 if (what.toHash) {
-return what.toHash();
+if (__indexOf.call(done, what) >= 0) {
+return "--recursive " + what.id + "--";
+}
+what.id = done.push(what);
+return what.toHash(done);
 } else {
 return what;
 }
@@ -1757,15 +1770,11 @@ return what;
 hash.type = this.typeName();
 hash.src = this.src();
 for (i in this) {
-if (i === 'filename' || i === 'length' || i === 'type' || i === 'start' || i === 'end' || i === 'tokenizer' || i === 'lineno') {
+if (i === 'filename' || i === 'length' || i === 'type' || i === 'start' || i === 'end' || i === 'tokenizer') {
 continue;
 }
-if (typeof this[i] === 'function') {
-continue;
-}
-if (!this[i]) {
-continue;
-}
+if (typeof this[i] === 'function') continue;
+if (!this[i]) continue;
 if (this[i].constructor === Array) {
 hash[i] = _.map(this[i], function(item) {
 return toHash(item);
@@ -1817,18 +1826,11 @@ Types: Types,
 Typenames: Typenames,
 Node: Node
 };
-if (typeof module !== "undefined" && module !== null) {
-module.exports = exports;
-}
+if (typeof module !== "undefined" && module !== null) module.exports = exports;
 }).call(this);
 (function() {
-var Code, CoffeeScript, blockTrim, coffeescript_reserved, exports, isSingleLine, ltrim, p, paren, rtrim, strEscape, strRepeat, trim, truthy, unreserve, unshift, word;
-var __indexOf = Array.prototype.indexOf || function(item) {
-for (var i = 0, l = this.length; i < l; i++) {
-if (this[i] === item) return i;
-}
-return -1;
-};
+var Code, CoffeeScript, blockTrim, coffeescript_reserved, exports, indentLines, isSingleLine, ltrim, p, paren, rtrim, strEscape, strRepeat, trim, truthy, unreserve, unshift, word,
+__indexOf = Array.prototype.indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 CoffeeScript = this.CoffeeScript || require('coffee-script');
 Code = (function() {
 function Code() {
@@ -1840,9 +1842,7 @@ return this;
 };
 Code.prototype.scope = function(str, level) {
 var indent;
-if (level == null) {
-level = 1;
-}
+if (level == null) level = 1;
 indent = strRepeat("  ", level);
 this.code = rtrim(this.code) + "\n";
 this.code += indent + rtrim(str).replace(/\n/g, "\n" + indent) + "\n";
@@ -1889,18 +1889,14 @@ isSingleLine = function(str) {
 return trim(str).indexOf("\n") === -1;
 };
 unshift = function(str) {
-var m1, m2, _results;
+var m1, m2;
 str = "" + str;
-_results = [];
 while (true) {
 m1 = str.match(/^/gm);
 m2 = str.match(/^ /gm);
-if (!m1 || !m2 || m1.length !== m2.length) {
-return str;
+if (!m1 || !m2 || m1.length !== m2.length) return str;
+str = str.replace(/^ /gm, '');
 }
-_results.push(str = str.replace(/^ /gm, ''));
-}
-return _results;
 };
 truthy = function(n) {
 return n.isA('true') || (n.isA('number') && parseFloat(n.src()) !== 0.0);
@@ -1922,9 +1918,7 @@ _ref = CoffeeScript.RESERVED;
 _results = [];
 for (_i = 0, _len = _ref.length; _i < _len; _i++) {
 word = _ref[_i];
-if (word !== 'undefined') {
-_results.push(word);
-}
+if (word !== 'undefined') _results.push(word);
 }
 return _results;
 })();
@@ -1935,6 +1929,9 @@ return "" + str + "_";
 } else {
 return "" + str;
 }
+};
+indentLines = function(indent, lines) {
+return indent + lines.replace(/\n/g, "\n" + indent);
 };
 this.Js2coffeeHelpers = exports = {
 Code: Code,
@@ -1949,26 +1946,29 @@ ltrim: ltrim,
 rtrim: rtrim,
 strRepeat: strRepeat,
 paren: paren,
-truthy: truthy
+truthy: truthy,
+indentLines: indentLines
 };
-if (typeof module !== "undefined" && module !== null) {
-module.exports = exports;
-}
+if (typeof module !== "undefined" && module !== null) module.exports = exports;
 }).call(this);
 (function() {
-var Builder, Code, Node, Transformer, Typenames, Types, UnsupportedError, blockTrim, buildCoffee, exports, isSingleLine, ltrim, p, paren, parser, rtrim, strEscape, strRepeat, trim, truthy, unreserve, unshift, _, _ref, _ref2;
-var __slice = Array.prototype.slice, __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; }, __hasProp = Object.prototype.hasOwnProperty;
+var Builder, Code, Node, Transformer, Typenames, Types, UnsupportedError, blockTrim, buildCoffee, exports, indentLines, isSingleLine, ltrim, p, paren, parser, rtrim, strEscape, strRepeat, trim, truthy, unreserve, unshift, _, _ref, _ref2,
+__indexOf = Array.prototype.indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
+__slice = Array.prototype.slice,
+__hasProp = Object.prototype.hasOwnProperty;
 parser = (this.Narcissus || require('./narcissus_packed')).parser;
 _ = this._ || require('underscore');
 _ref = this.NodeExt || require('./node_ext'), Types = _ref.Types, Typenames = _ref.Typenames, Node = _ref.Node;
-_ref2 = this.Js2coffeeHelpers || require('./helpers'), Code = _ref2.Code, p = _ref2.p, strEscape = _ref2.strEscape, unreserve = _ref2.unreserve, unshift = _ref2.unshift, isSingleLine = _ref2.isSingleLine, trim = _ref2.trim, blockTrim = _ref2.blockTrim, ltrim = _ref2.ltrim, rtrim = _ref2.rtrim, strRepeat = _ref2.strRepeat, paren = _ref2.paren, truthy = _ref2.truthy;
-buildCoffee = function(str) {
-var builder, line, output, scriptNode;
+_ref2 = this.Js2coffeeHelpers || require('./helpers'), Code = _ref2.Code, p = _ref2.p, strEscape = _ref2.strEscape, unreserve = _ref2.unreserve, unshift = _ref2.unshift, isSingleLine = _ref2.isSingleLine, trim = _ref2.trim, blockTrim = _ref2.blockTrim, ltrim = _ref2.ltrim, rtrim = _ref2.rtrim, strRepeat = _ref2.strRepeat, paren = _ref2.paren, truthy = _ref2.truthy, indentLines = _ref2.indentLines;
+buildCoffee = function(str, opts) {
+var builder, comments, indent, keepLineNumbers, l, line, minline, output, precomments, res, scriptNode, srclines, text, _i, _len, _ref3;
+if (opts == null) opts = {};
 str = str.replace(/\r/g, '');
 str += "\n";
-builder = new Builder;
+builder = new Builder(opts);
 scriptNode = parser.parse(str);
 output = trim(builder.build(scriptNode));
+if (opts.no_comments) {
 return ((function() {
 var _i, _len, _ref3, _results;
 _ref3 = output.split('\n');
@@ -1979,20 +1979,152 @@ _results.push(rtrim(line));
 }
 return _results;
 })()).join('\n');
+} else {
+keepLineNumbers = opts.show_src_lineno;
+res = [];
+_ref3 = output.split("\n");
+for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
+l = _ref3[_i];
+srclines = [];
+text = l.replace(/\uFEFE([0-9]+).*?\uFEFE/g, function(m, g) {
+srclines.push(parseInt(g));
+return "";
+});
+srclines = _.sortBy(_.uniq(srclines), function(i) {
+return i;
+});
+text = rtrim(text);
+indent = text.match(/^\s*/);
+if (srclines.length > 0) {
+minline = _.last(srclines);
+precomments = builder.commentsNotDoneTo(minline);
+if (precomments) res.push(indentLines(indent, precomments));
+}
+if (text) {
+if (keepLineNumbers) text = text + "#" + srclines.join(",") + "#  ";
+res.push(rtrim(text + " " + ltrim(builder.lineComments(srclines))));
+} else {
+res.push("");
+}
+}
+comments = builder.commentsNotDoneTo(1e10);
+if (comments) res.push(comments);
+return res.join("\n");
+}
 };
 Builder = (function() {
-function Builder() {
+function Builder(options) {
+this.options = options != null ? options : {};
 this.transformer = new Transformer;
 }
+Builder.prototype.l = function(n) {
+if (this.options.no_comments) return '';
+if (n && n.lineno) {
+return "\uFEFE" + n.lineno + "\uFEFE";
+} else {
+return "";
+}
+};
+Builder.prototype.makeComment = function(comment) {
+var c, line;
+if (comment.type === "BLOCK_COMMENT") {
+c = comment.value.split("\n");
+if (c.length > 0 && c[0].length > 0 && c[0][0] === "*") {
+c = (function() {
+var _i, _len, _results;
+_results = [];
+for (_i = 0, _len = c.length; _i < _len; _i++) {
+line = c[_i];
+_results.push(line.replace(/^[\s\*]*/, ''));
+}
+return _results;
+})();
+c = (function() {
+var _i, _len, _results;
+_results = [];
+for (_i = 0, _len = c.length; _i < _len; _i++) {
+line = c[_i];
+_results.push(line.replace(/[\s]*$/, ''));
+}
+return _results;
+})();
+while (c.length > 0 && c[0].length === 0) {
+c.shift();
+}
+while (c.length > 0 && c[c.length - 1].length === 0) {
+c.pop();
+}
+c.unshift('###');
+c.push('###');
+} else {
+c = (function() {
+var _i, _len, _results;
+_results = [];
+for (_i = 0, _len = c.length; _i < _len; _i++) {
+line = c[_i];
+_results.push("#" + line);
+}
+return _results;
+})();
+}
+} else {
+c = ['#' + comment.value];
+}
+if (comment.nlcount > 0) c.unshift('');
+return c.join('\n');
+};
+Builder.prototype.commentsNotDoneTo = function(lineno) {
+var c, res;
+res = [];
+while (true) {
+if (this.comments.length === 0) break;
+c = this.comments[0];
+if (c.lineno < lineno) {
+res.push(this.makeComment(c));
+this.comments.shift();
+continue;
+}
+break;
+}
+return res.join("\n");
+};
+Builder.prototype.lineComments = function(linenos) {
+var c, selection;
+selection = (function() {
+var _i, _len, _ref3, _ref4, _results;
+_ref3 = this.comments;
+_results = [];
+for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
+c = _ref3[_i];
+if (_ref4 = c.lineno, __indexOf.call(linenos, _ref4) >= 0) {
+_results.push(c);
+}
+}
+return _results;
+}).call(this);
+this.comments = _.difference(this.comments, selection);
+return ((function() {
+var _i, _len, _results;
+_results = [];
+for (_i = 0, _len = selection.length; _i < _len; _i++) {
+c = selection[_i];
+_results.push(this.makeComment(c));
+}
+return _results;
+}).call(this)).join("\n");
+};
 Builder.prototype.build = function() {
 var args, fn, name, node, out;
 args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
 node = args[0];
+if (!(this.comments != null)) {
+this.comments = _.sortBy(node.tokenizer.comments, function(n) {
+return n.start;
+});
+}
 this.transform(node);
 name = 'other';
-if (node !== void 0 && node.typeName) {
-name = node.typeName();
-}
+if (node !== void 0 && node.typeName) name = node.typeName();
 fn = this[name] || this.other;
 out = fn.apply(this, args);
 if (node.parenthesized) {
@@ -2008,9 +2140,7 @@ return this.transformer.transform.apply(this.transformer, args);
 };
 Builder.prototype.body = function(node, opts) {
 var str;
-if (opts == null) {
-opts = {};
-}
+if (opts == null) opts = {};
 str = this.build(node, opts);
 str = blockTrim(str);
 str = unshift(str);
@@ -2021,60 +2151,59 @@ return "";
 }
 };
 Builder.prototype['script'] = function(n, opts) {
-var c;
-if (opts == null) {
-opts = {};
-}
+var c,
+_this = this;
+if (opts == null) opts = {};
 c = new Code;
-_.each(n.functions, __bind(function(item) {
-return c.add(this.build(item));
-}, this));
-_.each(n.nonfunctions, __bind(function(item) {
-return c.add(this.build(item));
-}, this));
+_.each(n.functions, function(item) {
+return c.add(_this.build(item));
+});
+_.each(n.nonfunctions, function(item) {
+return c.add(_this.build(item));
+});
 return c.toString();
 };
 Builder.prototype['property_identifier'] = function(n) {
 var str;
 str = n.value.toString();
 if (str.match(/^([_\$a-z][_\$a-z0-9]*)$/i) || str.match(/^[0-9]+$/i)) {
-return str;
+return this.l(n) + str;
 } else {
-return strEscape(str);
+return this.l(n) + strEscape(str);
 }
 };
 Builder.prototype['identifier'] = function(n) {
 if (n.value === 'undefined') {
-return '`undefined`';
+return this.l(n) + '`undefined`';
 } else if (n.property_accessor) {
-return n.value.toString();
+return this.l(n) + n.value.toString();
 } else {
-return unreserve(n.value.toString());
+return this.l(n) + unreserve(n.value.toString());
 }
 };
 Builder.prototype['number'] = function(n) {
-return "" + (n.src());
+return this.l(n) + ("" + (n.src()));
 };
 Builder.prototype['id'] = function(n) {
 if (n.property_accessor) {
-return n;
+return this.l(n) + n;
 } else {
-return unreserve(n);
+return this.l(n) + unreserve(n);
 }
 };
 Builder.prototype['id_param'] = function(n) {
 var _ref3;
 if ((_ref3 = n.toString()) === 'undefined') {
-return "" + n + "_";
+return this.l(n) + ("" + n + "_");
 } else {
-return this.id(n);
+return this.l(n) + this.id(n);
 }
 };
 Builder.prototype['return'] = function(n) {
 if (!(n.value != null)) {
-return "return\n";
+return this.l(n) + "return\n";
 } else {
-return "return " + (this.build(n.value)) + "\n";
+return this.l(n) + ("return " + (this.build(n.value)) + "\n");
 }
 };
 Builder.prototype[';'] = function(n) {
@@ -2093,10 +2222,10 @@ return this.build(n.expression) + "\n";
 }
 };
 Builder.prototype['new'] = function(n) {
-return "new " + (this.build(n.left()));
+return this.l(n) + ("new " + (this.build(n.left())));
 };
 Builder.prototype['new_with_args'] = function(n) {
-return "new " + (this.build(n.left())) + "(" + (this.build(n.right())) + ")";
+return this.l(n) + ("new " + (this.build(n.left())) + "(" + (this.build(n.right())) + ")");
 };
 Builder.prototype['unary_plus'] = function(n) {
 return "+" + (this.build(n.left()));
@@ -2105,34 +2234,34 @@ Builder.prototype['unary_minus'] = function(n) {
 return "-" + (this.build(n.left()));
 };
 Builder.prototype['this'] = function(n) {
-return 'this';
+return this.l(n) + 'this';
 };
 Builder.prototype['null'] = function(n) {
-return 'null';
+return this.l(n) + 'null';
 };
 Builder.prototype['true'] = function(n) {
-return 'true';
+return this.l(n) + 'true';
 };
 Builder.prototype['false'] = function(n) {
-return 'false';
+return this.l(n) + 'false';
 };
 Builder.prototype['void'] = function(n) {
-return 'undefined';
+return this.l(n) + 'undefined';
 };
 Builder.prototype['debugger'] = function(n) {
-return "debugger\n";
+return this.l(n) + "debugger\n";
 };
 Builder.prototype['break'] = function(n) {
-return "break\n";
+return this.l(n) + "break\n";
 };
 Builder.prototype['continue'] = function(n) {
-return "continue\n";
+return this.l(n) + "continue\n";
 };
 Builder.prototype['~'] = function(n) {
 return "~" + (this.build(n.left()));
 };
 Builder.prototype['typeof'] = function(n) {
-return "typeof " + (this.build(n.left()));
+return this.l(n) + ("typeof " + (this.build(n.left())));
 };
 Builder.prototype['index'] = function(n) {
 var right;
@@ -2142,10 +2271,10 @@ return child.typeName() === 'object_init' && child.children.length > 1;
 })) {
 right = "{" + right + "}";
 }
-return "" + (this.build(n.left())) + "[" + right + "]";
+return this.l(n) + ("" + (this.build(n.left())) + "[" + right + "]");
 };
 Builder.prototype['throw'] = function(n) {
-return "throw " + (this.build(n.exception));
+return this.l(n) + ("throw " + (this.build(n.exception)));
 };
 Builder.prototype['!'] = function(n) {
 var negations, target;
@@ -2158,7 +2287,7 @@ if ((negations & 1) && target.isA('==', '!=', '===', '!==', 'in', 'instanceof'))
 target.negated = !target.negated;
 return this.build(target);
 }
-return "" + (negations & 1 ? 'not ' : '!!') + (this.build(target));
+return this.l(n) + ("" + (negations & 1 ? 'not ' : '!!') + (this.build(target)));
 };
 Builder.prototype["in"] = function(n) {
 return this.binary_operator(n, 'of');
@@ -2243,10 +2372,8 @@ v = INVERSIONS[k];
 INVERSIONS[v] = k;
 }
 return function(n, sign) {
-if (n.negated) {
-sign = INVERSIONS[sign];
-}
-return "" + (this.build(n.left())) + " " + sign + " " + (this.build(n.right()));
+if (n.negated) sign = INVERSIONS[sign];
+return this.l(n) + ("" + (this.build(n.left())) + " " + sign + " " + (this.build(n.right())));
 };
 })();
 Builder.prototype['--'] = function(n) {
@@ -2257,21 +2384,22 @@ return this.increment_decrement(n, '++');
 };
 Builder.prototype['increment_decrement'] = function(n, sign) {
 if (n.postfix) {
-return "" + (this.build(n.left())) + sign;
+return this.l(n) + ("" + (this.build(n.left())) + sign);
 } else {
-return "" + sign + (this.build(n.left()));
+return this.l(n) + ("" + sign + (this.build(n.left())));
 }
 };
 Builder.prototype['='] = function(n) {
 var sign;
 sign = n.assignOp != null ? Types[n.assignOp] + '=' : '=';
-return "" + (this.build(n.left())) + " " + sign + " " + (this.build(n.right()));
+return this.l(n) + ("" + (this.build(n.left())) + " " + sign + " " + (this.build(n.right())));
 };
 Builder.prototype[','] = function(n) {
-var list;
-list = _.map(n.children, __bind(function(item) {
-return this.build(item) + "\n";
-}, this));
+var list,
+_this = this;
+list = _.map(n.children, function(item) {
+return _this.l(item) + _this.build(item) + "\n";
+});
 return list.join('');
 };
 Builder.prototype['regexp'] = function(n) {
@@ -2282,53 +2410,51 @@ flag = m[2];
 begins_with = value[0];
 if (begins_with === ' ' || begins_with === '=') {
 if (flag.length > 0) {
-return "RegExp(" + (strEscape(value)) + ", \"" + flag + "\")";
+return this.l(n) + ("RegExp(" + (strEscape(value)) + ", \"" + flag + "\")");
 } else {
-return "RegExp(" + (strEscape(value)) + ")";
+return this.l(n) + ("RegExp(" + (strEscape(value)) + ")");
 }
 } else {
-return "/" + value + "/" + flag;
+return this.l(n) + ("/" + value + "/" + flag);
 }
 };
 Builder.prototype['string'] = function(n) {
-return strEscape(n.value);
+return this.l(n) + strEscape(n.value);
 };
 Builder.prototype['call'] = function(n) {
 if (n.right().children.length === 0) {
-return "" + (this.build(n.left())) + "()";
+return ("" + (this.build(n.left())) + "()") + this.l(n);
 } else {
-return "" + (this.build(n.left())) + "(" + (this.build(n.right())) + ")";
+return ("" + (this.build(n.left())) + "(" + (this.build(n.right())) + ")") + this.l(n);
 }
 };
 Builder.prototype['call_statement'] = function(n) {
 var left;
 left = this.build(n.left());
-if (n.left().isA('function')) {
-left = paren(left);
-}
+if (n.left().isA('function')) left = paren(left);
 if (n.right().children.length === 0) {
-return "" + left + "()";
+return ("" + left + "()") + this.l(n);
 } else {
-return "" + left + " " + (this.build(n.right()));
+return ("" + left + " " + (this.build(n.right()))) + this.l(n);
 }
 };
 Builder.prototype['list'] = function(n) {
-var list;
-list = _.map(n.children, __bind(function(item) {
-if (n.children.length > 1) {
-item.is_list_element = true;
-}
-return this.build(item);
-}, this));
-return list.join(", ");
+var list,
+_this = this;
+list = _.map(n.children, function(item) {
+if (n.children.length > 1) item.is_list_element = true;
+return _this.build(item);
+});
+return this.l(n) + list.join(", ");
 };
 Builder.prototype['delete'] = function(n) {
-var ids;
-ids = _.map(n.children, __bind(function(el) {
-return this.build(el);
-}, this));
+var ids,
+_this = this;
+ids = _.map(n.children, function(el) {
+return _this.build(el);
+});
 ids = ids.join(', ');
-return "delete " + ids + "\n";
+return this.l(n) + ("delete " + ids + "\n");
 };
 Builder.prototype['.'] = function(n) {
 var left, right, right_obj;
@@ -2337,37 +2463,36 @@ right_obj = n.right();
 right_obj.property_accessor = true;
 right = this.build(right_obj);
 if (n.isThis && n.isPrototype) {
-return "@::";
+return this.l(n) + "@::";
 } else if (n.isThis) {
-return "@" + right;
+return this.l(n) + ("@" + right);
 } else if (n.isPrototype) {
-return "" + left + "::";
+return this.l(n) + ("" + left + "::");
 } else if (n.left().isPrototype) {
-return "" + left + right;
+return this.l(n) + ("" + left + right);
 } else {
-return "" + left + "." + right;
+return this.l(n) + ("" + left + "." + right);
 }
 };
 Builder.prototype['try'] = function(n) {
-var c;
+var c,
+_this = this;
 c = new Code;
 c.add('try');
 c.scope(this.body(n.tryBlock));
-_.each(n.catchClauses, __bind(function(clause) {
-return c.add(this.build(clause));
-}, this));
+_.each(n.catchClauses, function(clause) {
+return c.add(_this.build(clause));
+});
 if (n.finallyBlock != null) {
 c.add("finally");
 c.scope(this.body(n.finallyBlock));
 }
-return c;
+return this.l(n) + c;
 };
 Builder.prototype['catch'] = function(n) {
 var body_, c;
 body_ = this.body(n.block);
-if (trim(body_).length === 0) {
-return '';
-}
+if (trim(body_).length === 0) return '';
 c = new Code;
 if (n.varName != null) {
 c.add("catch " + n.varName);
@@ -2375,34 +2500,30 @@ c.add("catch " + n.varName);
 c.add('catch');
 }
 c.scope(this.body(n.block));
-return c;
+return this.l(n) + c;
 };
 Builder.prototype['?'] = function(n) {
-return "(if " + (this.build(n.left())) + " then " + (this.build(n.children[1])) + " else " + (this.build(n.children[2])) + ")";
+return this.l(n) + ("(if " + (this.build(n.left())) + " then " + (this.build(n.children[1])) + " else " + (this.build(n.children[2])) + ")");
 };
 Builder.prototype['for'] = function(n) {
 var c;
 c = new Code;
-if (n.setup != null) {
-c.add("" + (this.build(n.setup)) + "\n");
-}
+if (n.setup != null) c.add("" + (this.build(n.setup)) + "\n");
 if (n.condition != null) {
 c.add("while " + (this.build(n.condition)) + "\n");
 } else {
 c.add("loop");
 }
 c.scope(this.body(n.body));
-if (n.update != null) {
-c.scope(this.body(n.update));
-}
-return c;
+if (n.update != null) c.scope(this.body(n.update));
+return this.l(n) + c;
 };
 Builder.prototype['for_in'] = function(n) {
 var c;
 c = new Code;
 c.add("for " + (this.build(n.iterator)) + " of " + (this.build(n.object)));
 c.scope(this.body(n.body));
-return c;
+return this.l(n) + c;
 };
 Builder.prototype['while'] = function(n) {
 var body_, c, keyword, statement;
@@ -2420,7 +2541,7 @@ c.add("" + (trim(body_)) + "  " + statement + "\n");
 c.add(statement);
 c.scope(body_);
 }
-return c;
+return this.l(n) + c;
 };
 Builder.prototype['do'] = function(n) {
 var c;
@@ -2430,7 +2551,7 @@ c.scope(this.body(n.body));
 if (n.condition != null) {
 c.scope("break unless " + (this.build(n.condition)));
 }
-return c;
+return this.l(n) + c;
 };
 Builder.prototype['if'] = function(n) {
 var body_, c, keyword;
@@ -2450,48 +2571,49 @@ if (n.elsePart != null) {
 if (n.elsePart.typeName() === 'if') {
 c.add("else " + (this.build(n.elsePart).toString()));
 } else {
-c.add("else\n");
+c.add(this.l(n.elsePart) + "else\n");
 c.scope(this.body(n.elsePart));
 }
 }
 }
-return c;
+return this.l(n) + c;
 };
 Builder.prototype['switch'] = function(n) {
-var c, fall_through;
+var c, fall_through,
+_this = this;
 c = new Code;
 c.add("switch " + (this.build(n.discriminant)) + "\n");
 fall_through = false;
-_.each(n.cases, __bind(function(item) {
+_.each(n.cases, function(item) {
 var first;
 if (item.value === 'default') {
-c.scope("else");
+c.scope(_this.l(item) + "else");
 } else {
 if (fall_through === true) {
-c.add(", " + (this.build(item.caseLabel)) + "\n");
+c.add(_this.l(item) + (", " + (_this.build(item.caseLabel)) + "\n"));
 } else {
-c.add("  when " + (this.build(item.caseLabel)));
+c.add(_this.l(item) + ("  when " + (_this.build(item.caseLabel))));
 }
 }
-if (this.body(item.statements).length === 0) {
+if (_this.body(item.statements).length === 0) {
 fall_through = true;
 } else {
 fall_through = false;
 c.add("\n");
-c.scope(this.body(item.statements), 2);
+c.scope(_this.body(item.statements), 2);
 }
 return first = false;
-}, this));
-return c;
+});
+return this.l(n) + c;
 };
 Builder.prototype['existence_check'] = function(n) {
-return "" + (this.build(n.left())) + "?";
+return this.l(n) + ("" + (this.build(n.left())) + "?");
 };
 Builder.prototype['array_init'] = function(n) {
 if (n.children.length === 0) {
-return "[]";
+return this.l(n) + "[]";
 } else {
-return "[ " + (this.list(n)) + " ]";
+return this.l(n) + ("[" + (this.list(n)) + "]");
 }
 };
 Builder.prototype['property_init'] = function(n) {
@@ -2502,39 +2624,35 @@ right.is_property_value = true;
 return "" + (this.property_identifier(left)) + ": " + (this.build(right));
 };
 Builder.prototype['object_init'] = function(n, options) {
-var c, list;
-if (options == null) {
-options = {};
-}
+var c, list,
+_this = this;
+if (options == null) options = {};
 if (n.children.length === 0) {
-return "{}";
+return this.l(n) + "{}";
 } else if (n.children.length === 1 && !(n.is_property_value || n.is_list_element)) {
 return this.build(n.children[0]);
 } else {
-list = _.map(n.children, __bind(function(item) {
-return this.build(item);
-}, this));
-c = new Code;
+list = _.map(n.children, function(item) {
+return _this.build(item);
+});
+c = new Code(this, n);
 c.scope(list.join("\n"));
-if (options.brackets != null) {
-c = "{" + c + "}";
-}
+if (options.brackets != null) c = "{" + c + "}";
 return c;
 }
 };
 Builder.prototype['function'] = function(n) {
-var body, c, params;
+var body, c, params,
+_this = this;
 c = new Code;
-params = _.map(n.params, __bind(function(str) {
+params = _.map(n.params, function(str) {
 if (str.constructor === String) {
-return this.id_param(str);
+return _this.id_param(str);
 } else {
-return this.build(str);
+return _this.build(str);
 }
-}, this));
-if (n.name) {
-c.add("" + n.name + " = ");
-}
+});
+if (n.name) c.add("" + n.name + " = ");
 if (n.params.length > 0) {
 c.add("(" + (params.join(', ')) + ") ->");
 } else {
@@ -2546,14 +2664,15 @@ c.scope(body);
 } else {
 c.add("\n");
 }
-return c;
+return this.l(n) + c;
 };
 Builder.prototype['var'] = function(n) {
-var list;
-list = _.map(n.children, __bind(function(item) {
-return "" + (unreserve(item.value)) + " = " + (item.initializer != null ? this.build(item.initializer) : 'undefined');
-}, this));
-return _.compact(list).join("\n") + "\n";
+var list,
+_this = this;
+list = _.map(n.children, function(item) {
+return "" + (unreserve(item.value)) + " = " + (item.initializer != null ? _this.build(item.initializer) : 'undefined');
+});
+return this.l(n) + _.compact(list).join("\n") + "\n";
 };
 Builder.prototype['other'] = function(n) {
 return this.unsupported(n, "" + (n.typeName()) + " is not supported yet");
@@ -2586,9 +2705,7 @@ Transformer.prototype.transform = function() {
 var args, fn, node, type;
 args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
 node = args[0];
-if (node.transformed != null) {
-return;
-}
+if (node.transformed != null) return;
 type = node.typeName();
 fn = this[type];
 if (fn) {
@@ -2597,18 +2714,19 @@ return node.transformed = true;
 }
 };
 Transformer.prototype['script'] = function(n) {
-var last;
+var last,
+_this = this;
 n.functions = [];
 n.nonfunctions = [];
-_.each(n.children, __bind(function(item) {
+_.each(n.children, function(item) {
 if (item.isA('function')) {
 return n.functions.push(item);
 } else {
 return n.nonfunctions.push(item);
 }
-}, this));
+});
 last = null;
-return _.each(n.nonfunctions, __bind(function(item) {
+return _.each(n.nonfunctions, function(item) {
 var expr;
 if (item.expression != null) {
 expr = item.expression;
@@ -2619,7 +2737,7 @@ item.parenthesized = false;
 }
 return last = expr;
 }
-}, this));
+});
 };
 Transformer.prototype['.'] = function(n) {
 n.isThis = n.left().isA('this');
@@ -2649,14 +2767,15 @@ return lastNode.expression = lastNode.value;
 });
 };
 Transformer.prototype['switch'] = function(n) {
-return _.each(n.cases, __bind(function(item) {
+var _this = this;
+return _.each(n.cases, function(item) {
 var block, ch, _ref3;
 block = item.statements;
 ch = block.children;
 if ((_ref3 = block.last()) != null ? _ref3.isA('break') : void 0) {
 return delete ch[ch.length - 1];
 }
-}, this));
+});
 };
 Transformer.prototype['call_statement'] = function(n) {
 if (n.children[1]) {
@@ -2740,11 +2859,9 @@ return this.message;
 return UnsupportedError;
 })();
 this.Js2coffee = exports = {
-version: '0.1.2',
+VERSION: '0.2.0',
 build: buildCoffee,
 UnsupportedError: UnsupportedError
 };
-if (typeof module !== "undefined" && module !== null) {
-module.exports = exports;
-}
+if (typeof module !== "undefined" && module !== null) module.exports = exports;
 }).call(this);

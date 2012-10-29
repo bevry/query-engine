@@ -127,7 +127,7 @@ util =
 		valueExists = typeof value isnt 'undefined'
 		if valueExists
 			if util.isArray(value)
-				result = value
+				result = value.slice()
 			else if util.isObject(value)
 				for own key,item of value
 					result.push(item)
@@ -146,7 +146,7 @@ util =
 		valueExists = typeof value isnt 'undefined'
 		if valueExists
 			if util.isArray(value)
-				result = value
+				result = value.slice()
 			else if util.isObject(value)
 				for own key,item of value
 					obj = {}
@@ -273,27 +273,26 @@ class QueryCollection extends Backbone.Collection
 
 	# Constructor
 	initialize: (models,options) ->
-		# Bindings
-		_.bindAll(@, 'onChange', 'onParentChange', 'onParentRemove', 'onParentAdd', 'onParentReset')
+		# Prepare
+		me = @
+		@options ?= {}
+		_.extend(@options, options)
 
-		# Defaults
-		@options = _.extend({}, @options or {}, options or {})
-		@options.filters = _.extend({}, @options.filters or {})
-		@options.queries = _.extend({}, @options.queries or {})
-		@options.pills = _.extend({}, @options.pills or {})
-		@options.paging = _.extend({}, @options.paging or {})
-		@options.searchString or= null
+		# Proxy Criteria
+		for own key,value of Criteria::
+			@[key] ?= value
 
-		# Initialise filters, queries and pills if we have them
-		@setFilters(@options.filters)
-		@setQueries(@options.queries)
-		@setPills(@options.pills)
-		@setPaging(@options.paging)
-		@setSearchString(@options.searchString)  if @options.searchString?
-		@setComparator(@comparator)  if @comparator?  # @options.comparator is shortcutted here by Backbone
+		# Comparator
+		@setComparator(@comparator)  if @comparator?
+		# @options.comparator is shortcutted here by Backbone
 
+		# Criteria
+		@applyCriteria(options)
+
+		# Parent Collection
 		# No need to set parent collection, as if it is an option, it has already been set
 
+		# Live
 		# Initliase live events if we use them
 		@live()
 
@@ -302,172 +301,41 @@ class QueryCollection extends Backbone.Collection
 
 
 	# ---------------------------------
-	# Filters: Getters and Setters
+	# Comparator: Getters and Setters
 
-	# Get Filters
-	getFilter: (key) ->
-		@options.filters[key]
+	# Get Comparator
+	getComparator: ->
+		return @comparator
 
-	# Get Filters
-	getFilters: ->
-		@options.filters
+	# Set Comparator
+	setComparator: (comparator) ->
+		# Prepare comparator
+		comparator = util.generateComparator(comparator)
 
-	# Set Filters
-	setFilters: (filters) ->
-		filters or= {}
-		for own key,value of filters
-			@setFilter(key,value)
-		@
-
-	# Set Filter
-	setFilter: (name,value) ->
-		# Check we have been called with both arguments
-		throw new Error('QueryCollection::setFilter was called without both arguments')  if typeof value is 'undefined'
-
-		# Prepare
-		filters = @options.filters
-
-		# Apply or delete the value
-		if value?
-			filters[name] = value
-		else if filters[name]?
-			delete filters[name]
+		# Apply it
+		@comparator = comparator
 
 		# Chain
 		@
-
-
-	# ---------------------------------
-	# Queries: Getters and Setters
-
-	# Get Query
-	getQuery: (key) ->
-		@options.queries[key]
-
-	# Get Queries
-	getQueries: ->
-		@options.queries
-
-	# Set Queries
-	setQueries: (queries) ->
-		queries or= {}
-		for own key,value of queries
-			@setQuery(key,value)
-		@
-
-	# Set Query
-	setQuery: (name,value) ->
-		# Check we have been called with both arguments
-		throw new Error('QueryCollection::setQuery was called without both arguments')  if typeof value is 'undefined'
-
-		# Prepare
-		queries = @options.queries
-
-		# Apply or delete the value
-		if value?
-			value = new Query(value)  unless (value instanceof Query)
-			queries[name] = value
-		else if queries[name]?
-			delete queries[name]
-
-		# Chain
-		@
-
-
-	# ---------------------------------
-	# Pills: Getters and Setters
-
-	# Get Pill
-	getPill: (key) ->
-		@options.pills[key]
-
-	# Get Pills
-	getPills: ->
-		@options.pills
-
-	# Set Pills
-	setPills: (pills) ->
-		pills or= {}
-		for own key,value of pills
-			@setPill(key,value)
-		@
-
-	# Set Pill
-	setPill: (name,value) ->
-		# Check we have been called with both arguments
-		throw new Error('QueryCollection::setPill was called without both arguments')  if typeof value is 'undefined'
-
-		# Prepare
-		pills = @options.pills
-		searchString = @options.searchString
-
-		# Apply or delete the value
-		if value?
-			value = new Pill(value)  unless (value instanceof Pill)
-			if searchString
-				value.setSearchString(searchString)
-			pills[name] = value
-		else if pills[name]?
-			delete pills[name]
-
-		# Chain
-		@
-
-
-	# ---------------------------------
-	# Search String: Getters and Setters
-
-	# Get Cleaned Search String
-	getCleanedSearchString: ->
-		@options.cleanedSearchString
-
-	# Get Search String
-	getSearchString: ->
-		@options.searchString
-
-	# Set Search String
-	setSearchString: (searchString) ->
-		# Prepare
-		pills = @options.pills
-		cleanedSearchString = searchString
-
-		# Apply the search string to each of our pills
-		# and for each applicable pill, clean up our search string
-		_.each pills, (pill,pillName) ->
-			cleanedSearchString = pill.setSearchString(cleanedSearchString)
-			return true
-
-		# Apply
-		@options.searchString = searchString
-		@options.cleanedSearchString = cleanedSearchString
-
-		# Chain
-		@
-
-	# ---------------------------------
-	# Paging: Getters and Setters
-
-	# Get Paging
-	getPaging: ->
-		@options.paging
-
-	# Set Paging
-	setPaging: (paging) ->
-		# Prepare
-		paging = _.extend(@getPaging(), paging or {})
-		paging.page or= null
-		paging.limit or= null
-		paging.offset or= null
-
-		# Apply paging
-		@options.paging = paging
-
-		# Chain
-		@
-
 
 	# ---------------------------------
 	# Parent Collection: Getters and Setters
+
+	# Create Child Collection
+	createChildCollection: (models,options) ->
+		options or= {}
+		options.parentCollection = @
+		options.collection ?= @collection or QueryCollection
+		options.comparator ?= options.collection::comparator or @comparator
+		collection = new (options.collection)(models,options)
+		return collection
+
+	# Create Live Child Collection
+	createLiveChildCollection: (models,options) ->
+		options or= {}
+		options.live = true
+		collection = @createChildCollection(models,options)
+		return collection
 
 	# Has Parent Collection
 	hasParentCollection: ->
@@ -538,17 +406,6 @@ class QueryCollection extends Backbone.Collection
 	# ---------------------------------
 	# Sorting and Paging
 
-	# Set Comparator
-	setComparator: (comparator) ->
-		# Prepare comparator
-		comparator = util.generateComparator(comparator)
-
-		# Apply it
-		@comparator = comparator
-
-		# Chain
-		@
-
 	# Sort Collection
 	# Sorts our current collection by our comparator
 	sortCollection: (comparator) ->
@@ -556,10 +413,12 @@ class QueryCollection extends Backbone.Collection
 		if comparator
 			comparator = util.generateComparator(comparator)
 			@models.sort(comparator)
-		else if @comparator
-			@models.sort(@comparator)
 		else
-			throw new Error('You need a comparator to sort')
+			comparator = @getComparator()
+			if comparator
+				@models.sort(comparator)
+			else
+				throw new Error('You need a comparator to sort')
 
 		# Chain
 		return @
@@ -574,86 +433,121 @@ class QueryCollection extends Backbone.Collection
 		if comparator
 			comparator = util.generateComparator(comparator)
 			arr.sort(comparator)
-		else if @comparator
-			arr.sort(@comparator)
 		else
-			throw new Error('You need a comparator to sort')
+			comparator = @getComparator()
+			if comparator
+				arr.sort(comparator)
+			else
+				throw new Error('You need a comparator to sort')
 
 		# Return sorted array
 		return arr
 
-	# Query
-	# Reset our collection with the new rules that we are using
-	query: (paging) ->
+	# Find All
+	findAll: (args...) ->
 		# Prepare
-		me = @
-		models = []
-		collection = @getParentCollection() or @
-		paging or= @getPaging()
+		if args.length
+			if args.length is 1 and args[0] instanceof Criteria
+				criteria = args[0].options
+			else
+				[query,comparator,paging] = args
+				criteria = {comparator, paging, queries:find:query}
 
-		# Page our models
-		start = paging.offset or 0
-		if paging.limit? and paging.limit > 0
-			start = start + paging.limit * ((paging.page or 1) - 1)
-			finish = start + paging.limit
+		# Create child collection
+		collection = @createChildCollection([],criteria).query()
 
-		# Cycle through the parent collection finding passing models
-		collection.each (model) ->
-			pass = me.test(model)
-			if pass
-				models.push(model)
+		# Return
+		return collection
 
-		# Page our models
-		start = paging.offset or 0
-		if paging.limit? and paging.limit > 0
-			start = start + paging.limit * ((paging.page or 1) - 1)
-			finish = start + paging.limit
-			models = models[start...finish]
+	# Find All Live
+	findAllLive: (args...) ->
+		# Prepare
+		if args.length
+			if args.length is 1 and args[0] instanceof Criteria
+				criteria = args[0].options
+			else
+				[query,comparator,paging] = args
+				criteria = {comparator, paging, queries:find:query}
+
+		# Create child collection
+		collection = @createLiveChildCollection([],criteria).query()
+
+		# Return
+		return collection
+
+	# Find One
+	findOne: (args...) ->
+		# Prepare
+		if args.length
+			if args.length is 1 and args[0] instanceof Criteria
+				criteria = args[0].options
+			else
+				[query,comparator,paging] = args
+				criteria = {comparator, paging, queries:find:query}
+
+		# Create child collection
+		passed = @testModels(@models,criteria)
+
+		# Return
+		if passed?.length isnt 0
+			return passed[0]
 		else
-			models = models[start..]
+			return null
 
-		# Reset our collection with the passing models
-		@reset(models)
+	# Query
+	# Reset our collection with the models that passed our criteria
+	query: (args...) ->
+		# Prepare
+		if args.length
+			if args[0] instanceof Criteria
+				criteria = args[0].options
+			else
+				criteria = {paging:args[0]}
+
+		# Test
+		passed = @queryModels(criteria)
+
+		# Reset
+		@reset(passed)
 
 		# Chain
 		@
 
-	# ---------------------------------
-	# Generic API
+	# Query
+	# Return an array of mdoels that passed our criteria
+	queryModels: (args...) ->
+		# Prepare
+		if args.length
+			if args.length is 1
+				if args[0] instanceof Criteria
+					criteria = args[0].options
+				else
+					criteria = args[0]
+			else
+				[query,comparator,paging] = args
+				criteria = {comparator, paging, queries:find:query}
 
-	# Create Child Collection
-	createChildCollection: (models,options) ->
-		options or= {}
-		options.parentCollection = @
-		options.collection ?= @collection or QueryCollection
-		options.comparator ?= options.collection::comparator or @comparator
-		collection = new (options.collection)(models,options)
-		return collection
+		# Test
+		collection = @getParentCollection() or @
+		models = collection.models
+		passed = @testModels(models, criteria)
 
-	# Create Live Child Collection
-	createLiveChildCollection: (models,options) ->
-		options or= {}
-		options.live = true
-		collection = @createChildCollection(models,options)
-		return collection
+		# Return
+		return passed
 
-	# Find All
-	findAll: (query,comparator,paging) ->
-		collection = @createChildCollection([],{comparator,paging,queries:find:query}).query()
-		return collection
+	# Query Array
+	# Return an array of JSON'ified models that passed our criteria
+	queryArray: (args...) ->
+		# Prepare
+		result = []
 
-	# Find All Live
-	findAllLive: (query,comparator,paging) ->
-		collection = @createLiveChildCollection([],{comparator,paging,queries:find:query}).query()
-		return collection
+		# Fetch
+		passed = @queryModels(args...)
+		for model in passed
+			result.push(model.toJSON())
 
-	# Find One
-	findOne: (query,comparator,paging) ->
-		collection = @createChildCollection([],{comparator,paging,queries:find:query}).query()
-		if collection and collection.length
-			return collection.models[0]
-		else
-			return null
+		# Return
+		return result
 
 
 	# ---------------------------------
@@ -735,7 +629,7 @@ class QueryCollection extends Backbone.Collection
 	# We should check if it still passes our tests
 	# and if it doesn't then we should remove the model
 	# We should perform a resort
-	onChange: (model) ->
+	onChange: (model) =>
 		pass = @test(model)
 		unless pass
 			@safeRemove(model)
@@ -746,7 +640,7 @@ class QueryCollection extends Backbone.Collection
 	# Fired when a model in our parent collection changes
 	# We should check if the model now passes our own tests, and if so add it to our own
 	# and if it doesn't then we should remove the model from our own
-	onParentChange: (model) ->
+	onParentChange: (model) =>
 		pass = @test(model) and @getParentCollection().hasModel(model)
 		if pass
 			@safeAdd(model)
@@ -756,89 +650,349 @@ class QueryCollection extends Backbone.Collection
 
 	# Fired when a model in our parent collection is removed
 	# We should remove it straight away from our own model
-	onParentRemove: (model) ->
+	onParentRemove: (model) =>
 		@safeRemove(model)
 		@
 
 	# Fired when a model in our parent collection is added
 	# We should try and add it to our own collection
 	# Try as in, it will call _prepareModel and the tests happen there
-	onParentAdd: (model) ->
+	onParentAdd: (model) =>
 		@safeAdd(model)
 		@
 
 	# Fired when our parent collection is reset
 	# We should reset our own collection when this happens with the parent collection's models
 	# For each model, it will trigger _prepareModel which will check if the model passes our tests
-	onParentReset: (model) ->
+	onParentReset: (model) =>
 		@reset(@getParentCollection().models)
 		@
 
 
-	# ---------------------------------
-	# Testers
 
-	# Test everything against the model
-	test: (model) ->
-		pass = @testFilters(model) and @testQueries(model) and @testPills(model)
-		return pass
+# =================================
+# Criteria
+
+class Criteria
+
+	# Constructor
+	constructor: (options) ->
+		# Prepare
+		@options ?= {}
+		_.extend(@options, options)
+
+		# Chain
+		@
+
+	# Apply Criteria
+	applyCriteria: (options={}) =>
+		# Apply
+		@options.filters = _.extend({}, @options.filters or {})
+		@options.queries = _.extend({}, @options.queries or {})
+		@options.pills = _.extend({}, @options.pills or {})
+		@options.searchString or= null
+		@options.paging = _.extend({}, @options.paging or {})
+
+		# Initialise filters, queries and pills if we have them
+		@setFilters(@options.filters)
+		@setQueries(@options.queries)
+		@setPills(@options.pills)
+		@setSearchString(@options.searchString)  if @options.searchString?
+		@setPaging(@options.paging)
+		@setComparator(@options.comparator)  if @options.comparator?
+
+		# Chain
+		@
+
+	# ---------------------------------
+	# Paging: Getters and Setters
+
+	# Get Paging
+	getPaging: ->
+		return @options.paging
+
+	# Set Paging
+	setPaging: (paging) ->
+		# Prepare
+		paging = _.extend(@getPaging(), paging or {})
+		paging.page or= null
+		paging.limit or= null
+		paging.offset or= null
+
+		# Apply paging
+		@options.paging = paging
+
+		# Chain
+		@
+
+
+	# ---------------------------------
+	# Comparator: Getters and Setters
+
+	# Get Comparator
+	getComparator: ->
+		return @options.comparator
+
+	# Set Comparator
+	setComparator: (comparator) ->
+		# Prepare comparator
+		comparator = util.generateComparator(comparator)
+
+		# Apply it
+		@options.comparator = comparator
+
+		# Chain
+		@
+
+
+	# ---------------------------------
+	# Filters: Getters and Setters
+
+	# Get Filters
+	getFilter: (key) ->
+		@options.filters[key]
+
+	# Get Filters
+	getFilters: ->
+		@options.filters
+
+	# Set Filters
+	setFilters: (filters) ->
+		filters or= {}
+		for own key,value of filters
+			@setFilter(key,value)
+		@
+
+	# Set Filter
+	setFilter: (name,value) ->
+		# Check we have been called with both arguments
+		throw new Error('QueryCollection::setFilter was called without both arguments')  if typeof value is 'undefined'
+
+		# Prepare
+		filters = @options.filters
+
+		# Apply or delete the value
+		if value?
+			filters[name] = value
+		else if filters[name]?
+			delete filters[name]
+
+		# Chain
+		@
+
+
+	# ---------------------------------
+	# Queries: Getters and Setters
+
+	# Get Query
+	getQuery: (key) ->
+		@options.queries[key]
+
+	# Get Queries
+	getQueries: ->
+		@options.queries
+
+	# Set Queries
+	setQueries: (queries) ->
+		queries or= {}
+		for own key,value of queries
+			@setQuery(key,value)
+		@
+
+	# Set Query
+	setQuery: (name,value) ->
+		# Check we have been called with both arguments
+		throw new Error('QueryCollection::setQuery was called without both arguments')  if typeof value is 'undefined'
+
+		# Prepare
+		queries = @options.queries
+
+		# Apply or delete the value
+		if value?
+			unless value instanceof Query
+				value = new Query(value)
+			queries[name] = value
+		else if queries[name]?
+			delete queries[name]
+
+		# Chain
+		@
+
+
+	# ---------------------------------
+	# Pills: Getters and Setters
+
+	# Get Pill
+	getPill: (key) ->
+		@options.pills[key]
+
+	# Get Pills
+	getPills: ->
+		@options.pills
+
+	# Set Pills
+	setPills: (pills) ->
+		pills or= {}
+		for own key,value of pills
+			@setPill(key,value)
+		@
+
+	# Set Pill
+	setPill: (name,value) ->
+		# Check we have been called with both arguments
+		throw new Error('QueryCollection::setPill was called without both arguments')  if typeof value is 'undefined'
+
+		# Prepare
+		pills = @getPills()
+		searchString = @getSearchString()
+
+		# Apply or delete the value
+		if value?
+			unless value instanceof Pill
+				value = new Pill(value)
+			if searchString
+				value.setSearchString(searchString)
+			pills[name] = value
+		else if pills[name]?
+			delete pills[name]
+
+		# Chain
+		@
+
+
+	# ---------------------------------
+	# Search String: Getters and Setters
+
+	# Get Cleaned Search String
+	getCleanedSearchString: ->
+		@options.cleanedSearchString
+
+	# Get Search String
+	getSearchString: ->
+		@options.searchString
+
+	# Set Search String
+	setSearchString: (searchString) ->
+		# Prepare
+		pills = @options.pills
+		cleanedSearchString = searchString
+
+		# Apply the search string to each of our pills
+		# and for each applicable pill, clean up our search string
+		for own pillName,pill of pills
+			cleanedSearchString = pill.setSearchString(cleanedSearchString)
+
+		# Apply
+		@options.searchString = searchString
+		@options.cleanedSearchString = cleanedSearchString
+
+		# Chain
+		@
+
+
+	# ---------------------------------
+	# Testing
+
+	# Test Model
+	test: (args...) -> return @testModel(args...)
+	testModel: (model,criteria={}) ->
+		passed = @testFilters(model,criteria.filters) and @testQueries(model,criteria.queries) and @testPills(model,criteria.pills)
+		return passed
+
+	# Test Models
+	testModels: (models,criteria={}) ->
+		# Prepare
+		me = @
+		passed = []
+		paging = criteria.paging ? @getPaging()
+		if criteria.comparator?
+			comparator = util.generateComparator(criteria.comparator)
+		else
+			comparator = @getComparator()
+
+		# Cycle through the parent collection finding passing models
+		for model in models
+			pass = me.testModel(model,criteria)
+			passed.push(model)  if pass
+
+		# Sort
+		passed.sort(comparator)  if comparator
+
+		# Page our models
+		start = paging.offset or 0
+		if paging.limit? and paging.limit > 0
+			start = start + paging.limit * ((paging.page or 1) - 1)
+			finish = start + paging.limit
+			passed = passed[start...finish]
+		else
+			passed = passed[start..]
+
+		# Return
+		return passed
 
 	# Perform the Filters against a Model
 	# Filters work in allow-all, deny by exeception way
 	# So if there are no queries, everything should pass
 	# If there is one failed query however, it should fail
-	testFilters: (model) ->
+	testFilters: (model,filters) ->
 		# Prepare
-		pass = true
+		passed = true
 		cleanedSearchString = @getCleanedSearchString()
-		filters = @getFilters()
+		filters ?= @getFilters()
 
 		# Cycle
-		_.each filters, (filter,filterName) ->
+		for own filterName,filter of filters
 			if filter(model,cleanedSearchString) is false
-				pass = false
+				passed = false
 				return false # break
 
 		# Return result
-		return pass
+		return passed
 
 	# Perform the Queries against a Model
 	# Queries work in allow-all, deny by exeception way
 	# So if there are no queries, everything should pass
 	# If there is one failed query however, it should fail
-	testQueries: (model) ->
+	testQueries: (model,queries) ->
 		# Prepare
-		pass = true
-		queries = @getQueries()
+		passed = true
+		queries ?= @getQueries()
 
 		# Cycle
-		_.each queries, (query,queryName) ->
+		for own queryName,query of queries
+			unless query instanceof Query
+				query = new Query(query)
+				queries[queryName] = query
 			if query.test(model) is false
-				pass = false
+				passed = false
 				return false # break
 
 		# Return result
-		return pass
+		return passed
 
 	# Perform the Pills against a Model
 	# Pills work in allow-all, deny by exeception way
 	# So if there are no queries, everything should pass
 	# If there is one failed query however, it should fail
-	testPills: (model) ->
+	testPills: (model,pills) ->
 		# Prepare
-		pass = true
+		passed = true
 		searchString = @getSearchString()
-		pills = @getPills()
+		pills ?= @getPills()
 
 		# Cycle
 		if searchString?
-			_.each pills, (pill,pillName) ->
+			for own pillName,pill of pills
+				unless pill instanceof Pill
+					pill = new Pill(query)
+					pill.setSearchString(searchString)
+					pills[pillName] = pill
 				if pill.test(model) is false
-					pass = false
+					passed = false
 					return false # break
 
 		# Return result
-		return pass
+		return passed
 
 
 # Pill
@@ -847,7 +1001,7 @@ class QueryCollection extends Backbone.Collection
 # Pills must be coded manually, as otherwise that could be a security problem
 class Pill
 	# Callback
-	# Our pills tester function
+	# Our pills criteria function
 	callback: null # Function
 
 	# Regex
@@ -1031,142 +1185,141 @@ class Query
 
 			# Conditional Operators
 			else if util.isObject(selectorValue)
-				# The $beginsWith operator checks if the value begins with a particular value or values if an array was passed
-				$beginsWith = selectorValue.$beginsWith or selectorValue.$startsWith or null
-				if $beginsWith and modelValueExists and util.isString(modelValue)
-					$beginsWith = [$beginsWith]  unless util.isArray($beginsWith)
-					for $beginsWithValue in $beginsWith
-						if modelValue.substr(0,$beginsWithValue.length) is $beginsWithValue
-							match = true
-							break
+				# Doing this tests var a for then switch is super fast verus just a switch
+				# not sure why this is, but woohoo
+				for own queryType,queryValue of selectorValue
+					switch queryType
+						# The $beginsWith operator checks if the value begins with a particular value or values if an array was passed
+						when '$beginsWith', '$startsWith'
+							if queryValue and modelValueExists and util.isString(modelValue)
+								queryValue = [queryValue]  unless util.isArray(queryValue)
+								for beginsWithValue in queryValue
+									if modelValue.substr(0,beginsWithValue.length) is beginsWithValue
+										match = true
+										break
 
-				# The $endsWith operator checks if the value ends with a particular value or values if an array was passed
-				$endsWith = selectorValue.$endsWith or selectorValue.$finishesWith or null
-				if $endsWith and modelValueExists and util.isString(modelValue)
-					$endsWith = [$endsWith]  unless util.isArray($endsWith)
-					for $endWithValue in $endsWith
-						if modelValue.substr($endWithValue.length*-1) is $endWithValue
-							match = true
-							break
+						# The $endsWith operator checks if the value ends with a particular value or values if an array was passed
+						when '$endsWith', '$finishesWith'
+							if queryValue and modelValueExists and util.isString(modelValue)
+								queryValue = [queryValue]  unless util.isArray(queryValue)
+								for endWithValue in queryValue
+									if modelValue.substr(endWithValue.length*-1) is endWithValue
+										match = true
+										break
 
-				# The $all operator is similar to $in, but instead of matching any value in the specified array all values in the array must be matched.
-				if selectorValue.$all?
-					if modelValueExists
-						if (new Hash modelValue).hasAll(selectorValue.$all)
-							match = true
+						# The $all operator is similar to $in, but instead of matching any value in the specified array all values in the array must be matched.
+						when '$all'
+							if queryValue? and modelValueExists
+								if (new Hash modelValue).hasAll(queryValue)
+									match = true
 
-				# The $in operator is analogous to the SQL IN modifier, allowing you to specify an array of possible matches.
-				# The target field's value can also be an array; if so then the document matches if any of the elements of the array's value matches any of the $in field's values
-				if selectorValue.$in?
-					if modelValueExists
-						if (new Hash modelValue).hasIn(selectorValue.$in)
-							match = true
-						else if (new Hash selectorValue.$in).hasIn(modelValue)
-							match = true
+						# The $in operator is analogous to the SQL IN modifier, allowing you to specify an array of possible matches.
+						# The target field's value can also be an array; if so then the document matches if any of the elements of the array's value matches any of the $in field's values
+						when '$in'
+							if queryValue? and modelValueExists
+								if (new Hash modelValue).hasIn(queryValue) or (new Hash queryValue).hasIn(modelValue)
+									match = true
 
-				# Query-Engine Specific
-				# The $has operator checks if any of the selectorValue values exist within our model's value
-				if selectorValue.$has?
-					if modelValueExists
-						if (new Hash modelValue).hasIn(selectorValue.$has)
-							match = true
+						# The $nin operator is similar to $in except that it selects objects for which the specified field does not have any value in the specified array.
+						when '$nin'
+							if queryValue? and modelValueExists
+								if (new Hash modelValue).hasIn(queryValue) is false and (new Hash queryValue).hasIn(modelValue) is false
+									match = true
 
-				# Query-Engine Specific
-				# The $hasAll operator checks if all of the selectorValue values exist within our model's value
-				if selectorValue.$hasAll?
-					if modelValueExists
-						if (new Hash modelValue).hasIn(selectorValue.$hasAll)
-							match = true
+						# Query-Engine Specific
+						# The $has operator checks if any of the selectorValue values exist within our model's value
+						when '$has'
+							if modelValueExists
+								if (new Hash modelValue).hasIn(queryValue)
+									match = true
 
-				# The $nin operator is similar to $in except that it selects objects for which the specified field does not have any value in the specified array.
-				if selectorValue.$nin?
-					if modelValueExists
-						if (new Hash modelValue).hasIn(selectorValue.$nin) is false and (new Hash selectorValue.$nin).hasIn(selectorValue) is false
-							match = true
+						# Query-Engine Specific
+						# The $hasAll operator checks if all of the selectorValue values exist within our model's value
+						when '$hasAll'
+							if modelValueExists
+								if (new Hash modelValue).hasIn(queryValue)
+									match = true
 
-				# The $size operator matches any array with the specified number of elements. The following example would match the object {a:["foo"]}, since that array has just one element:
-				$size = selectorValue.$size or selectorValue.$length
-				if $size?
-					if modelValue.length? and modelValue.length is $size
-						match = true
+						# The $size operator matches any array with the specified number of elements. The following example would match the object {a:["foo"]}, since that array has just one element:
+						when '$size', '$length'
+							if modelValue.length?
+								if modelValue.length is queryValue
+									match = true
 
-				# The $type operator matches values based on their BSON type.
-				if selectorValue.$type
-					if typeof modelValue is selectorValue.$type
-						match = true
+						# The $type operator matches values based on their BSON type.
+						when '$type'
+							if typeof modelValue is queryValue
+								match = true
 
-				# Query-Engine Specific
-				# The $like operator checks if selectorValue string exists within the modelValue string (case insensitive)
-				if selectorValue.$like?
-					if util.isString(modelValue) and modelValue.toLowerCase().indexOf(selectorValue.$like.toLowerCase()) isnt -1
-						match = true
+						# Query-Engine Specific
+						# The $like operator checks if selectorValue string exists within the modelValue string (case insensitive)
+						when '$like'
+							if util.isString(modelValue) and modelValue.toLowerCase().indexOf(queryValue.toLowerCase()) isnt -1
+								match = true
 
-				# Query-Engine Specific
-				# The $likeSensitive operator checks if selectorValue string exists within the modelValue string (case sensitive)
-				if selectorValue.$likeSensitive?
-					if util.isString(modelValue) and modelValue.indexOf(selectorValue.$likeSensitive) isnt -1
-						match = true
+						# Query-Engine Specific
+						# The $likeSensitive operator checks if selectorValue string exists within the modelValue string (case sensitive)
+						when '$likeSensitive'
+							if util.isString(modelValue) and modelValue.indexOf(queryValue) isnt -1
+								match = true
 
-				# Check for existence (or lack thereof) of a field.
-				if selectorValue.$exists?
-					if selectorValue.$exists
-						if modelValueExists is true
-							match = true
-					else
-						if modelValueExists is false
-							match = true
+						# Check for existence (or lack thereof) of a field.
+						when '$exists'
+							if queryValue is modelValueExists
+								match = true
 
-				# The $mod operator allows you to do fast modulo queries to replace a common case for where clauses.
-				if selectorValue.$mod?
-					if modelValueExists
-						$mod = selectorValue.$mod
-						$mod = [$mod]  unless util.isArray($mod)
-						$mod.push(0)  if $mod.length is 1
-						if (modelValue % $mod[0]) is $mod[1]
-							match = true
+						# The $mod operator allows you to do fast modulo queries to replace a common case for where clauses.
+						when '$mod'
+							if modelValueExists
+								$mod = queryValue
+								$mod = [$mod]  unless util.isArray($mod)
+								$mod.push(0)  if $mod.length is 1
+								if (modelValue % $mod[0]) is $mod[1]
+									match = true
 
-				# Query-Engine Specific
-				# Use $eq for deep equals
-				if util.isDefined(selectorValue.$eq)
-					if util.isEqual(modelValue,selectorValue.$eq)
-						match = true
+						# Query-Engine Specific
+						# Use $eq for deep equals
+						when '$eq', '$equal'
+							if util.isEqual(modelValue,queryValue)
+								match = true
 
-				# Use $ne for "not equals".
-				if util.isDefined(selectorValue.$ne)
-					if modelValue isnt selectorValue.$ne
-						match = true
+						# Use $ne for "not equals".
+						when '$ne'
+							if modelValue isnt queryValue
+								match = true
 
-				# less than
-				if selectorValue.$lt?
-					if util.isComparable(modelValue) and modelValue < selectorValue.$lt
-						match = true
+						# less than
+						when '$lt'
+							if queryValue? and util.isComparable(modelValue) and modelValue < queryValue
+								match = true
 
-				# greater than
-				if selectorValue.$gt?
-					if util.isComparable(modelValue) and modelValue > selectorValue.$gt
-						match = true
+						# greater than
+						when '$gt'
+							if queryValue? and util.isComparable(modelValue) and modelValue > queryValue
+								match = true
 
-				# Query-Engine Specific
-				# between
-				if selectorValue.$bt?
-					if util.isComparable(modelValue) and selectorValue.$bt[0] < modelValue and modelValue < selectorValue.$bt[1]
-						match = true
+						# Query-Engine Specific
+						# between
+						when '$bt'
+							if queryValue? and util.isComparable(modelValue) and queryValue[0] < modelValue and modelValue < queryValue[1]
+								match = true
 
-				# less than or equal to
-				if selectorValue.$lte?
-					if util.isComparable(modelValue) and modelValue <= selectorValue.$lte
-						match = true
+						# less than or equal to
+						when '$lte'
+							if queryValue? and util.isComparable(modelValue) and modelValue <= queryValue
+								match = true
 
-				# greater than or equal to
-				if selectorValue.$gte?
-					if util.isComparable(modelValue) and modelValue >= selectorValue.$gte
-						match = true
+						# greater than or equal to
+						when '$gte'
+							if queryValue? and util.isComparable(modelValue) and modelValue >= queryValue
+								match = true
 
-				# Query-Engine Specific
-				# between or equal to
-				if selectorValue.$bte?
-					if util.isComparable(modelValue) and selectorValue.$bte[0] <= modelValue and modelValue <= selectorValue.$bte[1]
-						match = true
+						# Query-Engine Specific
+						# between or equal to
+						when '$bte'
+							if queryValue? and util.isComparable(modelValue) and queryValue[0] <= modelValue and modelValue <= queryValue[1]
+								match = true
+
 
 			# Matched
 			if match
@@ -1182,6 +1335,7 @@ class Query
 		return matchAll
 
 
+
 # -------------------------------------
 # Exports
 
@@ -1195,6 +1349,7 @@ queryEngine =
 	Backbone: Backbone
 	Hash: Hash
 	QueryCollection: QueryCollection
+	Criteria: Criteria
 	Query: Query
 	Pill: Pill
 	createCollection: (models,options) ->

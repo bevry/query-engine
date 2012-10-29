@@ -347,7 +347,18 @@ describe 'live', (describe,it) ->
 		# Perform a query to find only the items that have the tag "jquery"
 		it 'should work with findAllLive with query and comparator', ->
 			# Perform the query
-			childCollection = parentCollection.findAllLive({tags: $has: ['jquery']}, {position:-1})
+			childCollection = parentCollection
+				.findAllLive(
+					# Query
+					{
+						tags:
+							$has: ['jquery']
+					}
+					# Comparator
+					{
+						position: -1
+					}
+				)
 
 			# Check the result
 			actual = childCollection.toJSON()

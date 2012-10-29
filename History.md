@@ -1,5 +1,18 @@
 ## History
 
+- v1.3.0 October 29, 2012
+	- Improved memory utilisation
+	- Improved speed by 3-7x
+	- Moved query criteria out of `QueryCollection` into new `Criteria` class
+		- `QueryCollection` injects the `Criteria` prototype methods to stay backwards compatible
+		- Introduced `Criteria::testModels` which is the same as `query` but returns the results instead of applying them
+	- `QueryCollection` changes:
+		- `findAll`, `findAllLive`, `findOne` and `query` can now accept a `Criteria` object in addition to what they could accept before
+		- Added `queryModels` and `queryArray` that accept the same arguments as `findAll`, `findAllLive` and `findOne`
+	- Updated dependencies
+		- underscore 1.4.x from 1.3.x
+		- coffee-script 1.4.x from 1.3.x
+
 - v1.2.7 August 10, 2012
 	- Re-added markdown files to npm distribution as they are required for the npm website
 
