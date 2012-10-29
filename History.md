@@ -9,6 +9,9 @@
 	- `QueryCollection` changes:
 		- `findAll`, `findAllLive`, `findOne` and `query` can now accept a `Criteria` object in addition to what they could accept before
 		- Added `queryModels` and `queryArray` that accept the same arguments as `findAll`, `findAllLive` and `findOne`
+	- Updated dependencies
+		- underscore 1.4.x from 1.3.x
+		- coffee-script 1.4.x from 1.3.x
 
 - v1.2.7 August 10, 2012
 	- Re-added markdown files to npm distribution as they are required for the npm website
