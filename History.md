@@ -1,8 +1,8 @@
 ## History
 
-- v1.3.0 ...
-	- Improves memory utilisation
-	- Improves speed by 3-7x
+- v1.3.0 October 29, 2012
+	- Improved memory utilisation
+	- Improved speed by 3-7x
 	- Moved query criteria out of `QueryCollection` into new `Criteria` class
 		- `QueryCollection` injects the `Criteria` prototype methods to stay backwards compatible
 		- Introduced `Criteria::testModels` which is the same as `query` but returns the results instead of applying them
