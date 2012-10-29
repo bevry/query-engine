@@ -8,7 +8,7 @@
 		- Introduced `Criteria::testModels` which is the same as `query` but returns the results instead of applying them
 	- `QueryCollection` changes:
 		- `findAll`, `findAllLive`, `findOne` and `query` can now accept a `Criteria` object in addition to what they could accept before
-	- TODO: Need to add tests for using paging with comparators
+		- Added `queryModels` and `queryArray` that accept the same arguments as `findAll`, `findAllLive` and `findOne`
 
 - v1.2.7 August 10, 2012
 	- Re-added markdown files to npm distribution as they are required for the npm website

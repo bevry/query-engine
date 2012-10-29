@@ -126,7 +126,7 @@ util =
 		# Determine the correct type
 		if value
 			if util.isArray(value)
-				result = value
+				result = value.slice()
 			else if util.isObject(value)
 				for own key,item of value
 					result.push(item)
@@ -144,7 +144,7 @@ util =
 		# Determine the correct type
 		if value
 			if util.isArray(value)
-				result = value
+				result = value.slice()
 			else if util.isObject(value)
 				for own key,item of value
 					obj = {}
@@ -493,25 +493,59 @@ class QueryCollection extends Backbone.Collection
 			return null
 
 	# Query
-	# Reset our collection with the new rules that we are using
+	# Reset our collection with the models that passed our criteria
 	query: (args...) ->
 		# Prepare
-		if args.length is 1
+		if args.length
 			if args[0] instanceof Criteria
 				criteria = args[0].options
 			else
 				criteria = {paging:args[0]}
 
 		# Test
-		collection = @getParentCollection() or @
-		models = collection.models
-		passed = @testModels(models, criteria)
+		passed = @queryModels(criteria)
 
 		# Reset
 		@reset(passed)
 
 		# Chain
 		@
+
+	# Query
+	# Return an array of mdoels that passed our criteria
+	queryModels: (args...) ->
+		# Prepare
+		if args.length
+			if args.length is 1
+				if args[0] instanceof Criteria
+					criteria = args[0].options
+				else
+					criteria = args[0]
+			else
+				[query,comparator,paging] = args
+				criteria = {comparator, paging, queries:find:query}
+
+		# Test
+		collection = @getParentCollection() or @
+		models = collection.models
+		passed = @testModels(models, criteria)
+
+		# Return
+		return passed
+
+	# Query Array
+	# Return an array of JSON'ified models that passed our criteria
+	queryArray: (args...) ->
+		# Prepare
+		result = []
+
+		# Fetch
+		passed = @queryModels(args...)
+		for model in passed
+			result.push(model.toJSON())
+
+		# Return
+		return result
 
 
 	# ---------------------------------
@@ -868,9 +902,11 @@ class Criteria
 		# Prepare
 		me = @
 		passed = []
-		models ?= @models
 		paging = criteria.paging ? @getPaging()
-		comparator = criteria.comparator ? @getComparator()
+		if criteria.comparator?
+			comparator = util.generateComparator(criteria.comparator)
+		else
+			comparator = @getComparator()
 
 		# Cycle through the parent collection finding passing models
 		for model in models

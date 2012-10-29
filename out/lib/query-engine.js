@@ -92,7 +92,7 @@
       result = [];
       if (value) {
         if (util.isArray(value)) {
-          result = value;
+          result = value.slice();
         } else if (util.isObject(value)) {
           for (key in value) {
             if (!__hasProp.call(value, key)) continue;
@@ -110,7 +110,7 @@
       result = [];
       if (value) {
         if (util.isArray(value)) {
-          result = value;
+          result = value.slice();
         } else if (util.isObject(value)) {
           for (key in value) {
             if (!__hasProp.call(value, key)) continue;
@@ -456,9 +456,9 @@
     };
 
     QueryCollection.prototype.query = function() {
-      var args, collection, criteria, models, passed;
+      var args, criteria, passed;
       args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      if (args.length === 1) {
+      if (args.length) {
         if (args[0] instanceof Criteria) {
           criteria = args[0].options;
         } else {
@@ -467,11 +467,48 @@
           };
         }
       }
+      passed = this.queryModels(criteria);
+      this.reset(passed);
+      return this;
+    };
+
+    QueryCollection.prototype.queryModels = function() {
+      var args, collection, comparator, criteria, models, paging, passed, query;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      if (args.length) {
+        if (args.length === 1) {
+          if (args[0] instanceof Criteria) {
+            criteria = args[0].options;
+          } else {
+            criteria = args[0];
+          }
+        } else {
+          query = args[0], comparator = args[1], paging = args[2];
+          criteria = {
+            comparator: comparator,
+            paging: paging,
+            queries: {
+              find: query
+            }
+          };
+        }
+      }
       collection = this.getParentCollection() || this;
       models = collection.models;
       passed = this.testModels(models, criteria);
-      this.reset(passed);
-      return this;
+      return passed;
+    };
+
+    QueryCollection.prototype.queryArray = function() {
+      var args, model, passed, result, _i, _len;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      result = [];
+      passed = this.queryModels.apply(this, args);
+      for (_i = 0, _len = passed.length; _i < _len; _i++) {
+        model = passed[_i];
+        result.push(model.toJSON());
+      }
+      return result;
     };
 
     QueryCollection.prototype.live = function(enabled) {
@@ -777,17 +814,18 @@
     };
 
     Criteria.prototype.testModels = function(models, criteria) {
-      var comparator, finish, me, model, paging, pass, passed, start, _i, _len, _ref, _ref1;
+      var comparator, finish, me, model, paging, pass, passed, start, _i, _len, _ref;
       if (criteria == null) {
         criteria = {};
       }
       me = this;
       passed = [];
-      if (models == null) {
-        models = this.models;
-      }
       paging = (_ref = criteria.paging) != null ? _ref : this.getPaging();
-      comparator = (_ref1 = criteria.comparator) != null ? _ref1 : this.getComparator();
+      if (criteria.comparator != null) {
+        comparator = util.generateComparator(criteria.comparator);
+      } else {
+        comparator = this.getComparator();
+      }
       for (_i = 0, _len = models.length; _i < _len; _i++) {
         model = models[_i];
         pass = me.testModel(model, criteria);
