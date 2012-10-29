@@ -1027,7 +1027,7 @@
     }
 
     Query.prototype.test = function(model) {
-      var $beginsWith, $beginsWithValue, $endWithValue, $endsWith, $mod, $size, empty, match, matchAll, matchAny, modelId, modelValue, modelValueExists, query, queryGroup, selectorName, selectorValue, _i, _j, _k, _l, _len, _len1, _len2, _len3, _ref;
+      var $mod, beginsWithValue, empty, endWithValue, match, matchAll, matchAny, modelId, modelValue, modelValueExists, query, queryGroup, queryType, queryValue, selectorName, selectorValue, _i, _j, _k, _l, _len, _len1, _len2, _len3, _ref;
       matchAll = true;
       matchAny = false;
       empty = true;
@@ -1096,153 +1096,157 @@
             match = true;
           }
         } else if (util.isObject(selectorValue)) {
-          $beginsWith = selectorValue.$beginsWith || selectorValue.$startsWith || null;
-          if ($beginsWith && modelValueExists && util.isString(modelValue)) {
-            if (!util.isArray($beginsWith)) {
-              $beginsWith = [$beginsWith];
-            }
-            for (_k = 0, _len2 = $beginsWith.length; _k < _len2; _k++) {
-              $beginsWithValue = $beginsWith[_k];
-              if (modelValue.substr(0, $beginsWithValue.length) === $beginsWithValue) {
-                match = true;
+          for (queryType in selectorValue) {
+            if (!__hasProp.call(selectorValue, queryType)) continue;
+            queryValue = selectorValue[queryType];
+            switch (queryType) {
+              case '$beginsWith':
+              case '$startsWith':
+                if (queryValue && modelValueExists && util.isString(modelValue)) {
+                  if (!util.isArray(queryValue)) {
+                    queryValue = [queryValue];
+                  }
+                  for (_k = 0, _len2 = queryValue.length; _k < _len2; _k++) {
+                    beginsWithValue = queryValue[_k];
+                    if (modelValue.substr(0, beginsWithValue.length) === beginsWithValue) {
+                      match = true;
+                      break;
+                    }
+                  }
+                }
                 break;
-              }
-            }
-          }
-          $endsWith = selectorValue.$endsWith || selectorValue.$finishesWith || null;
-          if ($endsWith && modelValueExists && util.isString(modelValue)) {
-            if (!util.isArray($endsWith)) {
-              $endsWith = [$endsWith];
-            }
-            for (_l = 0, _len3 = $endsWith.length; _l < _len3; _l++) {
-              $endWithValue = $endsWith[_l];
-              if (modelValue.substr($endWithValue.length * -1) === $endWithValue) {
-                match = true;
+              case '$endsWith':
+              case '$finishesWith':
+                if (queryValue && modelValueExists && util.isString(modelValue)) {
+                  if (!util.isArray(queryValue)) {
+                    queryValue = [queryValue];
+                  }
+                  for (_l = 0, _len3 = queryValue.length; _l < _len3; _l++) {
+                    endWithValue = queryValue[_l];
+                    if (modelValue.substr(endWithValue.length * -1) === endWithValue) {
+                      match = true;
+                      break;
+                    }
+                  }
+                }
                 break;
-              }
-            }
-          }
-          if (selectorValue.$all != null) {
-            if (modelValueExists) {
-              if ((new Hash(modelValue)).hasAll(selectorValue.$all)) {
-                match = true;
-              }
-            }
-          }
-          if (selectorValue.$in != null) {
-            if (modelValueExists) {
-              if ((new Hash(modelValue)).hasIn(selectorValue.$in)) {
-                match = true;
-              } else if ((new Hash(selectorValue.$in)).hasIn(modelValue)) {
-                match = true;
-              }
-            }
-          }
-          if (selectorValue.$has != null) {
-            if (modelValueExists) {
-              if ((new Hash(modelValue)).hasIn(selectorValue.$has)) {
-                match = true;
-              }
-            }
-          }
-          if (selectorValue.$hasAll != null) {
-            if (modelValueExists) {
-              if ((new Hash(modelValue)).hasIn(selectorValue.$hasAll)) {
-                match = true;
-              }
-            }
-          }
-          if (selectorValue.$nin != null) {
-            if (modelValueExists) {
-              if ((new Hash(modelValue)).hasIn(selectorValue.$nin) === false && (new Hash(selectorValue.$nin)).hasIn(selectorValue) === false) {
-                match = true;
-              }
-            }
-          }
-          $size = selectorValue.$size || selectorValue.$length;
-          if ($size != null) {
-            if ((modelValue.length != null) && modelValue.length === $size) {
-              match = true;
-            }
-          }
-          if (selectorValue.$type) {
-            if (typeof modelValue === selectorValue.$type) {
-              match = true;
-            }
-          }
-          if (selectorValue.$like != null) {
-            if (util.isString(modelValue) && modelValue.toLowerCase().indexOf(selectorValue.$like.toLowerCase()) !== -1) {
-              match = true;
-            }
-          }
-          if (selectorValue.$likeSensitive != null) {
-            if (util.isString(modelValue) && modelValue.indexOf(selectorValue.$likeSensitive) !== -1) {
-              match = true;
-            }
-          }
-          if (selectorValue.$exists != null) {
-            if (selectorValue.$exists) {
-              if (modelValueExists === true) {
-                match = true;
-              }
-            } else {
-              if (modelValueExists === false) {
-                match = true;
-              }
-            }
-          }
-          if (selectorValue.$mod != null) {
-            if (modelValueExists) {
-              $mod = selectorValue.$mod;
-              if (!util.isArray($mod)) {
-                $mod = [$mod];
-              }
-              if ($mod.length === 1) {
-                $mod.push(0);
-              }
-              if ((modelValue % $mod[0]) === $mod[1]) {
-                match = true;
-              }
-            }
-          }
-          if (util.isDefined(selectorValue.$eq)) {
-            if (util.isEqual(modelValue, selectorValue.$eq)) {
-              match = true;
-            }
-          }
-          if (util.isDefined(selectorValue.$ne)) {
-            if (modelValue !== selectorValue.$ne) {
-              match = true;
-            }
-          }
-          if (selectorValue.$lt != null) {
-            if (util.isComparable(modelValue) && modelValue < selectorValue.$lt) {
-              match = true;
-            }
-          }
-          if (selectorValue.$gt != null) {
-            if (util.isComparable(modelValue) && modelValue > selectorValue.$gt) {
-              match = true;
-            }
-          }
-          if (selectorValue.$bt != null) {
-            if (util.isComparable(modelValue) && selectorValue.$bt[0] < modelValue && modelValue < selectorValue.$bt[1]) {
-              match = true;
-            }
-          }
-          if (selectorValue.$lte != null) {
-            if (util.isComparable(modelValue) && modelValue <= selectorValue.$lte) {
-              match = true;
-            }
-          }
-          if (selectorValue.$gte != null) {
-            if (util.isComparable(modelValue) && modelValue >= selectorValue.$gte) {
-              match = true;
-            }
-          }
-          if (selectorValue.$bte != null) {
-            if (util.isComparable(modelValue) && selectorValue.$bte[0] <= modelValue && modelValue <= selectorValue.$bte[1]) {
-              match = true;
+              case '$all':
+                if ((queryValue != null) && modelValueExists) {
+                  if ((new Hash(modelValue)).hasAll(queryValue)) {
+                    match = true;
+                  }
+                }
+                break;
+              case '$in':
+                if ((queryValue != null) && modelValueExists) {
+                  if ((new Hash(modelValue)).hasIn(queryValue) || (new Hash(queryValue)).hasIn(modelValue)) {
+                    match = true;
+                  }
+                }
+                break;
+              case '$nin':
+                if ((queryValue != null) && modelValueExists) {
+                  if ((new Hash(modelValue)).hasIn(queryValue) === false && (new Hash(queryValue)).hasIn(modelValue) === false) {
+                    match = true;
+                  }
+                }
+                break;
+              case '$has':
+                if (modelValueExists) {
+                  if ((new Hash(modelValue)).hasIn(queryValue)) {
+                    match = true;
+                  }
+                }
+                break;
+              case '$hasAll':
+                if (modelValueExists) {
+                  if ((new Hash(modelValue)).hasIn(queryValue)) {
+                    match = true;
+                  }
+                }
+                break;
+              case '$size':
+              case '$length':
+                if (modelValue.length != null) {
+                  if (modelValue.length === queryValue) {
+                    match = true;
+                  }
+                }
+                break;
+              case '$type':
+                if (typeof modelValue === queryValue) {
+                  match = true;
+                }
+                break;
+              case '$like':
+                if (util.isString(modelValue) && modelValue.toLowerCase().indexOf(queryValue.toLowerCase()) !== -1) {
+                  match = true;
+                }
+                break;
+              case '$likeSensitive':
+                if (util.isString(modelValue) && modelValue.indexOf(queryValue) !== -1) {
+                  match = true;
+                }
+                break;
+              case '$exists':
+                if (queryValue === modelValueExists) {
+                  match = true;
+                }
+                break;
+              case '$mod':
+                if (modelValueExists) {
+                  $mod = queryValue;
+                  if (!util.isArray($mod)) {
+                    $mod = [$mod];
+                  }
+                  if ($mod.length === 1) {
+                    $mod.push(0);
+                  }
+                  if ((modelValue % $mod[0]) === $mod[1]) {
+                    match = true;
+                  }
+                }
+                break;
+              case '$eq':
+              case '$equal':
+                if (util.isEqual(modelValue, queryValue)) {
+                  match = true;
+                }
+                break;
+              case '$ne':
+                if (modelValue !== queryValue) {
+                  match = true;
+                }
+                break;
+              case '$lt':
+                if ((queryValue != null) && util.isComparable(modelValue) && modelValue < queryValue) {
+                  match = true;
+                }
+                break;
+              case '$gt':
+                if ((queryValue != null) && util.isComparable(modelValue) && modelValue > queryValue) {
+                  match = true;
+                }
+                break;
+              case '$bt':
+                if ((queryValue != null) && util.isComparable(modelValue) && queryValue[0] < modelValue && modelValue < queryValue[1]) {
+                  match = true;
+                }
+                break;
+              case '$lte':
+                if ((queryValue != null) && util.isComparable(modelValue) && modelValue <= queryValue) {
+                  match = true;
+                }
+                break;
+              case '$gte':
+                if ((queryValue != null) && util.isComparable(modelValue) && modelValue >= queryValue) {
+                  match = true;
+                }
+                break;
+              case '$bte':
+                if ((queryValue != null) && util.isComparable(modelValue) && queryValue[0] <= modelValue && modelValue <= queryValue[1]) {
+                  match = true;
+                }
             }
           }
         }
