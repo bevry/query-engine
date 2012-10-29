@@ -1,5 +1,9 @@
 ## History
 
+- v1.3.1 October 29, 2012
+	- Fixed searching for `false`
+		- Thanks to [Andrew Shults](https://github.com/andrewjshults) for [pull request #17](https://github.com/bevry/query-engine/pull/17)
+
 - v1.3.0 October 29, 2012
 	- Improved memory utilisation
 	- Improved speed by 3-7x
