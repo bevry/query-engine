@@ -896,7 +896,7 @@ class Criteria
 	# Test Model
 	test: (args...) -> return @testModel(args...)
 	testModel: (model,criteria={}) ->
-		passed = @testFilters(model,criteria.filters) and @testQueries(model,criteria.queries) and @testPills(model,criteria.pills)
+		passed = @testQueries(model,criteria.queries) and @testFilters(model,criteria.filters) and @testPills(model,criteria.pills)
 		return passed
 
 	# Test Models
@@ -930,25 +930,6 @@ class Criteria
 		# Return
 		return passed
 
-	# Perform the Filters against a Model
-	# Filters work in allow-all, deny by exeception way
-	# So if there are no queries, everything should pass
-	# If there is one failed query however, it should fail
-	testFilters: (model,filters) ->
-		# Prepare
-		passed = true
-		cleanedSearchString = @getCleanedSearchString()
-		filters ?= @getFilters()
-
-		# Cycle
-		for own filterName,filter of filters
-			if filter(model,cleanedSearchString) is false
-				passed = false
-				return false # break
-
-		# Return result
-		return passed
-
 	# Perform the Queries against a Model
 	# Queries work in allow-all, deny by exeception way
 	# So if there are no queries, everything should pass
@@ -964,6 +945,25 @@ class Criteria
 				query = new Query(query)
 				queries[queryName] = query
 			if query.test(model) is false
+				passed = false
+				return false # break
+
+		# Return result
+		return passed
+
+	# Perform the Filters against a Model
+	# Filters work in allow-all, deny by exeception way
+	# So if there are no queries, everything should pass
+	# If there is one failed query however, it should fail
+	testFilters: (model,filters) ->
+		# Prepare
+		passed = true
+		cleanedSearchString = @getCleanedSearchString()
+		filters ?= @getFilters()
+
+		# Cycle
+		for own filterName,filter of filters
+			if filter(model,cleanedSearchString) is false
 				passed = false
 				return false # break
 
@@ -1107,13 +1107,325 @@ class Pill
 # A NoSQL type query wrapper
 # http://www.mongodb.org/display/DOCS/Advanced+Queries
 class Query
-	# Prepare
-	query: null
+	# Source Query
+	source: null
 
-	constructor: (query={}) ->
+	# Compiled Selectors
+	compiledSelectors: null
+
+	# Selectors
+	selectors:
+		# Types
+		'string':
+			test: ->
+				return @modelValueExists and @modelValue is @selectorValue
+		'number':
+			test: ->
+				return @selector('string',@)
+		'boolean':
+			test: ->
+				return @selector('string',@)
+		'array':
+			test: ->
+				return @modelValueExists and (new Hash @modelValue).isSame(@selectorValue)
+		'date':
+			test: ->
+				return @modelValueExists and @modelValue.toString() is @selectorValue.toString()
+		'regexp':
+			test: ->
+				return @modelValueExists and @selectorValue.test(@modelValue)
+		'null':
+			test: ->
+				return @modelValue is @selectorValue
+
+		# The $or operator lets you use a boolean or expression to do queries. You give $or a list of expressions, any of which can satisfy the query.
+		'$or':
+			compile: ->
+				# Prepare
+				queries = []
+				queryGroup = util.toArrayGroup(@selectorValue)
+				unless queryGroup.length then throw new Error("Query called with an empty #{selectorName} statement")
+				# Match if at least one item passes
+				for querySource in queryGroup
+					query = new Query(querySource)
+					queries.push(query)
+				# Return
+				return {queries}
+			test: ->
+				for query in @queries
+					if query.test(@model)
+						return true
+				return false
+		# The $nor operator is the opposite of $or (pass if they all don't match the query)
+		'$nor':
+			compile: ->
+				return @selector('$or',@)
+			test: ->
+				return !@selector('$or',@)
+
+		# The $and operator lets you use boolean and in a query. You give $and an array of expressions, all of which must match to satisfy the query.
+		'$and':
+			compile: ->
+				return @selector('$or',@)
+			test: ->
+				for query in @queries
+					if query.test(@model) is false
+						return false
+				return true
+		# The $not operator is the opposite of $and (pass if only one doesn't match the query)
+		'$not':
+			compile: ->
+				return @selector('$and',@)
+			test: ->
+				return !@selector('$and',@)
+
+		# The $beginsWith operator checks if the value begins with a particular value or values if an array was passed
+		'$beginsWith':
+			test: ->
+				if @selectorValue and @modelValueExists and util.isString(@modelValue)
+					beginsWithParts = util.toArray(@selectorValue)
+					for beginsWithValue in beginsWithParts
+						if @modelValue.substr(0,beginsWithValue.length) is beginsWithValue
+							return true
+							break
+				return false
+		'$startsWith':
+			test: ->
+				return @selector('$beginsWith',@)
+
+		# The $endsWith operator checks if the value ends with a particular value or values if an array was passed
+		'$endsWith':
+			test: ->
+				if @selectorValue and @modelValueExists and util.isString(@modelValue)
+					endsWithParts = util.toArray(@selectorValue)
+					for endsWithValue in endsWithParts
+						if @modelValue.substr(endsWithValue.length*-1) is endsWithValue
+							return true
+							break
+				return false
+		'$finishesWith':
+			test: ->
+				return @selector('$endsWith',@)
+
+		# The $all operator is similar to $in, but instead of matching any value in the specified array all values in the array must be matched.
+		'$all':
+			test: ->
+				if @selectorValue? and @modelValueExists
+					if (new Hash @modelValue).hasAll(@selectorValue)
+						return true
+				return false
+
+		# The $in operator is analogous to the SQL IN modifier, allowing you to specify an array of possible matches.
+		# The target field's value can also be an array; if so then the document matches if any of the elements of the array's value matches any of the $in field's values
+		'$in':
+			test: ->
+				if @selectorValue? and @modelValueExists
+					if (new Hash @modelValue).hasIn(@selectorValue) or (new Hash @selectorValue).hasIn(@modelValue)
+						return true
+				return false
+
+		# The $nin operator is similar to $in except that it selects objects for which the specified field does not have any value in the specified array.
+		'$nin':
+			test: ->
+				if @selectorValue? and @modelValueExists
+					if (new Hash @modelValue).hasIn(@selectorValue) is false and (new Hash @selectorValue).hasIn(@modelValue) is false
+						return true
+				return false
+
+		# Query-Engine Specific
+		# The $has operator checks if any of the selectorValue values exist within our @model's value
+		'$has':
+			test: ->
+				if @modelValueExists
+					if (new Hash @modelValue).hasIn(@selectorValue)
+						return true
+				return false
+
+		# Query-Engine Specific
+		# The $hasAll operator checks if all of the selectorValue values exist within our @model's value
+		'$hasAll':
+			test: ->
+				if @modelValueExists
+					if (new Hash @modelValue).hasIn(@selectorValue)
+						return true
+				return false
+
+		# The $size operator matches any array with the specified number of elements. The following example would match the object {a:["foo"]}, since that array has just one element:
+		'$size':
+			test: ->
+				if @modelValue.length?
+					if @modelValue.length is @selectorValue
+						return true
+				return false
+		'$length':
+			test: ->
+				return @selector('$size',@)
+
+		# The $type operator matches values based on their BSON type.
+		'$type':
+			test: ->
+				if typeof @modelValue is @selectorValue
+					return true
+				return false
+
+		# Query-Engine Specific
+		# The $like operator checks if selectorValue string exists within the @modelValue string (case insensitive)
+		'$like':
+			test: ->
+				if util.isString(@modelValue) and @modelValue.toLowerCase().indexOf(@selectorValue.toLowerCase()) isnt -1
+					return true
+				return false
+
+		# Query-Engine Specific
+		# The $likeSensitive operator checks if selectorValue string exists within the @modelValue string (case sensitive)
+		'$likeSensitive':
+			test: ->
+				if util.isString(@modelValue) and @modelValue.indexOf(@selectorValue) isnt -1
+					return true
+				return false
+
+		# Check for existence (or lack thereof) of a field.
+		'$exists':
+			test: ->
+				if @selectorValue is @modelValueExists
+					return true
+				return false
+
+		# The $mod operator allows you to do fast modulo queries to replace a common case for where clauses.
+		'$mod':
+			test: ->
+				if @modelValueExists
+					$mod = @selectorValue
+					$mod = [$mod]  unless util.isArray($mod)
+					$mod.push(0)  if $mod.length is 1
+					if (@modelValue % $mod[0]) is $mod[1]
+						return true
+				return false
+
+		# Query-Engine Specific
+		# Use $eq for deep equals
+		'$eq':
+			test: ->
+				if util.isEqual(@modelValue,@selectorValue)
+					return true
+				return false
+		'$equal':
+			test: ->
+				return @selector('$eq',@)
+
+		# Use $ne for "not equals".
+		'$ne':
+			test: ->
+				if @modelValue isnt @selectorValue
+					return true
+				return false
+
+		# less than
+		'$lt':
+			test: ->
+				if @selectorValue? and util.isComparable(@modelValue) and @modelValue < @selectorValue
+					return true
+				return false
+
+		# greater than
+		'$gt':
+			test: ->
+				if @selectorValue? and util.isComparable(@modelValue) and @modelValue > @selectorValue
+					return true
+				return false
+
+		# Query-Engine Specific
+		# between
+		'$bt':
+			test: ->
+				if @selectorValue? and util.isComparable(@modelValue) and @selectorValue[0] < @modelValue and @modelValue < @selectorValue[1]
+					return true
+				return false
+
+		# less than or equal to
+		'$lte':
+			test: ->
+				if @selectorValue? and util.isComparable(@modelValue) and @modelValue <= @selectorValue
+					return true
+				return false
+
+		# greater than or equal to
+		'$gte':
+			test: ->
+				if @selectorValue? and util.isComparable(@modelValue) and @modelValue >= @selectorValue
+					return true
+				return false
+
+		# Query-Engine Specific
+		# between or equal to
+		'$bte':
+			test: ->
+				if @selectorValue? and util.isComparable(@modelValue) and @selectorValue[0] <= @modelValue and @modelValue <= @selectorValue[1]
+					return true
+				return false
+
+	# Constructor
+	constructor: (source={}) ->
 		# Apply
-		@query = query
+		@source = source
+		@compileQuery()
 
+	# Compile Selector
+	compileSelector: (selectorName,selectorOpts={}) ->
+		# Prepare
+		query = @
+		selectors = @selectors
+		opts = {selectorName}
+
+		# Fetch selector
+		selector = selectors[selectorName]
+		throw new Error("Couldn't find the selector #{selectorName}")  unless selector
+
+		# Add selector opts
+		opts[key] = value  for own key,value of selectorOpts
+
+		# We hav ea compile step, use that
+		if selector.compile?
+			# Add the selector helper
+			opts.selector = (selectorName,opts) ->
+				return selectors[selectorName].compile.call(opts)
+			# Add compile opts
+			compileOpts = selector.compile.call(opts)
+			opts[key] = value  for own key,value of compileOpts
+
+		# Add the selector helper
+		opts.selector = (selectorName,opts) ->
+			return selectors[selectorName].test.call(opts)
+
+		# Add the selector with its compiled opts
+		compiledSelector =
+			opts: opts
+			test: selector.test
+
+		# return
+		return compiledSelector
+
+	# Test Compiled Selector
+	testCompiledSelector: (compiledSelector, model) ->
+		# Prepare
+		opts = compiledSelector.opts
+		test = compiledSelector.test
+
+		# Add model opts
+		opts.model = model
+		opts.modelValue = opts.model.get(opts.fieldName)
+		opts.modelId = opts.model.get('id')
+		opts.modelValueExists = typeof opts.modelValue isnt 'undefined'
+		opts.modelValue = false  unless opts.modelValueExists
+
+		# Fire selector
+		match = test.call(opts)
+
+		# Return
+		return match
+
+	# Test
+	# Test the Query
 	test: (model) ->
 		# Match
 		matchAll = true
@@ -1121,205 +1433,9 @@ class Query
 		empty = true
 
 		# Selectors
-		for own selectorName, selectorValue of @query
-			match = false
-			empty = false
-			modelValue = model.get(selectorName)
-			modelId = model.get('id')
-			modelValueExists = typeof modelValue isnt 'undefined'
-			modelValue = false  unless modelValueExists
-
-			# The $or operator lets you use a boolean or expression to do queries. You give $or a list of expressions, any of which can satisfy the query.
-			# The $nor operator is the opposite of $or (pass if they all don't match the query)
-			if selectorName in ['$or','$nor']
-				queryGroup = util.toArrayGroup(selectorValue)
-				unless queryGroup.length then throw new Error("Query called with an empty #{selectorName} statement")
-				# Match if at least one item passes
-				for query in queryGroup
-					query = new Query(query)
-					if query.test(model)
-						match = true
-						break
-				# If we are $nor, then invert
-				if selectorName is '$nor'
-					match = !match
-
-			# The $and operator lets you use boolean and in a query. You give $and an array of expressions, all of which must match to satisfy the query.
-			# The $not operator is the opposite of $and (pass if only one doesn't match the query)
-			else if selectorName in ['$and','$not']
-				queryGroup = util.toArrayGroup(selectorValue)
-				unless queryGroup.length then throw new Error("Query called with an empty #{selectorName} statement")
-				for query in queryGroup
-					query = new Query(query)
-					match = query.test(model)
-					break  unless match
-				# If we are $not, then inver
-				if selectorName is '$not'
-					match = !match
-
-
-			# String, Number, Boolean
-			else if util.isString(selectorValue) or util.isNumber(selectorValue) or util.isBoolean(selectorValue)
-				if modelValueExists and modelValue is selectorValue
-					match = true
-
-			# Array
-			else if util.isArray(selectorValue)
-				if modelValueExists and (new Hash modelValue).isSame(selectorValue)
-					match = true
-
-			# Date
-			else if util.isDate(selectorValue)
-				if modelValueExists and modelValue.toString() is selectorValue.toString()
-					match = true
-
-			# Regular Expression
-			else if util.isRegExp(selectorValue)
-				if modelValueExists and selectorValue.test(modelValue)
-					match = true
-
-			# Null
-			else if util.isNull(selectorValue)
-				if modelValue is selectorValue
-					match = true
-
-			# Conditional Operators
-			else if util.isObject(selectorValue)
-				# Doing this tests var a for then switch is super fast verus just a switch
-				# not sure why this is, but woohoo
-				for own queryType,queryValue of selectorValue
-					switch queryType
-						# The $beginsWith operator checks if the value begins with a particular value or values if an array was passed
-						when '$beginsWith', '$startsWith'
-							if queryValue and modelValueExists and util.isString(modelValue)
-								queryValue = [queryValue]  unless util.isArray(queryValue)
-								for beginsWithValue in queryValue
-									if modelValue.substr(0,beginsWithValue.length) is beginsWithValue
-										match = true
-										break
-
-						# The $endsWith operator checks if the value ends with a particular value or values if an array was passed
-						when '$endsWith', '$finishesWith'
-							if queryValue and modelValueExists and util.isString(modelValue)
-								queryValue = [queryValue]  unless util.isArray(queryValue)
-								for endWithValue in queryValue
-									if modelValue.substr(endWithValue.length*-1) is endWithValue
-										match = true
-										break
-
-						# The $all operator is similar to $in, but instead of matching any value in the specified array all values in the array must be matched.
-						when '$all'
-							if queryValue? and modelValueExists
-								if (new Hash modelValue).hasAll(queryValue)
-									match = true
-
-						# The $in operator is analogous to the SQL IN modifier, allowing you to specify an array of possible matches.
-						# The target field's value can also be an array; if so then the document matches if any of the elements of the array's value matches any of the $in field's values
-						when '$in'
-							if queryValue? and modelValueExists
-								if (new Hash modelValue).hasIn(queryValue) or (new Hash queryValue).hasIn(modelValue)
-									match = true
-
-						# The $nin operator is similar to $in except that it selects objects for which the specified field does not have any value in the specified array.
-						when '$nin'
-							if queryValue? and modelValueExists
-								if (new Hash modelValue).hasIn(queryValue) is false and (new Hash queryValue).hasIn(modelValue) is false
-									match = true
-
-						# Query-Engine Specific
-						# The $has operator checks if any of the selectorValue values exist within our model's value
-						when '$has'
-							if modelValueExists
-								if (new Hash modelValue).hasIn(queryValue)
-									match = true
-
-						# Query-Engine Specific
-						# The $hasAll operator checks if all of the selectorValue values exist within our model's value
-						when '$hasAll'
-							if modelValueExists
-								if (new Hash modelValue).hasIn(queryValue)
-									match = true
-
-						# The $size operator matches any array with the specified number of elements. The following example would match the object {a:["foo"]}, since that array has just one element:
-						when '$size', '$length'
-							if modelValue.length?
-								if modelValue.length is queryValue
-									match = true
-
-						# The $type operator matches values based on their BSON type.
-						when '$type'
-							if typeof modelValue is queryValue
-								match = true
-
-						# Query-Engine Specific
-						# The $like operator checks if selectorValue string exists within the modelValue string (case insensitive)
-						when '$like'
-							if util.isString(modelValue) and modelValue.toLowerCase().indexOf(queryValue.toLowerCase()) isnt -1
-								match = true
-
-						# Query-Engine Specific
-						# The $likeSensitive operator checks if selectorValue string exists within the modelValue string (case sensitive)
-						when '$likeSensitive'
-							if util.isString(modelValue) and modelValue.indexOf(queryValue) isnt -1
-								match = true
-
-						# Check for existence (or lack thereof) of a field.
-						when '$exists'
-							if queryValue is modelValueExists
-								match = true
-
-						# The $mod operator allows you to do fast modulo queries to replace a common case for where clauses.
-						when '$mod'
-							if modelValueExists
-								$mod = queryValue
-								$mod = [$mod]  unless util.isArray($mod)
-								$mod.push(0)  if $mod.length is 1
-								if (modelValue % $mod[0]) is $mod[1]
-									match = true
-
-						# Query-Engine Specific
-						# Use $eq for deep equals
-						when '$eq', '$equal'
-							if util.isEqual(modelValue,queryValue)
-								match = true
-
-						# Use $ne for "not equals".
-						when '$ne'
-							if modelValue isnt queryValue
-								match = true
-
-						# less than
-						when '$lt'
-							if queryValue? and util.isComparable(modelValue) and modelValue < queryValue
-								match = true
-
-						# greater than
-						when '$gt'
-							if queryValue? and util.isComparable(modelValue) and modelValue > queryValue
-								match = true
-
-						# Query-Engine Specific
-						# between
-						when '$bt'
-							if queryValue? and util.isComparable(modelValue) and queryValue[0] < modelValue and modelValue < queryValue[1]
-								match = true
-
-						# less than or equal to
-						when '$lte'
-							if queryValue? and util.isComparable(modelValue) and modelValue <= queryValue
-								match = true
-
-						# greater than or equal to
-						when '$gte'
-							if queryValue? and util.isComparable(modelValue) and modelValue >= queryValue
-								match = true
-
-						# Query-Engine Specific
-						# between or equal to
-						when '$bte'
-							if queryValue? and util.isComparable(modelValue) and queryValue[0] <= modelValue and modelValue <= queryValue[1]
-								match = true
-
+		for compiledSelector in @compiledSelectors
+			# Test Selector
+			match = @testCompiledSelector(compiledSelector, model)
 
 			# Matched
 			if match
@@ -1333,6 +1449,70 @@ class Query
 
 		# Return
 		return matchAll
+
+	# Compile Query
+	# Transform the query into a series of compiled selectors
+	compileQuery: ->
+		# Prepare
+		query = @
+		compiledSelectors = []
+
+		# Selectors
+		for own fieldName, selectorValue of @source
+
+			# Advanced Selectors
+			if fieldName in ['$or','$nor','$and','$not']
+				compiledSelector = @compileSelector(fieldName,{fieldName,selectorValue})
+				compiledSelectors.push(compiledSelector)
+
+			# String
+			else if util.isString(selectorValue)
+				compiledSelector = @compileSelector('string',{fieldName,selectorValue})
+				compiledSelectors.push(compiledSelector)
+
+			# Number
+			else if util.isNumber(selectorValue)
+				compiledSelector = @compileSelector('number',{fieldName,selectorValue})
+				compiledSelectors.push(compiledSelector)
+
+			# Boolean
+			else if util.isBoolean(selectorValue)
+				compiledSelector = @compileSelector('boolean',{fieldName,selectorValue})
+				compiledSelectors.push(compiledSelector)
+
+			# Array
+			else if util.isArray(selectorValue)
+				compiledSelector = @compileSelector('array',{fieldName,selectorValue})
+				compiledSelectors.push(compiledSelector)
+
+			# Date
+			else if util.isDate(selectorValue)
+				compiledSelector = @compileSelector('date',{fieldName,selectorValue})
+				compiledSelectors.push(compiledSelector)
+
+			# Regular Expression
+			else if util.isRegExp(selectorValue)
+				compiledSelector = @compileSelector('regexp',{fieldName,selectorValue})
+				compiledSelectors.push(compiledSelector)
+
+			# Null
+			else if util.isNull(selectorValue)
+				compiledSelector = @compileSelector('null',{fieldName,selectorValue})
+				compiledSelectors.push(compiledSelector)
+
+			# Advanced Selectors
+			else if util.isObject(selectorValue)
+				for own advancedSelectorName,advancedSelectorValue of selectorValue
+					compiledSelector = @compileSelector(advancedSelectorName,{fieldName,selectorValue:advancedSelectorValue})
+					compiledSelectors.push(compiledSelector)
+
+		# Apply
+		@compiledSelectors = compiledSelectors
+
+		# Chain
+		@
+
+
 
 
 

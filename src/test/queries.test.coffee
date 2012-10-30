@@ -324,7 +324,6 @@ generateTestSuite = (describe, it, name,docs) ->
 				assert.deepEqual actual.toJSON(), expected.toJSON()
 
 			it 'limit+offset+page (via findAll)', ->
-				debugger
 				actual = docs.findAll(
 					# Query
 					{id: $exists: true},

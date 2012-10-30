@@ -811,7 +811,7 @@
       if (criteria == null) {
         criteria = {};
       }
-      passed = this.testFilters(model, criteria.filters) && this.testQueries(model, criteria.queries) && this.testPills(model, criteria.pills);
+      passed = this.testQueries(model, criteria.queries) && this.testFilters(model, criteria.filters) && this.testPills(model, criteria.pills);
       return passed;
     };
 
@@ -849,24 +849,6 @@
       return passed;
     };
 
-    Criteria.prototype.testFilters = function(model, filters) {
-      var cleanedSearchString, filter, filterName, passed;
-      passed = true;
-      cleanedSearchString = this.getCleanedSearchString();
-      if (filters == null) {
-        filters = this.getFilters();
-      }
-      for (filterName in filters) {
-        if (!__hasProp.call(filters, filterName)) continue;
-        filter = filters[filterName];
-        if (filter(model, cleanedSearchString) === false) {
-          passed = false;
-          return false;
-        }
-      }
-      return passed;
-    };
-
     Criteria.prototype.testQueries = function(model, queries) {
       var passed, query, queryName;
       passed = true;
@@ -881,6 +863,24 @@
           queries[queryName] = query;
         }
         if (query.test(model) === false) {
+          passed = false;
+          return false;
+        }
+      }
+      return passed;
+    };
+
+    Criteria.prototype.testFilters = function(model, filters) {
+      var cleanedSearchString, filter, filterName, passed;
+      passed = true;
+      cleanedSearchString = this.getCleanedSearchString();
+      if (filters == null) {
+        filters = this.getFilters();
+      }
+      for (filterName in filters) {
+        if (!__hasProp.call(filters, filterName)) continue;
+        filter = filters[filterName];
+        if (filter(model, cleanedSearchString) === false) {
           passed = false;
           return false;
         }
@@ -1017,239 +1017,407 @@
 
   Query = (function() {
 
-    Query.prototype.query = null;
+    Query.prototype.source = null;
 
-    function Query(query) {
-      if (query == null) {
-        query = {};
-      }
-      this.query = query;
-    }
+    Query.prototype.compiledSelectors = null;
 
-    Query.prototype.test = function(model) {
-      var $mod, beginsWithValue, empty, endWithValue, match, matchAll, matchAny, modelId, modelValue, modelValueExists, query, queryGroup, queryType, queryValue, selectorName, selectorValue, _i, _j, _k, _l, _len, _len1, _len2, _len3, _ref;
-      matchAll = true;
-      matchAny = false;
-      empty = true;
-      _ref = this.query;
-      for (selectorName in _ref) {
-        if (!__hasProp.call(_ref, selectorName)) continue;
-        selectorValue = _ref[selectorName];
-        match = false;
-        empty = false;
-        modelValue = model.get(selectorName);
-        modelId = model.get('id');
-        modelValueExists = typeof modelValue !== 'undefined';
-        if (!modelValueExists) {
-          modelValue = false;
+    Query.prototype.selectors = {
+      'string': {
+        test: function() {
+          return this.modelValueExists && this.modelValue === this.selectorValue;
         }
-        if (selectorName === '$or' || selectorName === '$nor') {
-          queryGroup = util.toArrayGroup(selectorValue);
+      },
+      'number': {
+        test: function() {
+          return this.selector('string', this);
+        }
+      },
+      'boolean': {
+        test: function() {
+          return this.selector('string', this);
+        }
+      },
+      'array': {
+        test: function() {
+          return this.modelValueExists && (new Hash(this.modelValue)).isSame(this.selectorValue);
+        }
+      },
+      'date': {
+        test: function() {
+          return this.modelValueExists && this.modelValue.toString() === this.selectorValue.toString();
+        }
+      },
+      'regexp': {
+        test: function() {
+          return this.modelValueExists && this.selectorValue.test(this.modelValue);
+        }
+      },
+      'null': {
+        test: function() {
+          return this.modelValue === this.selectorValue;
+        }
+      },
+      '$or': {
+        compile: function() {
+          var queries, query, queryGroup, querySource, _i, _len;
+          queries = [];
+          queryGroup = util.toArrayGroup(this.selectorValue);
           if (!queryGroup.length) {
             throw new Error("Query called with an empty " + selectorName + " statement");
           }
           for (_i = 0, _len = queryGroup.length; _i < _len; _i++) {
-            query = queryGroup[_i];
-            query = new Query(query);
-            if (query.test(model)) {
-              match = true;
-              break;
+            querySource = queryGroup[_i];
+            query = new Query(querySource);
+            queries.push(query);
+          }
+          return {
+            queries: queries
+          };
+        },
+        test: function() {
+          var query, _i, _len, _ref;
+          _ref = this.queries;
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            query = _ref[_i];
+            if (query.test(this.model)) {
+              return true;
             }
           }
-          if (selectorName === '$nor') {
-            match = !match;
-          }
-        } else if (selectorName === '$and' || selectorName === '$not') {
-          queryGroup = util.toArrayGroup(selectorValue);
-          if (!queryGroup.length) {
-            throw new Error("Query called with an empty " + selectorName + " statement");
-          }
-          for (_j = 0, _len1 = queryGroup.length; _j < _len1; _j++) {
-            query = queryGroup[_j];
-            query = new Query(query);
-            match = query.test(model);
-            if (!match) {
-              break;
-            }
-          }
-          if (selectorName === '$not') {
-            match = !match;
-          }
-        } else if (util.isString(selectorValue) || util.isNumber(selectorValue) || util.isBoolean(selectorValue)) {
-          if (modelValueExists && modelValue === selectorValue) {
-            match = true;
-          }
-        } else if (util.isArray(selectorValue)) {
-          if (modelValueExists && (new Hash(modelValue)).isSame(selectorValue)) {
-            match = true;
-          }
-        } else if (util.isDate(selectorValue)) {
-          if (modelValueExists && modelValue.toString() === selectorValue.toString()) {
-            match = true;
-          }
-        } else if (util.isRegExp(selectorValue)) {
-          if (modelValueExists && selectorValue.test(modelValue)) {
-            match = true;
-          }
-        } else if (util.isNull(selectorValue)) {
-          if (modelValue === selectorValue) {
-            match = true;
-          }
-        } else if (util.isObject(selectorValue)) {
-          for (queryType in selectorValue) {
-            if (!__hasProp.call(selectorValue, queryType)) continue;
-            queryValue = selectorValue[queryType];
-            switch (queryType) {
-              case '$beginsWith':
-              case '$startsWith':
-                if (queryValue && modelValueExists && util.isString(modelValue)) {
-                  if (!util.isArray(queryValue)) {
-                    queryValue = [queryValue];
-                  }
-                  for (_k = 0, _len2 = queryValue.length; _k < _len2; _k++) {
-                    beginsWithValue = queryValue[_k];
-                    if (modelValue.substr(0, beginsWithValue.length) === beginsWithValue) {
-                      match = true;
-                      break;
-                    }
-                  }
-                }
-                break;
-              case '$endsWith':
-              case '$finishesWith':
-                if (queryValue && modelValueExists && util.isString(modelValue)) {
-                  if (!util.isArray(queryValue)) {
-                    queryValue = [queryValue];
-                  }
-                  for (_l = 0, _len3 = queryValue.length; _l < _len3; _l++) {
-                    endWithValue = queryValue[_l];
-                    if (modelValue.substr(endWithValue.length * -1) === endWithValue) {
-                      match = true;
-                      break;
-                    }
-                  }
-                }
-                break;
-              case '$all':
-                if ((queryValue != null) && modelValueExists) {
-                  if ((new Hash(modelValue)).hasAll(queryValue)) {
-                    match = true;
-                  }
-                }
-                break;
-              case '$in':
-                if ((queryValue != null) && modelValueExists) {
-                  if ((new Hash(modelValue)).hasIn(queryValue) || (new Hash(queryValue)).hasIn(modelValue)) {
-                    match = true;
-                  }
-                }
-                break;
-              case '$nin':
-                if ((queryValue != null) && modelValueExists) {
-                  if ((new Hash(modelValue)).hasIn(queryValue) === false && (new Hash(queryValue)).hasIn(modelValue) === false) {
-                    match = true;
-                  }
-                }
-                break;
-              case '$has':
-                if (modelValueExists) {
-                  if ((new Hash(modelValue)).hasIn(queryValue)) {
-                    match = true;
-                  }
-                }
-                break;
-              case '$hasAll':
-                if (modelValueExists) {
-                  if ((new Hash(modelValue)).hasIn(queryValue)) {
-                    match = true;
-                  }
-                }
-                break;
-              case '$size':
-              case '$length':
-                if (modelValue.length != null) {
-                  if (modelValue.length === queryValue) {
-                    match = true;
-                  }
-                }
-                break;
-              case '$type':
-                if (typeof modelValue === queryValue) {
-                  match = true;
-                }
-                break;
-              case '$like':
-                if (util.isString(modelValue) && modelValue.toLowerCase().indexOf(queryValue.toLowerCase()) !== -1) {
-                  match = true;
-                }
-                break;
-              case '$likeSensitive':
-                if (util.isString(modelValue) && modelValue.indexOf(queryValue) !== -1) {
-                  match = true;
-                }
-                break;
-              case '$exists':
-                if (queryValue === modelValueExists) {
-                  match = true;
-                }
-                break;
-              case '$mod':
-                if (modelValueExists) {
-                  $mod = queryValue;
-                  if (!util.isArray($mod)) {
-                    $mod = [$mod];
-                  }
-                  if ($mod.length === 1) {
-                    $mod.push(0);
-                  }
-                  if ((modelValue % $mod[0]) === $mod[1]) {
-                    match = true;
-                  }
-                }
-                break;
-              case '$eq':
-              case '$equal':
-                if (util.isEqual(modelValue, queryValue)) {
-                  match = true;
-                }
-                break;
-              case '$ne':
-                if (modelValue !== queryValue) {
-                  match = true;
-                }
-                break;
-              case '$lt':
-                if ((queryValue != null) && util.isComparable(modelValue) && modelValue < queryValue) {
-                  match = true;
-                }
-                break;
-              case '$gt':
-                if ((queryValue != null) && util.isComparable(modelValue) && modelValue > queryValue) {
-                  match = true;
-                }
-                break;
-              case '$bt':
-                if ((queryValue != null) && util.isComparable(modelValue) && queryValue[0] < modelValue && modelValue < queryValue[1]) {
-                  match = true;
-                }
-                break;
-              case '$lte':
-                if ((queryValue != null) && util.isComparable(modelValue) && modelValue <= queryValue) {
-                  match = true;
-                }
-                break;
-              case '$gte':
-                if ((queryValue != null) && util.isComparable(modelValue) && modelValue >= queryValue) {
-                  match = true;
-                }
-                break;
-              case '$bte':
-                if ((queryValue != null) && util.isComparable(modelValue) && queryValue[0] <= modelValue && modelValue <= queryValue[1]) {
-                  match = true;
-                }
-            }
-          }
+          return false;
         }
+      },
+      '$nor': {
+        compile: function() {
+          return this.selector('$or', this);
+        },
+        test: function() {
+          return !this.selector('$or', this);
+        }
+      },
+      '$and': {
+        compile: function() {
+          return this.selector('$or', this);
+        },
+        test: function() {
+          var query, _i, _len, _ref;
+          _ref = this.queries;
+          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+            query = _ref[_i];
+            if (query.test(this.model) === false) {
+              return false;
+            }
+          }
+          return true;
+        }
+      },
+      '$not': {
+        compile: function() {
+          return this.selector('$and', this);
+        },
+        test: function() {
+          return !this.selector('$and', this);
+        }
+      },
+      '$beginsWith': {
+        test: function() {
+          var beginsWithParts, beginsWithValue, _i, _len;
+          if (this.selectorValue && this.modelValueExists && util.isString(this.modelValue)) {
+            beginsWithParts = util.toArray(this.selectorValue);
+            for (_i = 0, _len = beginsWithParts.length; _i < _len; _i++) {
+              beginsWithValue = beginsWithParts[_i];
+              if (this.modelValue.substr(0, beginsWithValue.length) === beginsWithValue) {
+                return true;
+                break;
+              }
+            }
+          }
+          return false;
+        }
+      },
+      '$startsWith': {
+        test: function() {
+          return this.selector('$beginsWith', this);
+        }
+      },
+      '$endsWith': {
+        test: function() {
+          var endsWithParts, endsWithValue, _i, _len;
+          if (this.selectorValue && this.modelValueExists && util.isString(this.modelValue)) {
+            endsWithParts = util.toArray(this.selectorValue);
+            for (_i = 0, _len = endsWithParts.length; _i < _len; _i++) {
+              endsWithValue = endsWithParts[_i];
+              if (this.modelValue.substr(endsWithValue.length * -1) === endsWithValue) {
+                return true;
+                break;
+              }
+            }
+          }
+          return false;
+        }
+      },
+      '$finishesWith': {
+        test: function() {
+          return this.selector('$endsWith', this);
+        }
+      },
+      '$all': {
+        test: function() {
+          if ((this.selectorValue != null) && this.modelValueExists) {
+            if ((new Hash(this.modelValue)).hasAll(this.selectorValue)) {
+              return true;
+            }
+          }
+          return false;
+        }
+      },
+      '$in': {
+        test: function() {
+          if ((this.selectorValue != null) && this.modelValueExists) {
+            if ((new Hash(this.modelValue)).hasIn(this.selectorValue) || (new Hash(this.selectorValue)).hasIn(this.modelValue)) {
+              return true;
+            }
+          }
+          return false;
+        }
+      },
+      '$nin': {
+        test: function() {
+          if ((this.selectorValue != null) && this.modelValueExists) {
+            if ((new Hash(this.modelValue)).hasIn(this.selectorValue) === false && (new Hash(this.selectorValue)).hasIn(this.modelValue) === false) {
+              return true;
+            }
+          }
+          return false;
+        }
+      },
+      '$has': {
+        test: function() {
+          if (this.modelValueExists) {
+            if ((new Hash(this.modelValue)).hasIn(this.selectorValue)) {
+              return true;
+            }
+          }
+          return false;
+        }
+      },
+      '$hasAll': {
+        test: function() {
+          if (this.modelValueExists) {
+            if ((new Hash(this.modelValue)).hasIn(this.selectorValue)) {
+              return true;
+            }
+          }
+          return false;
+        }
+      },
+      '$size': {
+        test: function() {
+          if (this.modelValue.length != null) {
+            if (this.modelValue.length === this.selectorValue) {
+              return true;
+            }
+          }
+          return false;
+        }
+      },
+      '$length': {
+        test: function() {
+          return this.selector('$size', this);
+        }
+      },
+      '$type': {
+        test: function() {
+          if (typeof this.modelValue === this.selectorValue) {
+            return true;
+          }
+          return false;
+        }
+      },
+      '$like': {
+        test: function() {
+          if (util.isString(this.modelValue) && this.modelValue.toLowerCase().indexOf(this.selectorValue.toLowerCase()) !== -1) {
+            return true;
+          }
+          return false;
+        }
+      },
+      '$likeSensitive': {
+        test: function() {
+          if (util.isString(this.modelValue) && this.modelValue.indexOf(this.selectorValue) !== -1) {
+            return true;
+          }
+          return false;
+        }
+      },
+      '$exists': {
+        test: function() {
+          if (this.selectorValue === this.modelValueExists) {
+            return true;
+          }
+          return false;
+        }
+      },
+      '$mod': {
+        test: function() {
+          var $mod;
+          if (this.modelValueExists) {
+            $mod = this.selectorValue;
+            if (!util.isArray($mod)) {
+              $mod = [$mod];
+            }
+            if ($mod.length === 1) {
+              $mod.push(0);
+            }
+            if ((this.modelValue % $mod[0]) === $mod[1]) {
+              return true;
+            }
+          }
+          return false;
+        }
+      },
+      '$eq': {
+        test: function() {
+          if (util.isEqual(this.modelValue, this.selectorValue)) {
+            return true;
+          }
+          return false;
+        }
+      },
+      '$equal': {
+        test: function() {
+          return this.selector('$eq', this);
+        }
+      },
+      '$ne': {
+        test: function() {
+          if (this.modelValue !== this.selectorValue) {
+            return true;
+          }
+          return false;
+        }
+      },
+      '$lt': {
+        test: function() {
+          if ((this.selectorValue != null) && util.isComparable(this.modelValue) && this.modelValue < this.selectorValue) {
+            return true;
+          }
+          return false;
+        }
+      },
+      '$gt': {
+        test: function() {
+          if ((this.selectorValue != null) && util.isComparable(this.modelValue) && this.modelValue > this.selectorValue) {
+            return true;
+          }
+          return false;
+        }
+      },
+      '$bt': {
+        test: function() {
+          if ((this.selectorValue != null) && util.isComparable(this.modelValue) && this.selectorValue[0] < this.modelValue && this.modelValue < this.selectorValue[1]) {
+            return true;
+          }
+          return false;
+        }
+      },
+      '$lte': {
+        test: function() {
+          if ((this.selectorValue != null) && util.isComparable(this.modelValue) && this.modelValue <= this.selectorValue) {
+            return true;
+          }
+          return false;
+        }
+      },
+      '$gte': {
+        test: function() {
+          if ((this.selectorValue != null) && util.isComparable(this.modelValue) && this.modelValue >= this.selectorValue) {
+            return true;
+          }
+          return false;
+        }
+      },
+      '$bte': {
+        test: function() {
+          if ((this.selectorValue != null) && util.isComparable(this.modelValue) && this.selectorValue[0] <= this.modelValue && this.modelValue <= this.selectorValue[1]) {
+            return true;
+          }
+          return false;
+        }
+      }
+    };
+
+    function Query(source) {
+      if (source == null) {
+        source = {};
+      }
+      this.source = source;
+      this.compileQuery();
+    }
+
+    Query.prototype.compileSelector = function(selectorName, selectorOpts) {
+      var compileOpts, compiledSelector, key, opts, query, selector, selectors, value;
+      if (selectorOpts == null) {
+        selectorOpts = {};
+      }
+      query = this;
+      selectors = this.selectors;
+      opts = {
+        selectorName: selectorName
+      };
+      selector = selectors[selectorName];
+      if (!selector) {
+        throw new Error("Couldn't find the selector " + selectorName);
+      }
+      for (key in selectorOpts) {
+        if (!__hasProp.call(selectorOpts, key)) continue;
+        value = selectorOpts[key];
+        opts[key] = value;
+      }
+      if (selector.compile != null) {
+        opts.selector = function(selectorName, opts) {
+          return selectors[selectorName].compile.call(opts);
+        };
+        compileOpts = selector.compile.call(opts);
+        for (key in compileOpts) {
+          if (!__hasProp.call(compileOpts, key)) continue;
+          value = compileOpts[key];
+          opts[key] = value;
+        }
+      }
+      opts.selector = function(selectorName, opts) {
+        return selectors[selectorName].test.call(opts);
+      };
+      compiledSelector = {
+        opts: opts,
+        test: selector.test
+      };
+      return compiledSelector;
+    };
+
+    Query.prototype.testCompiledSelector = function(compiledSelector, model) {
+      var match, opts, test;
+      opts = compiledSelector.opts;
+      test = compiledSelector.test;
+      opts.model = model;
+      opts.modelValue = opts.model.get(opts.fieldName);
+      opts.modelId = opts.model.get('id');
+      opts.modelValueExists = typeof opts.modelValue !== 'undefined';
+      if (!opts.modelValueExists) {
+        opts.modelValue = false;
+      }
+      match = test.call(opts);
+      return match;
+    };
+
+    Query.prototype.test = function(model) {
+      var compiledSelector, empty, match, matchAll, matchAny, _i, _len, _ref;
+      matchAll = true;
+      matchAny = false;
+      empty = true;
+      _ref = this.compiledSelectors;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        compiledSelector = _ref[_i];
+        match = this.testCompiledSelector(compiledSelector, model);
         if (match) {
           matchAny = true;
         } else {
@@ -1260,6 +1428,78 @@
         matchAll = false;
       }
       return matchAll;
+    };
+
+    Query.prototype.compileQuery = function() {
+      var advancedSelectorName, advancedSelectorValue, compiledSelector, compiledSelectors, fieldName, query, selectorValue, _ref;
+      query = this;
+      compiledSelectors = [];
+      _ref = this.source;
+      for (fieldName in _ref) {
+        if (!__hasProp.call(_ref, fieldName)) continue;
+        selectorValue = _ref[fieldName];
+        if (fieldName === '$or' || fieldName === '$nor' || fieldName === '$and' || fieldName === '$not') {
+          compiledSelector = this.compileSelector(fieldName, {
+            fieldName: fieldName,
+            selectorValue: selectorValue
+          });
+          compiledSelectors.push(compiledSelector);
+        } else if (util.isString(selectorValue)) {
+          compiledSelector = this.compileSelector('string', {
+            fieldName: fieldName,
+            selectorValue: selectorValue
+          });
+          compiledSelectors.push(compiledSelector);
+        } else if (util.isNumber(selectorValue)) {
+          compiledSelector = this.compileSelector('number', {
+            fieldName: fieldName,
+            selectorValue: selectorValue
+          });
+          compiledSelectors.push(compiledSelector);
+        } else if (util.isBoolean(selectorValue)) {
+          compiledSelector = this.compileSelector('boolean', {
+            fieldName: fieldName,
+            selectorValue: selectorValue
+          });
+          compiledSelectors.push(compiledSelector);
+        } else if (util.isArray(selectorValue)) {
+          compiledSelector = this.compileSelector('array', {
+            fieldName: fieldName,
+            selectorValue: selectorValue
+          });
+          compiledSelectors.push(compiledSelector);
+        } else if (util.isDate(selectorValue)) {
+          compiledSelector = this.compileSelector('date', {
+            fieldName: fieldName,
+            selectorValue: selectorValue
+          });
+          compiledSelectors.push(compiledSelector);
+        } else if (util.isRegExp(selectorValue)) {
+          compiledSelector = this.compileSelector('regexp', {
+            fieldName: fieldName,
+            selectorValue: selectorValue
+          });
+          compiledSelectors.push(compiledSelector);
+        } else if (util.isNull(selectorValue)) {
+          compiledSelector = this.compileSelector('null', {
+            fieldName: fieldName,
+            selectorValue: selectorValue
+          });
+          compiledSelectors.push(compiledSelector);
+        } else if (util.isObject(selectorValue)) {
+          for (advancedSelectorName in selectorValue) {
+            if (!__hasProp.call(selectorValue, advancedSelectorName)) continue;
+            advancedSelectorValue = selectorValue[advancedSelectorName];
+            compiledSelector = this.compileSelector(advancedSelectorName, {
+              fieldName: fieldName,
+              selectorValue: advancedSelectorValue
+            });
+            compiledSelectors.push(compiledSelector);
+          }
+        }
+      }
+      this.compiledSelectors = compiledSelectors;
+      return this;
     };
 
     return Query;
