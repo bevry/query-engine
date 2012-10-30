@@ -1117,10 +1117,10 @@ class Query
 	selectors:
 		# The $or operator lets you use a boolean or expression to do queries. You give $or a list of expressions, any of which can satisfy the query.
 		'$or':
-			compile: ->
+			compile: (opts) ->
 				# Prepare
 				queries = []
-				queryGroup = util.toArrayGroup(@selectorValue)
+				queryGroup = util.toArrayGroup(opts.selectorValue)
 				unless queryGroup.length then throw new Error("Query called with an empty #{selectorName} statement")
 				# Match if at least one item passes
 				for querySource in queryGroup
@@ -1128,240 +1128,240 @@ class Query
 					queries.push(query)
 				# Return
 				return {queries}
-			test: ->
-				for query in @queries
-					if query.test(@model)
+			test: (opts) ->
+				for query in opts.queries
+					if query.test(opts.model)
 						return true
 				return false
 		# The $nor operator is the opposite of $or (pass if they all don't match the query)
 		'$nor':
-			compile: ->
-				return @selector('$or',@)
-			test: ->
-				return !@selector('$or',@)
+			compile: (opts) ->
+				return opts.selector('$or',opts)
+			test: (opts) ->
+				return !opts.selector('$or',opts)
 
 		# The $and operator lets you use boolean and in a query. You give $and an array of expressions, all of which must match to satisfy the query.
 		'$and':
-			compile: ->
-				return @selector('$or',@)
-			test: ->
-				for query in @queries
-					if query.test(@model) is false
+			compile: (opts) ->
+				return opts.selector('$or',opts)
+			test: (opts) ->
+				for query in opts.queries
+					if query.test(opts.model) is false
 						return false
 				return true
 		# The $not operator is the opposite of $and (pass if only one doesn't match the query)
 		'$not':
-			compile: ->
-				return @selector('$and',@)
-			test: ->
-				return !@selector('$and',@)
+			compile: (opts) ->
+				return opts.selector('$and',opts)
+			test: (opts) ->
+				return !opts.selector('$and',opts)
 
 
 		# Types
 		'string':
-			test: ->
-				return @modelValueExists and @modelValue is @selectorValue
+			test: (opts) ->
+				return opts.modelValueExists and opts.modelValue is opts.selectorValue
 		'number':
-			test: ->
-				return @selector('string',@)
+			test: (opts) ->
+				return opts.selector('string',opts)
 		'boolean':
-			test: ->
-				return @selector('string',@)
+			test: (opts) ->
+				return opts.selector('string',opts)
 		'array':
-			test: ->
-				return @modelValueExists and (new Hash @modelValue).isSame(@selectorValue)
+			test: (opts) ->
+				return opts.modelValueExists and (new Hash opts.modelValue).isSame(opts.selectorValue)
 		'date':
-			test: ->
-				return @modelValueExists and @modelValue.toString() is @selectorValue.toString()
+			test: (opts) ->
+				return opts.modelValueExists and opts.modelValue.toString() is opts.selectorValue.toString()
 		'regexp':
-			test: ->
-				return @modelValueExists and @selectorValue.test(@modelValue)
+			test: (opts) ->
+				return opts.modelValueExists and opts.selectorValue.test(opts.modelValue)
 		'null':
-			test: ->
-				return @modelValue is @selectorValue
+			test: (opts) ->
+				return opts.modelValue is opts.selectorValue
 
 		# The $beginsWith operator checks if the value begins with a particular value or values if an array was passed
 		'$beginsWith':
-			test: ->
-				if @selectorValue and @modelValueExists and util.isString(@modelValue)
-					beginsWithParts = util.toArray(@selectorValue)
+			test: (opts) ->
+				if opts.selectorValue and opts.modelValueExists and util.isString(opts.modelValue)
+					beginsWithParts = util.toArray(opts.selectorValue)
 					for beginsWithValue in beginsWithParts
-						if @modelValue.substr(0,beginsWithValue.length) is beginsWithValue
+						if opts.modelValue.substr(0,beginsWithValue.length) is beginsWithValue
 							return true
 							break
 				return false
 		'$startsWith':
-			test: ->
-				return @selector('$beginsWith',@)
+			test: (opts) ->
+				return opts.selector('$beginsWith',opts)
 
 		# The $endsWith operator checks if the value ends with a particular value or values if an array was passed
 		'$endsWith':
-			test: ->
-				if @selectorValue and @modelValueExists and util.isString(@modelValue)
-					endsWithParts = util.toArray(@selectorValue)
+			test: (opts) ->
+				if opts.selectorValue and opts.modelValueExists and util.isString(opts.modelValue)
+					endsWithParts = util.toArray(opts.selectorValue)
 					for endsWithValue in endsWithParts
-						if @modelValue.substr(endsWithValue.length*-1) is endsWithValue
+						if opts.modelValue.substr(endsWithValue.length*-1) is endsWithValue
 							return true
 							break
 				return false
 		'$finishesWith':
-			test: ->
-				return @selector('$endsWith',@)
+			test: (opts) ->
+				return opts.selector('$endsWith',opts)
 
 		# The $all operator is similar to $in, but instead of matching any value in the specified array all values in the array must be matched.
 		'$all':
-			test: ->
-				if @selectorValue? and @modelValueExists
-					if (new Hash @modelValue).hasAll(@selectorValue)
+			test: (opts) ->
+				if opts.selectorValue? and opts.modelValueExists
+					if (new Hash opts.modelValue).hasAll(opts.selectorValue)
 						return true
 				return false
 
 		# The $in operator is analogous to the SQL IN modifier, allowing you to specify an array of possible matches.
 		# The target field's value can also be an array; if so then the document matches if any of the elements of the array's value matches any of the $in field's values
 		'$in':
-			test: ->
-				if @selectorValue? and @modelValueExists
-					if (new Hash @modelValue).hasIn(@selectorValue) or (new Hash @selectorValue).hasIn(@modelValue)
+			test: (opts) ->
+				if opts.selectorValue? and opts.modelValueExists
+					if (new Hash opts.modelValue).hasIn(opts.selectorValue) or (new Hash opts.selectorValue).hasIn(opts.modelValue)
 						return true
 				return false
 
 		# The $nin operator is similar to $in except that it selects objects for which the specified field does not have any value in the specified array.
 		'$nin':
-			test: ->
-				if @selectorValue? and @modelValueExists
-					if (new Hash @modelValue).hasIn(@selectorValue) is false and (new Hash @selectorValue).hasIn(@modelValue) is false
+			test: (opts) ->
+				if opts.selectorValue? and opts.modelValueExists
+					if (new Hash opts.modelValue).hasIn(opts.selectorValue) is false and (new Hash opts.selectorValue).hasIn(opts.modelValue) is false
 						return true
 				return false
 
 		# Query-Engine Specific
-		# The $has operator checks if any of the selectorValue values exist within our @model's value
+		# The $has operator checks if any of the selectorValue values exist within our opts.model's value
 		'$has':
-			test: ->
-				if @modelValueExists
-					if (new Hash @modelValue).hasIn(@selectorValue)
+			test: (opts) ->
+				if opts.modelValueExists
+					if (new Hash opts.modelValue).hasIn(opts.selectorValue)
 						return true
 				return false
 
 		# Query-Engine Specific
-		# The $hasAll operator checks if all of the selectorValue values exist within our @model's value
+		# The $hasAll operator checks if all of the selectorValue values exist within our opts.model's value
 		'$hasAll':
-			test: ->
-				if @modelValueExists
-					if (new Hash @modelValue).hasIn(@selectorValue)
+			test: (opts) ->
+				if opts.modelValueExists
+					if (new Hash opts.modelValue).hasIn(opts.selectorValue)
 						return true
 				return false
 
 		# The $size operator matches any array with the specified number of elements. The following example would match the object {a:["foo"]}, since that array has just one element:
 		'$size':
-			test: ->
-				if @modelValue.length?
-					if @modelValue.length is @selectorValue
+			test: (opts) ->
+				if opts.modelValue.length?
+					if opts.modelValue.length is opts.selectorValue
 						return true
 				return false
 		'$length':
-			test: ->
-				return @selector('$size',@)
+			test: (opts) ->
+				return opts.selector('$size',opts)
 
 		# The $type operator matches values based on their BSON type.
 		'$type':
-			test: ->
-				if typeof @modelValue is @selectorValue
+			test: (opts) ->
+				if typeof opts.modelValue is opts.selectorValue
 					return true
 				return false
 
 		# Query-Engine Specific
-		# The $like operator checks if selectorValue string exists within the @modelValue string (case insensitive)
+		# The $like operator checks if selectorValue string exists within the opts.modelValue string (case insensitive)
 		'$like':
-			test: ->
-				if util.isString(@modelValue) and @modelValue.toLowerCase().indexOf(@selectorValue.toLowerCase()) isnt -1
+			test: (opts) ->
+				if util.isString(opts.modelValue) and opts.modelValue.toLowerCase().indexOf(opts.selectorValue.toLowerCase()) isnt -1
 					return true
 				return false
 
 		# Query-Engine Specific
-		# The $likeSensitive operator checks if selectorValue string exists within the @modelValue string (case sensitive)
+		# The $likeSensitive operator checks if selectorValue string exists within the opts.modelValue string (case sensitive)
 		'$likeSensitive':
-			test: ->
-				if util.isString(@modelValue) and @modelValue.indexOf(@selectorValue) isnt -1
+			test: (opts) ->
+				if util.isString(opts.modelValue) and opts.modelValue.indexOf(opts.selectorValue) isnt -1
 					return true
 				return false
 
 		# Check for existence (or lack thereof) of a field.
 		'$exists':
-			test: ->
-				if @selectorValue is @modelValueExists
+			test: (opts) ->
+				if opts.selectorValue is opts.modelValueExists
 					return true
 				return false
 
 		# The $mod operator allows you to do fast modulo queries to replace a common case for where clauses.
 		'$mod':
-			test: ->
-				if @modelValueExists
-					$mod = @selectorValue
+			test: (opts) ->
+				if opts.modelValueExists
+					$mod = opts.selectorValue
 					$mod = [$mod]  unless util.isArray($mod)
 					$mod.push(0)  if $mod.length is 1
-					if (@modelValue % $mod[0]) is $mod[1]
+					if (opts.modelValue % $mod[0]) is $mod[1]
 						return true
 				return false
 
 		# Query-Engine Specific
 		# Use $eq for deep equals
 		'$eq':
-			test: ->
-				if util.isEqual(@modelValue,@selectorValue)
+			test: (opts) ->
+				if util.isEqual(opts.modelValue,opts.selectorValue)
 					return true
 				return false
 		'$equal':
-			test: ->
-				return @selector('$eq',@)
+			test: (opts) ->
+				return opts.selector('$eq',opts)
 
 		# Use $ne for "not equals".
 		'$ne':
-			test: ->
-				if @modelValue isnt @selectorValue
+			test: (opts) ->
+				if opts.modelValue isnt opts.selectorValue
 					return true
 				return false
 
 		# less than
 		'$lt':
-			test: ->
-				if @selectorValue? and util.isComparable(@modelValue) and @modelValue < @selectorValue
+			test: (opts) ->
+				if opts.selectorValue? and util.isComparable(opts.modelValue) and opts.modelValue < opts.selectorValue
 					return true
 				return false
 
 		# greater than
 		'$gt':
-			test: ->
-				if @selectorValue? and util.isComparable(@modelValue) and @modelValue > @selectorValue
+			test: (opts) ->
+				if opts.selectorValue? and util.isComparable(opts.modelValue) and opts.modelValue > opts.selectorValue
 					return true
 				return false
 
 		# Query-Engine Specific
 		# between
 		'$bt':
-			test: ->
-				if @selectorValue? and util.isComparable(@modelValue) and @selectorValue[0] < @modelValue and @modelValue < @selectorValue[1]
+			test: (opts) ->
+				if opts.selectorValue? and util.isComparable(opts.modelValue) and opts.selectorValue[0] < opts.modelValue and opts.modelValue < opts.selectorValue[1]
 					return true
 				return false
 
 		# less than or equal to
 		'$lte':
-			test: ->
-				if @selectorValue? and util.isComparable(@modelValue) and @modelValue <= @selectorValue
+			test: (opts) ->
+				if opts.selectorValue? and util.isComparable(opts.modelValue) and opts.modelValue <= opts.selectorValue
 					return true
 				return false
 
 		# greater than or equal to
 		'$gte':
-			test: ->
-				if @selectorValue? and util.isComparable(@modelValue) and @modelValue >= @selectorValue
+			test: (opts) ->
+				if opts.selectorValue? and util.isComparable(opts.modelValue) and opts.modelValue >= opts.selectorValue
 					return true
 				return false
 
 		# Query-Engine Specific
 		# between or equal to
 		'$bte':
-			test: ->
-				if @selectorValue? and util.isComparable(@modelValue) and @selectorValue[0] <= @modelValue and @modelValue <= @selectorValue[1]
+			test: (opts) ->
+				if opts.selectorValue? and util.isComparable(opts.modelValue) and opts.selectorValue[0] <= opts.modelValue and opts.modelValue <= opts.selectorValue[1]
 					return true
 				return false
 
@@ -1389,14 +1389,14 @@ class Query
 		if selector.compile?
 			# Add the selector helper
 			opts.selector = (selectorName,opts) ->
-				return selectors[selectorName].compile.call(opts)
+				return selectors[selectorName].compile(opts)
 			# Add compile opts
-			compileOpts = selector.compile.call(opts)
+			compileOpts = selector.compile(opts)
 			opts[key] = value  for own key,value of compileOpts
 
 		# Add the selector helper
 		opts.selector = (selectorName,opts) ->
-			return selectors[selectorName].test.call(opts)
+			return selectors[selectorName].test(opts)
 
 		# Add the selector with its compiled opts
 		compiledSelector =
@@ -1420,7 +1420,7 @@ class Query
 		opts.modelValue = false  unless opts.modelValueExists
 
 		# Fire selector
-		match = test.call(opts)
+		match = test(opts)
 
 		# Return
 		return match

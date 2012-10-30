@@ -1023,10 +1023,10 @@
 
     Query.prototype.selectors = {
       '$or': {
-        compile: function() {
+        compile: function(opts) {
           var queries, query, queryGroup, querySource, _i, _len;
           queries = [];
-          queryGroup = util.toArrayGroup(this.selectorValue);
+          queryGroup = util.toArrayGroup(opts.selectorValue);
           if (!queryGroup.length) {
             throw new Error("Query called with an empty " + selectorName + " statement");
           }
@@ -1039,12 +1039,12 @@
             queries: queries
           };
         },
-        test: function() {
+        test: function(opts) {
           var query, _i, _len, _ref;
-          _ref = this.queries;
+          _ref = opts.queries;
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             query = _ref[_i];
-            if (query.test(this.model)) {
+            if (query.test(opts.model)) {
               return true;
             }
           }
@@ -1052,23 +1052,23 @@
         }
       },
       '$nor': {
-        compile: function() {
-          return this.selector('$or', this);
+        compile: function(opts) {
+          return opts.selector('$or', opts);
         },
-        test: function() {
-          return !this.selector('$or', this);
+        test: function(opts) {
+          return !opts.selector('$or', opts);
         }
       },
       '$and': {
-        compile: function() {
-          return this.selector('$or', this);
+        compile: function(opts) {
+          return opts.selector('$or', opts);
         },
-        test: function() {
+        test: function(opts) {
           var query, _i, _len, _ref;
-          _ref = this.queries;
+          _ref = opts.queries;
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             query = _ref[_i];
-            if (query.test(this.model) === false) {
+            if (query.test(opts.model) === false) {
               return false;
             }
           }
@@ -1076,56 +1076,56 @@
         }
       },
       '$not': {
-        compile: function() {
-          return this.selector('$and', this);
+        compile: function(opts) {
+          return opts.selector('$and', opts);
         },
-        test: function() {
-          return !this.selector('$and', this);
+        test: function(opts) {
+          return !opts.selector('$and', opts);
         }
       },
       'string': {
-        test: function() {
-          return this.modelValueExists && this.modelValue === this.selectorValue;
+        test: function(opts) {
+          return opts.modelValueExists && opts.modelValue === opts.selectorValue;
         }
       },
       'number': {
-        test: function() {
-          return this.selector('string', this);
+        test: function(opts) {
+          return opts.selector('string', opts);
         }
       },
       'boolean': {
-        test: function() {
-          return this.selector('string', this);
+        test: function(opts) {
+          return opts.selector('string', opts);
         }
       },
       'array': {
-        test: function() {
-          return this.modelValueExists && (new Hash(this.modelValue)).isSame(this.selectorValue);
+        test: function(opts) {
+          return opts.modelValueExists && (new Hash(opts.modelValue)).isSame(opts.selectorValue);
         }
       },
       'date': {
-        test: function() {
-          return this.modelValueExists && this.modelValue.toString() === this.selectorValue.toString();
+        test: function(opts) {
+          return opts.modelValueExists && opts.modelValue.toString() === opts.selectorValue.toString();
         }
       },
       'regexp': {
-        test: function() {
-          return this.modelValueExists && this.selectorValue.test(this.modelValue);
+        test: function(opts) {
+          return opts.modelValueExists && opts.selectorValue.test(opts.modelValue);
         }
       },
       'null': {
-        test: function() {
-          return this.modelValue === this.selectorValue;
+        test: function(opts) {
+          return opts.modelValue === opts.selectorValue;
         }
       },
       '$beginsWith': {
-        test: function() {
+        test: function(opts) {
           var beginsWithParts, beginsWithValue, _i, _len;
-          if (this.selectorValue && this.modelValueExists && util.isString(this.modelValue)) {
-            beginsWithParts = util.toArray(this.selectorValue);
+          if (opts.selectorValue && opts.modelValueExists && util.isString(opts.modelValue)) {
+            beginsWithParts = util.toArray(opts.selectorValue);
             for (_i = 0, _len = beginsWithParts.length; _i < _len; _i++) {
               beginsWithValue = beginsWithParts[_i];
-              if (this.modelValue.substr(0, beginsWithValue.length) === beginsWithValue) {
+              if (opts.modelValue.substr(0, beginsWithValue.length) === beginsWithValue) {
                 return true;
                 break;
               }
@@ -1135,18 +1135,18 @@
         }
       },
       '$startsWith': {
-        test: function() {
-          return this.selector('$beginsWith', this);
+        test: function(opts) {
+          return opts.selector('$beginsWith', opts);
         }
       },
       '$endsWith': {
-        test: function() {
+        test: function(opts) {
           var endsWithParts, endsWithValue, _i, _len;
-          if (this.selectorValue && this.modelValueExists && util.isString(this.modelValue)) {
-            endsWithParts = util.toArray(this.selectorValue);
+          if (opts.selectorValue && opts.modelValueExists && util.isString(opts.modelValue)) {
+            endsWithParts = util.toArray(opts.selectorValue);
             for (_i = 0, _len = endsWithParts.length; _i < _len; _i++) {
               endsWithValue = endsWithParts[_i];
-              if (this.modelValue.substr(endsWithValue.length * -1) === endsWithValue) {
+              if (opts.modelValue.substr(endsWithValue.length * -1) === endsWithValue) {
                 return true;
                 break;
               }
@@ -1156,14 +1156,14 @@
         }
       },
       '$finishesWith': {
-        test: function() {
-          return this.selector('$endsWith', this);
+        test: function(opts) {
+          return opts.selector('$endsWith', opts);
         }
       },
       '$all': {
-        test: function() {
-          if ((this.selectorValue != null) && this.modelValueExists) {
-            if ((new Hash(this.modelValue)).hasAll(this.selectorValue)) {
+        test: function(opts) {
+          if ((opts.selectorValue != null) && opts.modelValueExists) {
+            if ((new Hash(opts.modelValue)).hasAll(opts.selectorValue)) {
               return true;
             }
           }
@@ -1171,9 +1171,9 @@
         }
       },
       '$in': {
-        test: function() {
-          if ((this.selectorValue != null) && this.modelValueExists) {
-            if ((new Hash(this.modelValue)).hasIn(this.selectorValue) || (new Hash(this.selectorValue)).hasIn(this.modelValue)) {
+        test: function(opts) {
+          if ((opts.selectorValue != null) && opts.modelValueExists) {
+            if ((new Hash(opts.modelValue)).hasIn(opts.selectorValue) || (new Hash(opts.selectorValue)).hasIn(opts.modelValue)) {
               return true;
             }
           }
@@ -1181,9 +1181,9 @@
         }
       },
       '$nin': {
-        test: function() {
-          if ((this.selectorValue != null) && this.modelValueExists) {
-            if ((new Hash(this.modelValue)).hasIn(this.selectorValue) === false && (new Hash(this.selectorValue)).hasIn(this.modelValue) === false) {
+        test: function(opts) {
+          if ((opts.selectorValue != null) && opts.modelValueExists) {
+            if ((new Hash(opts.modelValue)).hasIn(opts.selectorValue) === false && (new Hash(opts.selectorValue)).hasIn(opts.modelValue) === false) {
               return true;
             }
           }
@@ -1191,9 +1191,9 @@
         }
       },
       '$has': {
-        test: function() {
-          if (this.modelValueExists) {
-            if ((new Hash(this.modelValue)).hasIn(this.selectorValue)) {
+        test: function(opts) {
+          if (opts.modelValueExists) {
+            if ((new Hash(opts.modelValue)).hasIn(opts.selectorValue)) {
               return true;
             }
           }
@@ -1201,9 +1201,9 @@
         }
       },
       '$hasAll': {
-        test: function() {
-          if (this.modelValueExists) {
-            if ((new Hash(this.modelValue)).hasIn(this.selectorValue)) {
+        test: function(opts) {
+          if (opts.modelValueExists) {
+            if ((new Hash(opts.modelValue)).hasIn(opts.selectorValue)) {
               return true;
             }
           }
@@ -1211,9 +1211,9 @@
         }
       },
       '$size': {
-        test: function() {
-          if (this.modelValue.length != null) {
-            if (this.modelValue.length === this.selectorValue) {
+        test: function(opts) {
+          if (opts.modelValue.length != null) {
+            if (opts.modelValue.length === opts.selectorValue) {
               return true;
             }
           }
@@ -1221,54 +1221,54 @@
         }
       },
       '$length': {
-        test: function() {
-          return this.selector('$size', this);
+        test: function(opts) {
+          return opts.selector('$size', opts);
         }
       },
       '$type': {
-        test: function() {
-          if (typeof this.modelValue === this.selectorValue) {
+        test: function(opts) {
+          if (typeof opts.modelValue === opts.selectorValue) {
             return true;
           }
           return false;
         }
       },
       '$like': {
-        test: function() {
-          if (util.isString(this.modelValue) && this.modelValue.toLowerCase().indexOf(this.selectorValue.toLowerCase()) !== -1) {
+        test: function(opts) {
+          if (util.isString(opts.modelValue) && opts.modelValue.toLowerCase().indexOf(opts.selectorValue.toLowerCase()) !== -1) {
             return true;
           }
           return false;
         }
       },
       '$likeSensitive': {
-        test: function() {
-          if (util.isString(this.modelValue) && this.modelValue.indexOf(this.selectorValue) !== -1) {
+        test: function(opts) {
+          if (util.isString(opts.modelValue) && opts.modelValue.indexOf(opts.selectorValue) !== -1) {
             return true;
           }
           return false;
         }
       },
       '$exists': {
-        test: function() {
-          if (this.selectorValue === this.modelValueExists) {
+        test: function(opts) {
+          if (opts.selectorValue === opts.modelValueExists) {
             return true;
           }
           return false;
         }
       },
       '$mod': {
-        test: function() {
+        test: function(opts) {
           var $mod;
-          if (this.modelValueExists) {
-            $mod = this.selectorValue;
+          if (opts.modelValueExists) {
+            $mod = opts.selectorValue;
             if (!util.isArray($mod)) {
               $mod = [$mod];
             }
             if ($mod.length === 1) {
               $mod.push(0);
             }
-            if ((this.modelValue % $mod[0]) === $mod[1]) {
+            if ((opts.modelValue % $mod[0]) === $mod[1]) {
               return true;
             }
           }
@@ -1276,69 +1276,69 @@
         }
       },
       '$eq': {
-        test: function() {
-          if (util.isEqual(this.modelValue, this.selectorValue)) {
+        test: function(opts) {
+          if (util.isEqual(opts.modelValue, opts.selectorValue)) {
             return true;
           }
           return false;
         }
       },
       '$equal': {
-        test: function() {
-          return this.selector('$eq', this);
+        test: function(opts) {
+          return opts.selector('$eq', opts);
         }
       },
       '$ne': {
-        test: function() {
-          if (this.modelValue !== this.selectorValue) {
+        test: function(opts) {
+          if (opts.modelValue !== opts.selectorValue) {
             return true;
           }
           return false;
         }
       },
       '$lt': {
-        test: function() {
-          if ((this.selectorValue != null) && util.isComparable(this.modelValue) && this.modelValue < this.selectorValue) {
+        test: function(opts) {
+          if ((opts.selectorValue != null) && util.isComparable(opts.modelValue) && opts.modelValue < opts.selectorValue) {
             return true;
           }
           return false;
         }
       },
       '$gt': {
-        test: function() {
-          if ((this.selectorValue != null) && util.isComparable(this.modelValue) && this.modelValue > this.selectorValue) {
+        test: function(opts) {
+          if ((opts.selectorValue != null) && util.isComparable(opts.modelValue) && opts.modelValue > opts.selectorValue) {
             return true;
           }
           return false;
         }
       },
       '$bt': {
-        test: function() {
-          if ((this.selectorValue != null) && util.isComparable(this.modelValue) && this.selectorValue[0] < this.modelValue && this.modelValue < this.selectorValue[1]) {
+        test: function(opts) {
+          if ((opts.selectorValue != null) && util.isComparable(opts.modelValue) && opts.selectorValue[0] < opts.modelValue && opts.modelValue < opts.selectorValue[1]) {
             return true;
           }
           return false;
         }
       },
       '$lte': {
-        test: function() {
-          if ((this.selectorValue != null) && util.isComparable(this.modelValue) && this.modelValue <= this.selectorValue) {
+        test: function(opts) {
+          if ((opts.selectorValue != null) && util.isComparable(opts.modelValue) && opts.modelValue <= opts.selectorValue) {
             return true;
           }
           return false;
         }
       },
       '$gte': {
-        test: function() {
-          if ((this.selectorValue != null) && util.isComparable(this.modelValue) && this.modelValue >= this.selectorValue) {
+        test: function(opts) {
+          if ((opts.selectorValue != null) && util.isComparable(opts.modelValue) && opts.modelValue >= opts.selectorValue) {
             return true;
           }
           return false;
         }
       },
       '$bte': {
-        test: function() {
-          if ((this.selectorValue != null) && util.isComparable(this.modelValue) && this.selectorValue[0] <= this.modelValue && this.modelValue <= this.selectorValue[1]) {
+        test: function(opts) {
+          if ((opts.selectorValue != null) && util.isComparable(opts.modelValue) && opts.selectorValue[0] <= opts.modelValue && opts.modelValue <= opts.selectorValue[1]) {
             return true;
           }
           return false;
@@ -1375,9 +1375,9 @@
       }
       if (selector.compile != null) {
         opts.selector = function(selectorName, opts) {
-          return selectors[selectorName].compile.call(opts);
+          return selectors[selectorName].compile(opts);
         };
-        compileOpts = selector.compile.call(opts);
+        compileOpts = selector.compile(opts);
         for (key in compileOpts) {
           if (!__hasProp.call(compileOpts, key)) continue;
           value = compileOpts[key];
@@ -1385,7 +1385,7 @@
         }
       }
       opts.selector = function(selectorName, opts) {
-        return selectors[selectorName].test.call(opts);
+        return selectors[selectorName].test(opts);
       };
       compiledSelector = {
         opts: opts,
@@ -1405,7 +1405,7 @@
       if (!opts.modelValueExists) {
         opts.modelValue = false;
       }
-      match = test.call(opts);
+      match = test(opts);
       return match;
     };
 
