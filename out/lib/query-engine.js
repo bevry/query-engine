@@ -1022,41 +1022,6 @@
     Query.prototype.compiledSelectors = null;
 
     Query.prototype.selectors = {
-      'string': {
-        test: function() {
-          return this.modelValueExists && this.modelValue === this.selectorValue;
-        }
-      },
-      'number': {
-        test: function() {
-          return this.selector('string', this);
-        }
-      },
-      'boolean': {
-        test: function() {
-          return this.selector('string', this);
-        }
-      },
-      'array': {
-        test: function() {
-          return this.modelValueExists && (new Hash(this.modelValue)).isSame(this.selectorValue);
-        }
-      },
-      'date': {
-        test: function() {
-          return this.modelValueExists && this.modelValue.toString() === this.selectorValue.toString();
-        }
-      },
-      'regexp': {
-        test: function() {
-          return this.modelValueExists && this.selectorValue.test(this.modelValue);
-        }
-      },
-      'null': {
-        test: function() {
-          return this.modelValue === this.selectorValue;
-        }
-      },
       '$or': {
         compile: function() {
           var queries, query, queryGroup, querySource, _i, _len;
@@ -1116,6 +1081,41 @@
         },
         test: function() {
           return !this.selector('$and', this);
+        }
+      },
+      'string': {
+        test: function() {
+          return this.modelValueExists && this.modelValue === this.selectorValue;
+        }
+      },
+      'number': {
+        test: function() {
+          return this.selector('string', this);
+        }
+      },
+      'boolean': {
+        test: function() {
+          return this.selector('string', this);
+        }
+      },
+      'array': {
+        test: function() {
+          return this.modelValueExists && (new Hash(this.modelValue)).isSame(this.selectorValue);
+        }
+      },
+      'date': {
+        test: function() {
+          return this.modelValueExists && this.modelValue.toString() === this.selectorValue.toString();
+        }
+      },
+      'regexp': {
+        test: function() {
+          return this.modelValueExists && this.selectorValue.test(this.modelValue);
+        }
+      },
+      'null': {
+        test: function() {
+          return this.modelValue === this.selectorValue;
         }
       },
       '$beginsWith': {
@@ -1409,27 +1409,6 @@
       return match;
     };
 
-    Query.prototype.test = function(model) {
-      var compiledSelector, empty, match, matchAll, matchAny, _i, _len, _ref;
-      matchAll = true;
-      matchAny = false;
-      empty = true;
-      _ref = this.compiledSelectors;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        compiledSelector = _ref[_i];
-        match = this.testCompiledSelector(compiledSelector, model);
-        if (match) {
-          matchAny = true;
-        } else {
-          matchAll = false;
-        }
-      }
-      if (matchAll && !matchAny) {
-        matchAll = false;
-      }
-      return matchAll;
-    };
-
     Query.prototype.compileQuery = function() {
       var advancedSelectorName, advancedSelectorValue, compiledSelector, compiledSelectors, fieldName, query, selectorValue, _ref;
       query = this;
@@ -1500,6 +1479,20 @@
       }
       this.compiledSelectors = compiledSelectors;
       return this;
+    };
+
+    Query.prototype.test = function(model) {
+      var compiledSelector, match, _i, _len, _ref;
+      match = true;
+      _ref = this.compiledSelectors;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        compiledSelector = _ref[_i];
+        match = this.testCompiledSelector(compiledSelector, model);
+        if (match === false) {
+          break;
+        }
+      }
+      return match;
     };
 
     return Query;

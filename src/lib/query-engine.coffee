@@ -1115,29 +1115,6 @@ class Query
 
 	# Selectors
 	selectors:
-		# Types
-		'string':
-			test: ->
-				return @modelValueExists and @modelValue is @selectorValue
-		'number':
-			test: ->
-				return @selector('string',@)
-		'boolean':
-			test: ->
-				return @selector('string',@)
-		'array':
-			test: ->
-				return @modelValueExists and (new Hash @modelValue).isSame(@selectorValue)
-		'date':
-			test: ->
-				return @modelValueExists and @modelValue.toString() is @selectorValue.toString()
-		'regexp':
-			test: ->
-				return @modelValueExists and @selectorValue.test(@modelValue)
-		'null':
-			test: ->
-				return @modelValue is @selectorValue
-
 		# The $or operator lets you use a boolean or expression to do queries. You give $or a list of expressions, any of which can satisfy the query.
 		'$or':
 			compile: ->
@@ -1178,6 +1155,30 @@ class Query
 				return @selector('$and',@)
 			test: ->
 				return !@selector('$and',@)
+
+
+		# Types
+		'string':
+			test: ->
+				return @modelValueExists and @modelValue is @selectorValue
+		'number':
+			test: ->
+				return @selector('string',@)
+		'boolean':
+			test: ->
+				return @selector('string',@)
+		'array':
+			test: ->
+				return @modelValueExists and (new Hash @modelValue).isSame(@selectorValue)
+		'date':
+			test: ->
+				return @modelValueExists and @modelValue.toString() is @selectorValue.toString()
+		'regexp':
+			test: ->
+				return @modelValueExists and @selectorValue.test(@modelValue)
+		'null':
+			test: ->
+				return @modelValue is @selectorValue
 
 		# The $beginsWith operator checks if the value begins with a particular value or values if an array was passed
 		'$beginsWith':
@@ -1424,32 +1425,6 @@ class Query
 		# Return
 		return match
 
-	# Test
-	# Test the Query
-	test: (model) ->
-		# Match
-		matchAll = true
-		matchAny = false
-		empty = true
-
-		# Selectors
-		for compiledSelector in @compiledSelectors
-			# Test Selector
-			match = @testCompiledSelector(compiledSelector, model)
-
-			# Matched
-			if match
-				matchAny = true
-			else
-				matchAll = false
-
-		# Match all
-		if matchAll and !matchAny
-			matchAll = false
-
-		# Return
-		return matchAll
-
 	# Compile Query
 	# Transform the query into a series of compiled selectors
 	compileQuery: ->
@@ -1512,7 +1487,21 @@ class Query
 		# Chain
 		@
 
+	# Test
+	# Test the Query
+	test: (model) ->
+		# Match
+		match = true
 
+		# Selectors
+		for compiledSelector in @compiledSelectors
+			# Test Selector
+			match = @testCompiledSelector(compiledSelector, model)
+			if match is false
+				break
+
+		# Return
+		return match
 
 
 
