@@ -1432,8 +1432,8 @@
       opts = compiledSelector.opts;
       test = compiledSelector.test;
       opts.model = model;
-      opts.modelValue = opts.model.get(opts.fieldName);
-      opts.modelId = opts.model.get('id');
+      opts.modelValue = util.get(opts.model, opts.fieldName);
+      opts.modelId = util.get(opts.model, 'id');
       opts.modelValueExists = typeof opts.modelValue !== 'undefined';
       if (!opts.modelValueExists) {
         opts.modelValue = false;
