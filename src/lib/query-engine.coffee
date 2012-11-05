@@ -78,6 +78,14 @@ util =
 	isEmpty: (value) ->
 		return value?
 
+	# Checks to see if an objectvalue is empty
+	isObjectEmpty: (object) ->
+		empty = true
+		for own key,value of object
+			empty = false
+			break
+		return empty
+
 	# Checks to see if the value is comparable (date or number)
 	isComparable: (value) ->
 		return util.isNumber(value) or util.isDate(value)
@@ -464,49 +472,64 @@ class QueryCollection extends Backbone.Collection
 		return arr
 
 	# Find All
+	# args = criteriaInstance
+	# args = query, comparator, paging
 	findAll: (args...) ->
-		# Prepare
+		# Extract
 		if args.length
 			if args.length is 1 and args[0] instanceof Criteria
-				criteria = args[0].options
+				criteriaOptions = args[0].options
 			else
 				[query,comparator,paging] = args
-				criteria = {comparator, paging, queries:find:query}
+				criteriaOptions = {comparator, paging, queries:find:query}
+		else
+			criteriaOptions = null
 
 		# Create child collection
-		collection = @createChildCollection([],criteria).query()
+		collection = @createChildCollection([],criteriaOptions).query()
 
 		# Return
 		return collection
 
 	# Find All Live
+	# args = criteriaInstance
+	# args = query, comparator, paging
 	findAllLive: (args...) ->
-		# Prepare
+		# Extract
 		if args.length
 			if args.length is 1 and args[0] instanceof Criteria
-				criteria = args[0].options
+				criteriaOptions = args[0].options
 			else
 				[query,comparator,paging] = args
-				criteria = {comparator, paging, queries:find:query}
+				criteriaOptions = {comparator, paging, queries:find:query}
+		else
+			criteriaOptions = null
 
 		# Create child collection
-		collection = @createLiveChildCollection([],criteria).query()
+		collection = @createLiveChildCollection([],criteriaOptions).query()
 
 		# Return
 		return collection
 
 	# Find One
+	# args = criteriaInstance
+	# args = query, comparator, paging
 	findOne: (args...) ->
-		# Prepare
+		# Extract
 		if args.length
 			if args.length is 1 and args[0] instanceof Criteria
-				criteria = args[0].options
+				criteriaOptions = args[0].options
 			else
 				[query,comparator,paging] = args
-				criteria = {comparator, paging, queries:find:query}
+				criteriaOptions = {comparator, paging, queries:find:query}
+		else
+			criteriaOptions = null
 
-		# Create child collection
-		passed = @testModels(@models,criteria)
+		# Test
+		# We use testModels here instead of queryModels
+		# as queryModels will use the parent collection if it exists
+		# where we just want to use this collection
+		passed = @testModels(@models,criteriaOptions)
 
 		# Return
 		if passed?.length isnt 0
@@ -516,9 +539,11 @@ class QueryCollection extends Backbone.Collection
 
 	# Query
 	# Reset our collection with the models that passed our criteria
+	# args = criteriaInstance
+	# args = paging
 	query: (args...) ->
 		# Prepare
-		if args.length
+		if args.length is 1
 			if args[0] instanceof Criteria
 				criteria = args[0].options
 			else
@@ -535,28 +560,26 @@ class QueryCollection extends Backbone.Collection
 
 	# Query
 	# Return an array of mdoels that passed our criteria
+	# args = criteriaInstance
+	# args = criteriaOptions
+	# args = query, comparator, paging
 	queryModels: (args...) ->
-		# Prepare
-		if args.length
-			if args.length is 1
-				if args[0] instanceof Criteria
-					criteria = args[0].options
-				else
-					criteria = args[0]
-			else
-				[query,comparator,paging] = args
-				criteria = {comparator, paging, queries:find:query}
+		# Extract
+		criteriaOptions = @extractCriteriaOptions(args...)
 
 		# Test
 		collection = @getParentCollection() or @
 		models = collection.models
-		passed = @testModels(models, criteria)
+		passed = @testModels(models,criteriaOptions)
 
 		# Return
 		return passed
 
 	# Query Array
 	# Return an array of JSON'ified models that passed our criteria
+	# args = criteriaInstance
+	# args = criteriaOptions
+	# args = query, comparator, paging
 	queryArray: (args...) ->
 		# Prepare
 		result = []
@@ -594,15 +617,15 @@ class QueryCollection extends Backbone.Collection
 		parentCollection = @getParentCollection()
 		if parentCollection?
 			if enabled
-				parentCollection.on('change',@onParentChange)
-				parentCollection.on('remove',@onParentRemove)
-				parentCollection.on('add',@onParentAdd)
-				parentCollection.on('reset',@onParentReset)
+				parentCollection.on('change',  @onParentChange)
+				parentCollection.on('remove',  @onParentRemove)
+				parentCollection.on('add',     @onParentAdd)
+				parentCollection.on('reset',   @onParentReset)
 			else
-				parentCollection.off('change',@onParentChange)
-				parentCollection.off('remove',@onParentRemove)
-				parentCollection.off('add',@onParentAdd)
-				parentCollection.off('reset',@onParentReset)
+				parentCollection.off('change', @onParentChange)
+				parentCollection.off('remove', @onParentRemove)
+				parentCollection.off('add',    @onParentAdd)
+				parentCollection.off('reset',  @onParentReset)
 
 		# Chain
 		@
@@ -714,10 +737,14 @@ class Criteria
 			else if args[0]
 				criteriaOptions = args[0]
 			else
-				criteriaOptions = {}
+				criteriaOptions = null
 		else if args.length > 1
 			[query,comparator,paging] = args
-			criteriaOptions = {comparator, paging, queries:find:query}
+			criteriaOptions = {
+				queries: find: query or null
+				comparator
+				paging
+			}
 		else
 			criteriaOptions = null
 
@@ -941,37 +968,45 @@ class Criteria
 
 	# Test Model
 	test: (args...) -> return @testModel(args...)
-	testModel: (model,criteria={}) ->
-		passed = @testQueries(model,criteria.queries) and @testFilters(model,criteria.filters) and @testPills(model,criteria.pills)
+	testModel: (model,criteriaOptions) ->
+		# Test
+		passed = @testQueries(model,criteriaOptions?.queries) and @testFilters(model,criteriaOptions?.filters) and @testPills(model,criteriaOptions?.pills)
+
+		# Return
 		return passed
 
 	# Test Models
-	testModels: (models,criteria={}) ->
+	testModels: (models,criteriaOptions) ->
 		# Prepare
 		me = @
 		passed = []
-		paging = criteria.paging ? @getPaging()
-		if criteria.comparator?
-			comparator = util.generateComparator(criteria.comparator)
-		else
-			comparator = @getComparator()
+
+		# Extract
+		paging = criteriaOptions?.paging ? @getPaging()
+		comparator =
+			if criteriaOptions?.comparator?
+				util.generateComparator(criteriaOptions?.comparator)
+			else
+				@getComparator()
 
 		# Cycle through the parent collection finding passing models
 		for model in models
-			pass = me.testModel(model,criteria)
+			pass = me.testModel(model,criteriaOptions)
 			passed.push(model)  if pass
 
 		# Sort
-		passed.sort(comparator)  if comparator
+		if comparator
+			passed.sort(comparator)
 
 		# Page our models
-		start = paging.offset or 0
-		if paging.limit? and paging.limit > 0
-			start = start + paging.limit * ((paging.page or 1) - 1)
-			finish = start + paging.limit
-			passed = passed[start...finish]
-		else
-			passed = passed[start..]
+		if paging
+			start = paging.offset or 0
+			if paging.limit? and paging.limit > 0
+				start = start + paging.limit * ((paging.page or 1) - 1)
+				finish = start + paging.limit
+				passed = passed[start...finish]
+			else
+				passed = passed[start..]
 
 		# Return
 		return passed
@@ -1579,6 +1614,16 @@ queryEngine =
 		else
 			delete Query::selectors[selectorHandle]
 		return @
+
+	# Test Models
+	# args = criteriaInstance
+	# args = criteriaOptions
+	testModels: (models,args...) ->
+		# Handle
+		models = util.toArray(models)
+		criteria = new Criteria(args...)
+		result = criteria.testModels(models)
+		return result
 
 	# Create Collection
 	createCollection: (models,options) ->

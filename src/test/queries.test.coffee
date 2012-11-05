@@ -2,6 +2,7 @@
 queryEngine = require?(__dirname+'/../lib/query-engine.js') or @queryEngine
 assert = require?('assert') or @assert
 Backbone = require?('backbone') or @Backbone
+_ = require?('underscore') or @_
 joe = require?('joe') or @joe
 {describe} = joe
 
@@ -58,292 +59,286 @@ modelsObject =
 		category: 1
 		date: tomorrow
 
-store =
-	associatedStandard: queryEngine.createCollection(modelsObject)
-	associatedModels: queryEngine.createCollection(
+stores =
+	modelsAsObject: modelsObject
+	modelsAsArray: _.values(modelsObject)
+	modelsAsParsedObject: queryEngine.createCollection(modelsObject)
+	modelsAsCollection: queryEngine.createCollection(
 		'index': new Backbone.Model(modelsObject.index)
 		'jquery': new Backbone.Model(modelsObject.jquery)
 		'history': new Backbone.Model(modelsObject.history)
 	)
+
+queryTests =
+	'beginsWith':
+		query: (title: $beginsWith: 'Index')
+		expected: ['index']
+
+	'endsWidth':
+		query: (title: $endsWith: '.js')
+		expected: ['history']
+
+	'string':
+		query: (id: 'index')
+		expected: ['index']
+
+	'number':
+		query: (position: 3)
+		expected: ['history']
+
+	'date':
+		query: (date: today)
+		expected: ['index']
+
+	'regex':
+		query: (id: /^[hj]/)
+		expected: ['jquery', 'history']
+
+	'joint':
+		query: (id: 'index', category: 1)
+		expected: ['index']
+
+	'boolean-true':
+		query: (good: true)
+		expected: ['index']
+
+	'boolean-false':
+		query: (good: false)
+		expected: ['jquery']
+
+	'$and':
+		query: ($and: [{id: 'index'}, {position: 1}])
+		expected: ['index']
+
+	'$and-none':
+		query: ($and: [{random:Math.random()}])
+		expected: []
+
+	'$not':
+		query: ($not: [{id: 'index'}, {position: 1}])
+		expected: ['jquery', 'history']
+
+	'$or':
+		query: ($or: [{id: 'index'}, {position: 2}])
+		expected: ['index', 'jquery']
+
+	'$or-object':
+		query: ($or: {id: 'index', position: 2})
+		expected: ['index', 'jquery']
+
+	'$or-none':
+		query: ($or: [{random:Math.random()}])
+		expected: []
+
+	'$nor':
+		query: ($nor: [{id: 'index'}, {position: 2}])
+		expected: ['history']
+
+	'$nor-none':
+		query: ($nor: [{random:Math.random()}])
+		expected: ['index','jquery','history']
+
+	'$ne':
+		query: (id: $ne: 'index')
+		expected: ['jquery', 'history']
+
+	'$all':
+		query: (tags: $all: ['jquery'])
+		expected: ['jquery']
+
+	'$in':
+		query: (tags: $in: 'jquery')
+		expected: ['jquery', 'history']
+
+	'$in-array':
+		query: (position: $in: [1,2])
+		expected: ['index', 'jquery']
+
+	'$nin':
+		query: (tags: $nin: ['history'])
+		expected: ['index', 'jquery']
+
+	'$size':
+		query: (tags: $size: 3)
+		expected: ['history']
+
+	'$like':
+		query: (content: $like: 'INDEX')
+		expected: ['index']
+
+	'$likeSensitive - one':
+		query: (content: $likeSensitive: 'INDEX')
+		expected: []
+
+	'$likeSensitive - two':
+		query: (content: $likeSensitive: 'index')
+		expected: ['index']
+
+	'$mod':
+		query: (position: $mod: [2,0])
+		expected: ['jquery']
+
+	'$eq':
+		query: (obj: $eq: {a:1,b:2})
+		expected: ['index']
+
+	'$bt':
+		query: (position: $bt: [1,3])
+		expected: ['jquery']
+
+	'$bte':
+		query: (position: $bte: [2,3])
+		expected: ['jquery', 'history']
+
+	'$gt':
+		query: (position: $gt: 2)
+		expected: ['history']
+
+	'$gt-date':
+		query: (date: $gt: today)
+		expected: ['history']
+
+	'$gte':
+		query: (position: $gte: 2)
+		expected: ['jquery', 'history']
+
+	'$lt':
+		query: (position: $lt: 2)
+		expected: ['index']
+
+	'$lt-date':
+		query: (date: $lt: today)
+		expected: ['jquery']
+
+	'$lte':
+		query: (position: $lte: 2)
+		expected: ['index', 'jquery']
+
+	'$lte-date':
+		query: (date: $lte: today)
+		expected: ['index', 'jquery']
+
+	'$has':
+		query: (tags: $has: 'jquery')
+		expected: ['jquery', 'history']
+
+	# ---------------------------------
+	# Nulls
+
+	'$in-null':
+		query: (positionNullable: $in: [null])
+		expected: ['index']
+
+	'$in-null-array':
+		query: (positionNullable: $in: [null,2])
+		expected: ['index', 'jquery']
+
+	'$in-false':
+		query: (good: $in: false)
+		expected: ['jquery']
+
+	"null values should show up when searching for them":
+		query: (positionNullable: null)
+		expected: ['index']
+
+	"null values shouldn't show up in greater than or equal to comparisons":
+		query: (positionNullable: $gte: 0)
+		expected: ['jquery', 'history']
+
+	"null values shouldn't show up in less than comparisons":
+		query: (positionNullable: $lte: 3)
+		expected: ['jquery', 'history']
 
 
 # =====================================
 # Tests
 
 # Generate Test Suite
-generateTestSuite = (describe, it, name,docs) ->
-	describe name, (describe,it) ->
-		it 'beginsWith', ->
-			actual = docs.findAll(title: $beginsWith: 'Index')
-			expected = queryEngine.createCollection 'index': docs.get('index')
-			assert.deepEqual actual.toJSON(), expected.toJSON()
+generateTestSuite = (describe, it, storeName, store) ->
+	describe storeName, (describe,it) ->
 
-		it 'endsWidth', ->
-			actual = docs.findAll(title: $endsWith: '.js')
-			expected = queryEngine.createCollection 'history': docs.get('history')
-			assert.deepEqual actual.toJSON(), expected.toJSON()
+		# Vanilla
+		unless store instanceof queryEngine.QueryCollection
+			describe 'queries', (describe,it) ->
+				_.each queryTests, (queryTest,queryTestName) ->
+					it queryTestName, ->
+						debugger  if queryTest.debug
+						criteriaOptions = {queries:find:queryTest.query}
+						actual = queryEngine.testModels(store, criteriaOptions)
+						expected = []
+						for expectedModelId in queryTest.expected
+							expected.push(stores.modelsAsObject[expectedModelId])
+						console.log({actual,expected})  if queryTest.debug
+						assert.deepEqual(actual, expected)
 
-		it 'string', ->
-			actual = docs.findAll(id: 'index')
-			expected = queryEngine.createCollection 'index': docs.get('index')
-			assert.deepEqual actual.toJSON(), expected.toJSON()
+		# Backbone
+		else
+			describe 'queries', (describe,it) ->
+				_.each queryTests, (queryTest,queryTestName) ->
+					it queryTestName, ->
+						debugger  if queryTest.debug
+						actual = store.findAll(queryTest.query)
+						expectedModels = {}
+						for expectedModelId in queryTest.expected
+							expectedModels[expectedModelId] = store.get(expectedModelId)
+						expected = queryEngine.createCollection(expectedModels)
+						console.log({actual,expected})  if queryTest.debug
+						assert.deepEqual(actual.toJSON(), expected.toJSON())
 
-		it 'number', ->
-			actual = docs.findAll(position: 3)
-			expected = queryEngine.createCollection 'history': docs.get('history')
-			assert.deepEqual actual.toJSON(), expected.toJSON()
+			describe 'special', (describe,it) ->
+				it 'all', ->
+					actual = store
+					expected = store
+					assert.deepEqual(actual.toJSON(), expected.toJSON())
 
-		it 'date', ->
-			actual = docs.findAll(date: today)
-			expected = queryEngine.createCollection 'index': docs.get('index')
-			assert.deepEqual actual.toJSON(), expected.toJSON()
+				it 'findOne', ->
+					actual = store.findOne(tags: $has: 'jquery')
+					expected = store.get('jquery')
 
-		it 'regex', ->
-			actual = docs.findAll(id: /^[hj]/)
-			expected = queryEngine.createCollection 'jquery': docs.get('jquery'), 'history': docs.get('history')
-			assert.deepEqual actual.toJSON(), expected.toJSON()
+			describe 'paging', (describe,it) ->
 
-		it 'joint', ->
-			actual = docs.findAll(id: 'index', category: 1)
-			expected = queryEngine.createCollection 'index': docs.get('index')
-			assert.deepEqual actual.toJSON(), expected.toJSON()
+				it 'limit', ->
+					actual = store.createChildCollection().query({limit:1})
+					expected = queryEngine.createCollection('index': store.get('index'))
+					assert.deepEqual(actual.toJSON(), expected.toJSON())
 
-		it 'boolean-true', ->
-			actual = docs.findAll(good: true)
-			expected = queryEngine.createCollection 'index': docs.get('index')
-			assert.deepEqual actual.toJSON(), expected.toJSON()
+				it 'limit+page', ->
+					actual = store.createChildCollection().query({limit:1,page:2})
+					expected = queryEngine.createCollection('jquery': store.get('jquery'))
+					assert.deepEqual(actual.toJSON(), expected.toJSON())
 
-		it 'boolean-false', ->
-			actual = docs.findAll(good: false)
-			expected = queryEngine.createCollection 'jquery': docs.get('jquery')
-			assert.deepEqual actual.toJSON(), expected.toJSON()
+				it 'limit+offset', ->
+					actual = store.createChildCollection().query({limit:1,offset:1})
+					expected = queryEngine.createCollection('jquery': store.get('jquery'))
+					assert.deepEqual(actual.toJSON(), expected.toJSON())
 
-		it '$and', ->
-			actual = docs.findAll($and: [{id: 'index'}, {position: 1}])
-			expected = queryEngine.createCollection 'index': docs.get('index')
-			assert.deepEqual actual.toJSON(), expected.toJSON()
+				it 'limit+offset+page', ->
+					actual = store.createChildCollection().query({limit:1,offset:1,page:2})
+					expected = queryEngine.createCollection('history': store.get('history'))
+					assert.deepEqual(actual.toJSON(), expected.toJSON())
 
-		it '$and-none', ->
-			actual = docs.findAll($and: [{random:Math.random()}])
-			expected = queryEngine.createCollection()
-			assert.deepEqual actual.toJSON(), expected.toJSON()
+				it 'limit+offset+page (via findAll)', ->
+					debugger
+					actual = store.findAll(
+						# Query
+						{id: $exists: true},
+						# Comparator
+						null,
+						# Paging
+						{limit:1,offset:1,page:2}
+					)
+					expected = queryEngine.createCollection('history': store.get('history'))
+					assert.deepEqual(actual.toJSON(), expected.toJSON())
 
-		it '$not', ->
-			actual = docs.findAll($not: [{id: 'index'}, {position: 1}])
-			expected = queryEngine.createCollection 'jquery': docs.get('jquery'), 'history': docs.get('history')
-			assert.deepEqual actual.toJSON(), expected.toJSON()
-
-		it '$or', ->
-			actual = docs.findAll($or: [{id: 'index'}, {position: 2}])
-			expected = queryEngine.createCollection 'index': docs.get('index'), 'jquery': docs.get('jquery')
-			assert.deepEqual actual.toJSON(), expected.toJSON()
-
-		it '$or-object', ->
-			actual = docs.findAll($or: {id: 'index', position: 2})
-			expected = queryEngine.createCollection 'index': docs.get('index'), 'jquery': docs.get('jquery')
-			assert.deepEqual actual.toJSON(), expected.toJSON()
-
-		it '$or-none', ->
-			actual = docs.findAll($or: [{random:Math.random()}])
-			expected = queryEngine.createCollection()
-			assert.deepEqual actual.toJSON(), expected.toJSON()
-
-		it '$nor', ->
-			actual = docs.findAll($nor: [{id: 'index'}, {position: 2}])
-			expected = queryEngine.createCollection 'history': docs.get('history')
-			assert.deepEqual actual.toJSON(), expected.toJSON()
-
-		it '$nor-none', ->
-			actual = docs.findAll($nor: [{random:Math.random()}])
-			expected = docs
-			assert.deepEqual actual.toJSON(), expected.toJSON()
-
-		it '$ne', ->
-			actual = docs.findAll(id: $ne: 'index')
-			expected = queryEngine.createCollection 'jquery': docs.get('jquery'), 'history': docs.get('history')
-			assert.deepEqual actual.toJSON(), expected.toJSON()
-
-		it '$all', ->
-			actual = docs.findAll(tags: $all: ['jquery'])
-			expected = queryEngine.createCollection 'jquery': docs.get('jquery')
-			assert.deepEqual actual.toJSON(), expected.toJSON()
-
-		it '$in', ->
-			actual = docs.findAll(tags: $in: 'jquery')
-			expected = queryEngine.createCollection 'jquery': docs.get('jquery'), 'history': docs.get('history')
-			assert.deepEqual actual.toJSON(), expected.toJSON()
-
-		it '$in-false', ->
-			actual = docs.findAll(good: $in: false)
-			expected = queryEngine.createCollection 'jquery': docs.get('jquery')
-			assert.deepEqual actual.toJSON(), expected.toJSON()
-
-		it '$in-null', ->
-			actual = docs.findAll(positionNullable: $in: [null])
-			expected = queryEngine.createCollection 'index': docs.get('index')
-			assert.deepEqual actual.toJSON(), expected.toJSON()
-
-		it '$in-array', ->
-			actual = docs.findAll(positionNullable: $in: [null,2])
-			expected = queryEngine.createCollection 'index': docs.get('index'), 'jquery': docs.get('jquery')
-			assert.deepEqual actual.toJSON(), expected.toJSON()
-
-		it '$nin', ->
-			actual = docs.findAll(tags: $nin: ['history'])
-			expected = queryEngine.createCollection 'index': docs.get('index'), 'jquery': docs.get('jquery')
-			assert.deepEqual actual.toJSON(), expected.toJSON()
-
-		it '$size', ->
-			actual = docs.findAll(tags: $size: 3)
-			expected = queryEngine.createCollection 'history': docs.get('history')
-			assert.deepEqual actual.toJSON(), expected.toJSON()
-
-		it '$like', ->
-			actual = docs.findAll(content: $like: 'INDEX')
-			expected = queryEngine.createCollection 'index': docs.get('index')
-			assert.deepEqual actual.toJSON(), expected.toJSON()
-
-		it '$likeSensitive', ->
-			actual = docs.findAll(content: $likeSensitive: 'INDEX')
-			expected = queryEngine.createCollection()
-			assert.deepEqual actual.toJSON(), expected.toJSON()
-
-			actual = docs.findAll(content: $likeSensitive: 'index')
-			expected = queryEngine.createCollection 'index': docs.get('index')
-			assert.deepEqual actual.toJSON(), expected.toJSON()
-
-		it '$mod', ->
-			actual = docs.findAll(position: $mod: [2,0])
-			expected = queryEngine.createCollection 'jquery': docs.get('jquery')
-			assert.deepEqual actual.toJSON(), expected.toJSON()
-
-		it '$eq', ->
-			actual = docs.findAll(obj: $eq: {a:1,b:2})
-			expected = queryEngine.createCollection 'index': docs.get('index')
-			assert.deepEqual actual.toJSON(), expected.toJSON()
-
-		it '$bt', ->
-			actual = docs.findAll(position: $bt: [1,3])
-			expected = queryEngine.createCollection 'jquery': docs.get('jquery')
-			assert.deepEqual actual.toJSON(), expected.toJSON()
-
-		it '$bte', ->
-			actual = docs.findAll(position: $bte: [2,3])
-			expected = queryEngine.createCollection 'jquery': docs.get('jquery'), 'history': docs.get('history')
-			assert.deepEqual actual.toJSON(), expected.toJSON()
-
-		it '$gt', ->
-			actual = docs.findAll(position: $gt: 2)
-			expected = queryEngine.createCollection 'history': docs.get('history')
-			assert.deepEqual actual.toJSON(), expected.toJSON()
-
-		it '$gt-date', ->
-			actual = docs.findAll(date: $gt: today)
-			expected = queryEngine.createCollection 'history': docs.get('history')
-			assert.deepEqual actual.toJSON(), expected.toJSON()
-
-		it '$gte', ->
-			actual = docs.findAll(position: $gte: 2)
-			expected = queryEngine.createCollection 'jquery': docs.get('jquery'), 'history': docs.get('history')
-			assert.deepEqual actual.toJSON(), expected.toJSON()
-
-		it '$lt', ->
-			actual = docs.findAll(position: $lt: 2)
-			expected = queryEngine.createCollection 'index': docs.get('index')
-			assert.deepEqual actual.toJSON(), expected.toJSON()
-
-		it '$lt-date', ->
-			actual = docs.findAll(date: $lt: today)
-			expected = queryEngine.createCollection 'jquery': docs.get('jquery')
-			assert.deepEqual actual.toJSON(), expected.toJSON()
-
-		it '$lte', ->
-			actual = docs.findAll(position: $lte: 2)
-			expected = queryEngine.createCollection 'index': docs.get('index'), 'jquery': docs.get('jquery')
-			assert.deepEqual actual.toJSON(), expected.toJSON()
-
-		it '$lte-date', ->
-			actual = docs.findAll(date: $lte: today)
-			expected = queryEngine.createCollection 'index': docs.get('index'), 'jquery': docs.get('jquery')
-			assert.deepEqual actual.toJSON(), expected.toJSON()
-
-		it '$has', ->
-			actual = docs.findAll(tags: $has: 'jquery')
-			expected = queryEngine.createCollection 'jquery': docs.get('jquery'), 'history': docs.get('history')
-			assert.deepEqual actual.toJSON(), expected.toJSON()
-
-		it 'all', ->
-			actual = docs
-			expected = docs
-			assert.deepEqual actual.toJSON(), expected.toJSON()
-
-		it 'findOne', ->
-			actual = docs.findOne(tags: $has: 'jquery')
-			expected = docs.get('jquery')
-			assert.deepEqual actual.toJSON(), expected.toJSON()
-
-
-		describe 'nullable', (describe,it) ->
-
-			it "null values should show up when searching for them", ->
-				actual = docs.findAll(positionNullable: null)
-				expected = queryEngine.createCollection('index': docs.get('index'))
-				assert.deepEqual actual.toJSON(), expected.toJSON()
-
-			it "null values shouldn't show up in greater than or equal to comparisons", ->
-				actual = docs.findAll(positionNullable: $gte: 0)
-				expected = queryEngine.createCollection 'jquery': docs.get('jquery'), 'history': docs.get('history')
-				assert.deepEqual actual.toJSON(), expected.toJSON()
-
-			it "null values shouldn't show up in less than comparisons", ->
-				actual = docs.findAll(positionNullable: $lte: 3)
-				expected = queryEngine.createCollection 'jquery': docs.get('jquery'), 'history': docs.get('history')
-				assert.deepEqual actual.toJSON(), expected.toJSON()
-
-
-		describe 'paging', (describe,it) ->
-
-			it 'limit', ->
-				actual = docs.createChildCollection().query({limit:1})
-				expected = queryEngine.createCollection 'index': docs.get('index')
-				assert.deepEqual actual.toJSON(), expected.toJSON()
-
-			it 'limit+page', ->
-				actual = docs.createChildCollection().query({limit:1,page:2})
-				expected = queryEngine.createCollection 'jquery': docs.get('jquery')
-				assert.deepEqual actual.toJSON(), expected.toJSON()
-
-			it 'limit+offset', ->
-				actual = docs.createChildCollection().query({limit:1,offset:1})
-				expected = queryEngine.createCollection 'jquery': docs.get('jquery')
-				assert.deepEqual actual.toJSON(), expected.toJSON()
-
-			it 'limit+offset+page', ->
-				actual = docs.createChildCollection().query({limit:1,offset:1,page:2})
-				expected = queryEngine.createCollection 'history': docs.get('history')
-				assert.deepEqual actual.toJSON(), expected.toJSON()
-
-			it 'limit+offset+page (via findAll)', ->
-				actual = docs.findAll(
-					# Query
-					{id: $exists: true},
-					# Comparator
-					null,
-					# Paging
-					{limit:1,offset:1,page:2}
-				)
-				expected = queryEngine.createCollection 'history': docs.get('history')
-				assert.deepEqual actual.toJSON(), expected.toJSON()
-
-			it 'offset', ->
-				actual = docs.createChildCollection().query({offset:1})
-				expected = queryEngine.createCollection 'jquery': docs.get('jquery'), 'history': docs.get('history')
-				assert.deepEqual actual.toJSON(), expected.toJSON()
+				it 'offset', ->
+					actual = store.createChildCollection().query({offset:1})
+					expected = queryEngine.createCollection('jquery': store.get('jquery'), 'history': store.get('history'))
+					assert.deepEqual(actual.toJSON(), expected.toJSON())
 
 # Generate Suites
 describe 'queries', (describe,it) ->
-	for own key, value of store
-		generateTestSuite describe, it, key, value
+	for own storeName,store of stores
+		generateTestSuite(describe, it, storeName, store)
 
 # Return
 null
