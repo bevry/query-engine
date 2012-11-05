@@ -41,7 +41,8 @@
 	"devDependencies": {
 		"underscore": "1.4.x",
 		"joe": "1.1.x",
-		"coffee-script": "1.4.x"
+		"coffee-script": "1.4.x",
+		"benchmark": "1.0.x"
 	},
 	"directories": {
 		"lib": "./out/lib"
