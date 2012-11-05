@@ -1532,21 +1532,37 @@ class Query
 
 # Prepare
 queryEngine =
+	# Aliases
 	safeRegex: util.safeRegex
 	createRegex: util.createRegex
 	createSafeRegex: util.createSafeRegex
 	generateComparator: util.generateComparator
 	toArray: util.toArray
+	util: util
 	Backbone: Backbone
 	Hash: Hash
 	QueryCollection: QueryCollection
 	Criteria: Criteria
 	Query: Query
 	Pill: Pill
+
+	# Set a Query Selector on the Query Prototype
+	# selectorHandle = string to be used for the selector (e.g. $like)
+	# selectorObject = {compile?:function(opts),test:function(opts)}, opts = {fieldName,selectorName,selectorValue,model,modelId,modelValue,modelValueExists}
+	setQuerySelector: (selectorHandle, selectorObject) ->
+		if selectorObject?
+			Query::selectors[selectorHandle] = selectorObject
+		else
+			delete Query::selectors[selectorHandle]
+		return @
+
+	# Create Collection
 	createCollection: (models,options) ->
 		models = util.toArray(models)
 		collection = new QueryCollection(models,options)
 		return collection
+
+	# Create a Live Collection
 	createLiveCollection: (models,options) ->
 		models = util.toArray(models)
 		collection = new QueryCollection(models,options).live(true)

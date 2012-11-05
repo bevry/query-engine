@@ -1540,12 +1540,21 @@
     createSafeRegex: util.createSafeRegex,
     generateComparator: util.generateComparator,
     toArray: util.toArray,
+    util: util,
     Backbone: Backbone,
     Hash: Hash,
     QueryCollection: QueryCollection,
     Criteria: Criteria,
     Query: Query,
     Pill: Pill,
+    setQuerySelector: function(selectorHandle, selectorObject) {
+      if (selectorObject != null) {
+        Query.prototype.selectors[selectorHandle] = selectorObject;
+      } else {
+        delete Query.prototype.selectors[selectorHandle];
+      }
+      return this;
+    },
     createCollection: function(models, options) {
       var collection;
       models = util.toArray(models);
