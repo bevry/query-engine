@@ -1,19 +1,10 @@
 # Requires
-_ = if module? then require('underscore') else @_
-Backbone = if module? then require('backbone') else @Backbone
+Backbone = (if module? then require('backbone') else @Backbone) ? null
 
 
 # Util
 # Contains our utility functions
 util =
-
-	# ---------------------------------
-	# Underscore Aliases
-
-	# Is Equal
-	isEqual: (value1,value2) ->
-		return _.isEqual(value1,value2)
-
 
 	# ---------------------------------
 	# Types, from bal-util: https://github.com/balupton/bal-util
@@ -94,7 +85,36 @@ util =
 
 
 	# ---------------------------------
-	# Other
+	# Helpers
+
+	# Is Equal
+	isEqual: (value1,value2) ->
+		return JSON.stringify(value1) is JSON.stringify(value2)
+
+	# Clone
+	clone: (args...) ->
+		return util.shallowExtendPlainObjects({}, args...)
+
+	# Extend
+	# Alias for Shallow Extend
+	extend: (args...) ->
+		return util.shallowExtendPlainObjects(args...)
+
+	# Shallow extend plain objects
+	shallowExtendPlainObjects: (target,objs...) ->
+		for obj in objs
+			obj or= {}
+			for own key,value of obj
+				target[key] = value
+		return target
+
+	# Get
+	get: (obj,key) ->
+		if obj.get?
+			result = obj.get(key)
+		else
+			result = obj[key]
+		return result
 
 	# Safe Regex
 	# Santitize a string for the use inside a regular expression
@@ -179,8 +199,8 @@ util =
 					comparison = 0
 					for own key,value of comparator
 						# Prepare
-						aValue = a.get?(key) ? a[key]
-						bValue = b.get?(key) ? b[key]
+						aValue = util.get(a,key)
+						bValue = util.get(b,key)
 						# Compare
 						if aValue is bValue
 							comparison = 0
@@ -199,6 +219,7 @@ util =
 				throw new Error('Unknown comparator type')
 		# Return the generated function for our comparator
 		return generateFunction(input)
+
 
 # Hash
 # Extends the Array class with:
@@ -266,6 +287,7 @@ class Hash extends Array
 # - pills: a hash of pill instances or pill objects
 # - parentCollection: a backbone.js collection to be used as the parent
 # - live: whether or not to automaticaly perform retests when events fire
+unless Backbone? then QueryCollection = null else \
 class QueryCollection extends Backbone.Collection
 	# Model
 	# The model that this query engine supports
@@ -276,7 +298,7 @@ class QueryCollection extends Backbone.Collection
 		# Prepare
 		me = @
 		@options ?= {}
-		_.extend(@options, options)
+		util.extend(@options, options)
 
 		# Proxy Criteria
 		for own key,value of Criteria::
@@ -591,8 +613,8 @@ class QueryCollection extends Backbone.Collection
 	# We should check if the models pass our tests, if so then we add them
 	add: (models, options) ->
 		# Prepare
-		options = if options then _.clone(options) else {}
-		models = if _.isArray(models) then models.slice() else [models]
+		options = if options then util.clone(options) else {}
+		models = if util.isArray(models) then models.slice() else [models]
 		passedModels = []
 
 		# Cycle through the models
@@ -614,7 +636,7 @@ class QueryCollection extends Backbone.Collection
 	# We should check if the model passes our tests, if so then we add them
 	create: (model, options) ->
 		# Prepare
-		options = if options then _.clone(options) else {}
+		options = if options then util.clone(options) else {}
 		model = @_prepareModel(model,options)
 
 		# Check
@@ -679,7 +701,7 @@ class Criteria
 	constructor: (options) ->
 		# Prepare
 		@options ?= {}
-		_.extend(@options, options)
+		util.extend(@options, options)
 
 		# Chain
 		@
@@ -687,11 +709,11 @@ class Criteria
 	# Apply Criteria
 	applyCriteria: (options={}) =>
 		# Apply
-		@options.filters = _.extend({}, @options.filters or {})
-		@options.queries = _.extend({}, @options.queries or {})
-		@options.pills = _.extend({}, @options.pills or {})
+		@options.filters = util.extend({}, @options.filters or {})
+		@options.queries = util.extend({}, @options.queries or {})
+		@options.pills = util.extend({}, @options.pills or {})
 		@options.searchString or= null
-		@options.paging = _.extend({}, @options.paging or {})
+		@options.paging = util.extend({}, @options.paging or {})
 
 		# Initialise filters, queries and pills if we have them
 		@setFilters(@options.filters)
@@ -714,7 +736,7 @@ class Criteria
 	# Set Paging
 	setPaging: (paging) ->
 		# Prepare
-		paging = _.extend(@getPaging(), paging or {})
+		paging = util.extend(@getPaging(), paging or {})
 		paging.page or= null
 		paging.limit or= null
 		paging.offset or= null

@@ -36,10 +36,10 @@
 		"url": "http://github.com/bevry/query-engine.git"
 	},
 	"dependencies": {
-		"underscore": "1.4.x",
 		"backbone": "0.9.x"
 	},
 	"devDependencies": {
+		"underscore": "1.4.x",
 		"joe": "1.1.x",
 		"coffee-script": "1.4.x"
 	},
