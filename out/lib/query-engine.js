@@ -293,7 +293,6 @@
         if ((_ref1 = this.options) == null) {
           this.options = {};
         }
-        util.extend(this.options, options);
         _ref2 = Criteria.prototype;
         for (key in _ref2) {
           if (!__hasProp.call(_ref2, key)) continue;
@@ -306,7 +305,15 @@
           this.setComparator(this.comparator);
         }
         this.applyCriteriaOptions(options);
-        this.live();
+        if (options != null) {
+          if (options.parentCollection != null) {
+            this.options.parentCollection = options.parentCollection;
+          }
+          if (options.live != null) {
+            this.options.live = options.live;
+          }
+          this.live();
+        }
         return this;
       };
 
@@ -644,37 +651,86 @@
 
   Criteria = (function() {
 
-    function Criteria(options) {
+    function Criteria() {
+      var args;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       this.applyCriteriaOptions = __bind(this.applyCriteriaOptions, this);
 
-      var _ref1;
-      if ((_ref1 = this.options) == null) {
-        this.options = {};
-      }
-      util.extend(this.options, options);
+      this.applyCriteriaOptions.apply(this, args);
       this;
 
     }
 
-    Criteria.prototype.applyCriteriaOptions = function(options) {
-      var _base;
-      if (options == null) {
-        options = {};
+    Criteria.prototype.extractCriteriaOptions = function() {
+      var args, comparator, criteriaOptions, paging, query;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      if (args.length === 1) {
+        if (args[0] instanceof Criteria) {
+          criteriaOptions = args[0].options;
+        } else if (args[0]) {
+          criteriaOptions = args[0];
+        } else {
+          criteriaOptions = {};
+        }
+      } else if (args.length > 1) {
+        query = args[0], comparator = args[1], paging = args[2];
+        criteriaOptions = {
+          comparator: comparator,
+          paging: paging,
+          queries: {
+            find: query
+          }
+        };
+      } else {
+        criteriaOptions = null;
       }
-      this.options.filters = util.extend({}, this.options.filters || {});
-      this.options.queries = util.extend({}, this.options.queries || {});
-      this.options.pills = util.extend({}, this.options.pills || {});
-      (_base = this.options).searchString || (_base.searchString = null);
-      this.options.paging = util.extend({}, this.options.paging || {});
-      this.setFilters(this.options.filters);
-      this.setQueries(this.options.queries);
-      this.setPills(this.options.pills);
-      if (this.options.searchString != null) {
-        this.setSearchString(this.options.searchString);
+      return criteriaOptions;
+    };
+
+    Criteria.prototype.applyCriteriaOptions = function() {
+      var args, criteriaOptions, _base, _base1, _base2, _base3, _base4, _base5, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      if ((_ref1 = this.options) == null) {
+        this.options = {};
       }
-      this.setPaging(this.options.paging);
-      if (this.options.comparator != null) {
-        this.setComparator(this.options.comparator);
+      if ((_ref2 = (_base = this.options).filters) == null) {
+        _base.filters = {};
+      }
+      if ((_ref3 = (_base1 = this.options).queries) == null) {
+        _base1.queries = {};
+      }
+      if ((_ref4 = (_base2 = this.options).pills) == null) {
+        _base2.pills = {};
+      }
+      if ((_ref5 = (_base3 = this.options).paging) == null) {
+        _base3.paging = {};
+      }
+      if ((_ref6 = (_base4 = this.options).searchString) == null) {
+        _base4.searchString = null;
+      }
+      if ((_ref7 = (_base5 = this.options).comparator) == null) {
+        _base5.comparator = null;
+      }
+      criteriaOptions = this.extractCriteriaOptions.apply(this, args);
+      if (criteriaOptions) {
+        if (criteriaOptions.filters != null) {
+          this.setFilters(criteriaOptions.filters);
+        }
+        if (criteriaOptions.queries != null) {
+          this.setQueries(criteriaOptions.queries);
+        }
+        if (criteriaOptions.pills != null) {
+          this.setPills(criteriaOptions.pills);
+        }
+        if (criteriaOptions.paging != null) {
+          this.setPaging(criteriaOptions.paging);
+        }
+        if (criteriaOptions.searchString != null) {
+          this.setSearchString(criteriaOptions.searchString);
+        }
+        if (criteriaOptions.comparator != null) {
+          this.setComparator(criteriaOptions.comparator);
+        }
       }
       return this;
     };

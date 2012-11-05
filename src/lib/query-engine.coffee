@@ -295,7 +295,6 @@ class QueryCollection extends Backbone.Collection
 		# Prepare
 		me = @
 		@options ?= {}
-		util.extend(@options, options)
 
 		# Proxy Criteria
 		for own key,value of Criteria::
@@ -308,12 +307,14 @@ class QueryCollection extends Backbone.Collection
 		# Criteria
 		@applyCriteriaOptions(options)
 
-		# Parent Collection
-		# No need to set parent collection, as if it is an option, it has already been set
+		# Options
+		if options?
+			# Parent Collection
+			@options.parentCollection = options.parentCollection  if options.parentCollection?
 
-		# Live
-		# Initliase live events if we use them
-		@live()
+			# Live
+			@options.live = options.live  if options.live?
+			@live()
 
 		# Chain
 		@
@@ -693,32 +694,58 @@ class QueryCollection extends Backbone.Collection
 # Criteria
 
 class Criteria
-
 	# Constructor
-	constructor: (options) ->
-		# Prepare
-		@options ?= {}
-		util.extend(@options, options)
+	constructor: (args...) ->
+		# Apply Options
+		@applyCriteriaOptions(args...)
 
 		# Chain
 		@
 
-	# Apply Criteria
-	applyCriteriaOptions: (options={}) =>
-		# Apply
-		@options.filters = util.extend({}, @options.filters or {})
-		@options.queries = util.extend({}, @options.queries or {})
-		@options.pills = util.extend({}, @options.pills or {})
-		@options.searchString or= null
-		@options.paging = util.extend({}, @options.paging or {})
+	# Extract Criteria Options
+	# args = query, comparator, paging?
+	# args = criteriaOptions
+	# args = criteriaInstance
+	extractCriteriaOptions: (args...) ->
+		# Prepare
+		if args.length is 1
+			if args[0] instanceof Criteria
+				criteriaOptions = args[0].options
+			else if args[0]
+				criteriaOptions = args[0]
+			else
+				criteriaOptions = {}
+		else if args.length > 1
+			[query,comparator,paging] = args
+			criteriaOptions = {comparator, paging, queries:find:query}
+		else
+			criteriaOptions = null
 
-		# Initialise filters, queries and pills if we have them
-		@setFilters(@options.filters)
-		@setQueries(@options.queries)
-		@setPills(@options.pills)
-		@setSearchString(@options.searchString)  if @options.searchString?
-		@setPaging(@options.paging)
-		@setComparator(@options.comparator)  if @options.comparator?
+		# Return
+		return criteriaOptions
+
+	# Apply Criteria Options
+	applyCriteriaOptions: (args...) =>
+		# Prepare
+		@options ?= {}
+		@options.filters ?= {}
+		@options.queries ?= {}
+		@options.pills ?= {}
+		@options.paging  ?= {}
+		@options.searchString ?= null
+		@options.comparator ?= null
+
+		# Extract
+		criteriaOptions = @extractCriteriaOptions(args...)
+
+		# Apply
+		if criteriaOptions
+			@setFilters(criteriaOptions.filters)            if criteriaOptions.filters?
+			@setQueries(criteriaOptions.queries)            if criteriaOptions.queries?
+			@setPills(criteriaOptions.pills)                if criteriaOptions.pills?
+			@setPaging(criteriaOptions.paging)              if criteriaOptions.paging?
+			@setSearchString(criteriaOptions.searchString)  if criteriaOptions.searchString?
+			@setComparator(criteriaOptions.comparator)      if criteriaOptions.comparator?
 
 		# Chain
 		@
