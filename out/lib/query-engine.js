@@ -215,8 +215,6 @@
 
     __extends(Hash, _super);
 
-    Hash.prototype.arr = [];
-
     function Hash(value) {
       var item, key, _i, _len;
       value = util.toArray(value);

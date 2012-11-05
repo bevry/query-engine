@@ -227,9 +227,6 @@ util =
 # - the hasIn function
 # - the hasAll function
 class Hash extends Array
-	# Array
-	arr: []
-
 	# Constructor
 	constructor: (value) ->
 		value = util.toArray(value)
