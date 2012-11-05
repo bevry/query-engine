@@ -1,12 +1,26 @@
 ## History
 
+- v1.4.0 November 5, 2012
+	- Speed improvements
+	- We now do compiled queries
+	- Got rid of underscore dependency (still used in tests)
+	- Backbone dependency is now optional on the client side
+		- Backbone is required for the `QueryCollection` class
+	- `Criteria` changes:
+		- Constructor now accepts criteria options
+		- `applyCriteria` renamed to `applyCriteriaOptions`
+		- Added `extractCriteriaOptions(criteriaOptions)`
+	- `queryEngine` changes:
+		- Added `setQuerySelector(selectorId, selectorObject)` so you can add your own custom query selectors
+		- Added `testModels(models,criteriaOptions)` so you can query standard javascript objects without backbone
+
 - v1.3.1 October 29, 2012
 	- Fixed searching for `false`
 		- Thanks to [Andrew Shults](https://github.com/andrewjshults) for [pull request #17](https://github.com/bevry/query-engine/pull/17)
 
 - v1.3.0 October 29, 2012
-	- Improved memory utilisation
-	- Improved speed by 3-7x
+	- Memory improvements
+	- Speed improvements
 	- Moved query criteria out of `QueryCollection` into new `Criteria` class
 		- `QueryCollection` injects the `Criteria` prototype methods to stay backwards compatible
 		- Introduced `Criteria::testModels` which is the same as `query` but returns the results instead of applying them
