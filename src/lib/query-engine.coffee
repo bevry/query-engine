@@ -306,7 +306,7 @@ class QueryCollection extends Backbone.Collection
 		# @options.comparator is shortcutted here by Backbone
 
 		# Criteria
-		@applyCriteria(options)
+		@applyCriteriaOptions(options)
 
 		# Parent Collection
 		# No need to set parent collection, as if it is an option, it has already been set
@@ -704,7 +704,7 @@ class Criteria
 		@
 
 	# Apply Criteria
-	applyCriteria: (options={}) =>
+	applyCriteriaOptions: (options={}) =>
 		# Apply
 		@options.filters = util.extend({}, @options.filters or {})
 		@options.queries = util.extend({}, @options.queries or {})

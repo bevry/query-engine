@@ -305,7 +305,7 @@
         if (this.comparator != null) {
           this.setComparator(this.comparator);
         }
-        this.applyCriteria(options);
+        this.applyCriteriaOptions(options);
         this.live();
         return this;
       };
@@ -645,7 +645,7 @@
   Criteria = (function() {
 
     function Criteria(options) {
-      this.applyCriteria = __bind(this.applyCriteria, this);
+      this.applyCriteriaOptions = __bind(this.applyCriteriaOptions, this);
 
       var _ref1;
       if ((_ref1 = this.options) == null) {
@@ -656,7 +656,7 @@
 
     }
 
-    Criteria.prototype.applyCriteria = function(options) {
+    Criteria.prototype.applyCriteriaOptions = function(options) {
       var _base;
       if (options == null) {
         options = {};
