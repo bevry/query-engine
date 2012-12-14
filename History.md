@@ -1,5 +1,8 @@
 ## History
 
+- v1.5.0 December 14, 2012
+	- Removed backbone dependency, should be handled by the parent project now
+
 - v1.4.0 November 5, 2012
 	- Speed improvements
 	- We now do compiled queries

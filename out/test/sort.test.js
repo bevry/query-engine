@@ -103,6 +103,14 @@
   generateTestSuite = function(describe, it, collectionName, docs) {
     return describe(collectionName, function(describe, it) {
       describe('sortArray', function(describe, it) {
+        it('string-object', function() {
+          var actual, expected;
+          actual = queryEngine.createCollection(docs.models).sortArray({
+            title: 1
+          });
+          expected = queryEngine.createCollection([docs.get('history'), docs.get('index'), docs.get('jquery')]);
+          return assert.deepEqual(actual, expected.toJSON());
+        });
         it('numeric-function', function() {
           var actual, expected;
           actual = queryEngine.createCollection(docs.models).sortArray(function(a, b) {

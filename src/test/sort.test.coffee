@@ -99,6 +99,11 @@ store =
 generateTestSuite = (describe, it, collectionName, docs) ->
 	describe collectionName, (describe,it) ->
 		describe 'sortArray', (describe,it) ->
+			it 'string-object', ->
+				actual = queryEngine.createCollection(docs.models).sortArray(title: 1)
+				expected = queryEngine.createCollection [docs.get('history'),docs.get('index'),docs.get('jquery')]
+				assert.deepEqual(actual, expected.toJSON())
+
 			it 'numeric-function', ->
 				actual = queryEngine.createCollection(docs.models).sortArray (a,b) -> return b.position - a.position
 				expected = queryEngine.createCollection [docs.get('history'),docs.get('jquery'),docs.get('index')]

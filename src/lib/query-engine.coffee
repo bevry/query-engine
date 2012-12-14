@@ -1,6 +1,8 @@
 # Requires
-Backbone = (if module? then require('backbone') else @Backbone) ? null
-
+try
+	Backbone = (if module? then require('backbone') else @Backbone) ? null
+catch err
+	Backbone = null
 
 # Util
 # Contains our utility functions

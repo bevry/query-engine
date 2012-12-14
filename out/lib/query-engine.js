@@ -7,7 +7,11 @@
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
-  Backbone = (_ref = (typeof module !== "undefined" && module !== null ? require('backbone') : this.Backbone)) != null ? _ref : null;
+  try {
+    Backbone = (_ref = (typeof module !== "undefined" && module !== null ? require('backbone') : this.Backbone)) != null ? _ref : null;
+  } catch (err) {
+    Backbone = null;
+  }
 
   util = {
     toString: function(value) {
