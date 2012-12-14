@@ -386,7 +386,7 @@
         model || (model = {});
         if ((model.id != null) && this.get(model.id)) {
           exists = true;
-        } else if ((model.cid != null) && this.getByCid(model.cid)) {
+        } else if ((model.cid != null) && (this._byCid[model.cid] != null)) {
           exists = true;
         } else {
           exists = false;

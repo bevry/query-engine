@@ -1,7 +1,8 @@
 ## History
 
 - v1.5.0 December 14, 2012
-	- Removed backbone dependency, should be handled by the parent project now
+	- Removed backbone dependency, should now be handled by the parent project
+	- Added support for Backbone v0.9.9 - [backbone issue #1922](https://github.com/documentcloud/backbone/issues/1922) broke it
 
 - v1.4.1 December 14, 2012
 	- Changed backbone dependency version from `0.9.x` to `0.9.2` due to the b/c break

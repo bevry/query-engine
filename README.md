@@ -1,6 +1,6 @@
 # QueryEngine [![Build Status](https://secure.travis-ci.org/bevry/query-engine.png?branch=master)](http://travis-ci.org/bevry/query-engine)
 
-QueryEngine provides extensive Querying, Filtering, and Searching abilities for [Backbone.js Collections](http://documentcloud.github.com/backbone/#Collection) as well as JavaScript arrays and objects.
+QueryEngine provides extensive Querying, Filtering, and Searching abilities for [Backbone.js Collections](http://documentcloud.github.com/backbone/#Collection) as well as JavaScript arrays and objects. The Backbone.js and Underscore dependencies are optional.
 
 
 ## Features
@@ -22,13 +22,19 @@ QueryEngine provides extensive Querying, Filtering, and Searching abilities for 
 
 1. [Install Node.js](https://github.com/balupton/node/wiki/Installing-Node.js)
 
-2. Install QueryEngine
+1. Install Backbone (optional, but required for `QueryCollection`)
+
+	``` bash
+	npm install backbone
+	```
+
+1. Install QueryEngine
 
 	``` bash
 	npm install query-engine
 	```
 
-3. Require QueryEngine
+1. Require QueryEngine
 
 	``` javascript
 	var queryEngine = require('query-engine');
@@ -40,8 +46,11 @@ QueryEngine provides extensive Querying, Filtering, and Searching abilities for 
 1. Include the necessary scripts
 
 	``` html
+	<!-- Optional: But required for QueryCollection -->
 	<script src="http://documentcloud.github.com/underscore/underscore-min.js"></script>
 	<script src="http://documentcloud.github.com/backbone/backbone-min.js"></script>
+
+	<!-- Required -->
 	<script src="http://raw.github.com/bevry/query-engine/master/out/lib/query-engine.js"></script>
 	```
 
@@ -57,6 +66,10 @@ QueryEngine provides extensive Querying, Filtering, and Searching abilities for 
 
 [You can discover the history inside the `History.md` file](https://github.com/bevry/query-engine/blob/master/History.md#files)
 
+
+## Compatability
+
+Tested and working against backbone versions 0.9.2 and 0.9.9.
 
 
 ## License

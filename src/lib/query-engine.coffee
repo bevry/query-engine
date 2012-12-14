@@ -405,7 +405,7 @@ class QueryCollection extends Backbone.Collection
 		if model.id? and @get(model.id)
 			exists = true
 		# Check by the model's cid
-		else if model.cid? and @getByCid(model.cid)
+		else if model.cid? and @_byCid[model.cid]?
 			exists = true
 		# Otherwise fail
 		else
