@@ -1,5 +1,8 @@
 ## History
 
+- v1.4.1 December 14, 2012
+	- Changed backbone dependency version from `0.9.x` to `0.9.2` due to the b/c break
+
 - v1.4.0 November 5, 2012
 	- Speed improvements
 	- We now do compiled queries
