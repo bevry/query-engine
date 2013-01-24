@@ -41,7 +41,7 @@
     },
     "devDependencies": {
         "bal-util": "~1.16.0",
-        "docpad": ">=6.21.4 <7",
+        "docpad": ">=6.21.5 <7",
         "docpad-plugin-coffeescript": "2.x",
         "backbone": "~0.9.2",
         "underscore": "~1.4.3",

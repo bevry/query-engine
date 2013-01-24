@@ -1,0 +1,27 @@
+<html>
+<head>
+    <!-- Query Engine -->
+    <script src="../vendor/underscore.js"></script>
+    <script src="../vendor/backbone.js"></script>
+    <script src="../lib/query-engine.js"></script>
+
+    <!-- Joe -->
+    <script src="../vendor/chai.js"></script>
+    <script>this.assert = this.chai.assert</script>
+    <script src="../vendor/flow.js"></script>
+    <script src="../vendor/joe/joe.js"></script>
+    <script src="../vendor/joe/reporters/console.js"></script>
+    <script src="../vendor/joe/reporters/list.js"></script>
+    <script>this.joe.setReporter(new this.joe.ListReporter());</script>
+
+    <!-- Tests -->
+    <script src="../test/live-test.js"></script>
+    <script src="../test/misc-test.js"></script>
+    <script src="../test/queries-test.js"></script>
+    <script src="../test/sort-test.js"></script>
+</head>
+<body>
+    <p>open your developer console</p>
+    <button onclick="javascript:joe.exit();">I'm done, give me the results</button>
+</body>
+</html>
