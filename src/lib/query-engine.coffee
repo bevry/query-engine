@@ -401,11 +401,15 @@ class QueryCollection extends Backbone.Collection
 		# Prepare
 		model or= {}
 
+		# As of Backbone v0.9.9 @get covers both .id and .cid
+		# however as we want to maintain support for v0.9.2 we must do this
+
 		# Check by the model's id
 		if model.id? and @get(model.id)
 			exists = true
 		# Check by the model's cid
-		else if model.cid? and (@_byCid? and @_byCid[model.cid]? or @get(model.cid))
+		# Use the old v0.9.2 @_byCid method or if that doesn't work use the new v0.9.9 @get method
+		else if model.cid? and (@_byCid?[model.cid] or @get(model.cid))
 			exists = true
 		# Otherwise fail
 		else
