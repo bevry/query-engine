@@ -1,5 +1,10 @@
 ## History
 
+- v1.5.1 January 24, 2013
+	- Support for Backbone v0.9.10
+		- Closes [pull request #21](https://github.com/bevry/query-engine/pull/21) thanks to [Nicholas Firth-McCoy](https://github.com/nfm)
+	- Added backbone as a peerDependency
+
 - v1.5.0 December 14, 2012
 	- Removed backbone dependency, should now be handled by the parent project
 	- Added support for Backbone v0.9.9 - [backbone issue #1922](https://github.com/documentcloud/backbone/issues/1922) broke it
