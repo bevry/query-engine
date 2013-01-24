@@ -1,5 +1,5 @@
 # Requires
-queryEngine = require?(__dirname+'/../lib/query-engine.js') or @queryEngine
+queryEngine = require?(__dirname+'/../lib/query-engine') or @queryEngine
 assert = require?('assert') or @assert
 Backbone = require?('backbone') or @Backbone
 joe = require?('joe') or @joe
