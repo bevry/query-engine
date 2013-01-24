@@ -409,7 +409,7 @@ class QueryCollection extends Backbone.Collection
 			exists = true
 		# Check by the model's cid
 		# Use the old v0.9.2 @_byCid method or if that doesn't work use the new v0.9.9 @get method
-		else if model.cid? and (@_byCid?[model.cid] or @get(model.cid))
+		else if model.cid? and (@_byCid?[model.cid] ? @get(model.cid))
 			exists = true
 		# Otherwise fail
 		else

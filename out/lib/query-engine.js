@@ -381,11 +381,11 @@
       };
 
       QueryCollection.prototype.hasModel = function(model) {
-        var exists, _ref1;
+        var exists, _ref1, _ref2;
         model || (model = {});
         if ((model.id != null) && this.get(model.id)) {
           exists = true;
-        } else if ((model.cid != null) && (((_ref1 = this._byCid) != null ? _ref1[model.cid] : void 0) || this.get(model.cid))) {
+        } else if ((model.cid != null) && ((_ref1 = (_ref2 = this._byCid) != null ? _ref2[model.cid] : void 0) != null ? _ref1 : this.get(model.cid))) {
           exists = true;
         } else {
           exists = false;

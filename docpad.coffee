@@ -3,6 +3,7 @@ delay = (next) -> setTimeout(next,500)
 
 # Export
 module.exports =
+	prompts: false
 	events:
 		generateAfter: (opts,next) ->
 			# Prepare
