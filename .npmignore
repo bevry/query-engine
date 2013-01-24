@@ -1,8 +1,10 @@
 .travis*
+Cakefile
 Makefile
+History.md
+docpad.coffee
 
 src/
 out/demo/
 out/test/
-demo/
-test-web/
+out/vendor/

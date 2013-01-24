@@ -75,5 +75,5 @@ Tested and working against backbone versions 0.9.2 and 0.9.9.
 ## License
 
 Licensed under the incredibly [permissive](http://en.wikipedia.org/wiki/Permissive_free_software_licence) [MIT License](http://creativecommons.org/licenses/MIT/)
-<br/>Copyright &copy; 2012 [Bevry Pty Ltd](http://bevry.me)
+<br/>Copyright &copy; 2012+ [Bevry Pty Ltd](http://bevry.me)
 <br/>Copyright &copy; 2011 [Benjamin Lupton](http://balupton.com)
