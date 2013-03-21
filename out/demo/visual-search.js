@@ -15,6 +15,7 @@
 
   $(window).resize(function() {
     var padHeight, padWidth;
+
     padWidth = $(window).width() / 2 - 20;
     padHeight = $(window).height() - $('.header:first').height() - 80;
     return $('.pad,.editor').width(padWidth).height(padHeight);
@@ -22,6 +23,7 @@
 
   $(document).keydown(function(e) {
     var isInput;
+
     isInput = $(document.activeElement).is(':input');
     if (e.keyCode === 8 && !isInput) {
       return e.preventDefault();
@@ -42,13 +44,15 @@
   }
 
   codeChanged = function() {
-    var codeCoffeeScript, codeJavaScript, collection, errMessage;
+    var codeCoffeeScript, codeJavaScript, collection, err, errMessage;
+
     try {
       codeCoffeeScript = editors.code.getSession().getValue();
       codeJavaScript = CoffeeScript.compile(codeCoffeeScript);
       collection = eval(codeJavaScript);
       return window.updateResults(collection);
-    } catch (err) {
+    } catch (_error) {
+      err = _error;
       errMessage = err.stack.toString();
       console.log(errMessage);
       return editors.result.getSession().setValue(errMessage);
@@ -57,6 +61,7 @@
 
   window.updateResults = function(collection) {
     var resultArray, resultCoffee, resultJavaScript;
+
     resultArray = collection != null ? collection.toJSON() : void 0;
     resultJavaScript = JSON.stringify(resultArray);
     resultCoffee = Js2coffee.build("var result = " + resultJavaScript);

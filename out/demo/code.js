@@ -15,6 +15,7 @@
 
   $(window).resize(function() {
     var padHeight, padWidth;
+
     padWidth = $(window).width() / 2 - 20;
     padHeight = $(window).height() - $('.header:first').height() - 80;
     return $('.pad,.editor').width(padWidth).height(padHeight);
@@ -34,14 +35,16 @@
   }
 
   performQuery = function() {
-    var code, errMessage, inCollection, resultCoffee, resultCollection;
+    var code, err, errMessage, inCollection, resultCoffee, resultCollection;
+
     try {
       code = CoffeeScript.compile(editors.code.getSession().getValue());
       inCollection = eval(code);
       resultCollection = queryEngine.createCollection(inCollection);
       resultCoffee = Js2coffee.build('var result = ' + JSON.stringify(resultCollection));
       return editors.result.getSession().setValue(resultCoffee);
-    } catch (err) {
+    } catch (_error) {
+      err = _error;
       errMessage = err.toString();
       console.log(err);
       return editors.result.getSession().setValue(errMessage);

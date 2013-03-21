@@ -1,5 +1,10 @@
 ## History
 
+- v1.5.2 March 21, 2013
+	- Backbone peerDependency now supports any version
+	- Tested again Backbone.js v1.0.0
+	- Re-compiled with CoffeeScript 1.6.2 from 1.4.0
+
 - v1.5.1 January 24, 2013
 	- Support for Backbone v0.9.10
 		- Closes [pull request #21](https://github.com/bevry/query-engine/pull/21) thanks to [Nicholas Firth-McCoy](https://github.com/nfm)

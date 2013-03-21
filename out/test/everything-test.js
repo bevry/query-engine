@@ -1,5 +1,4 @@
 (function() {
-
   require(__dirname + '/live-test');
 
   require(__dirname + '/misc-test');

@@ -69,7 +69,7 @@ QueryEngine provides extensive Querying, Filtering, and Searching abilities for 
 
 ## Compatability
 
-Tested and working against backbone versions 0.9.2 and 0.9.9.
+Tested and working against Backbone versions 0.9.2, 0.9.9, and 1.0.0
 
 
 ## License

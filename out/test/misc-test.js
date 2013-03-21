@@ -16,13 +16,14 @@
   describe('misc', function(describe, it) {
     return describe('collection property', function(describe, it) {
       return it('when specificied, should create child collections of the property type', function() {
-        var MyQueryCollection, myChildCollection, myQueryCollection;
-        MyQueryCollection = (function(_super) {
+        var MyQueryCollection, myChildCollection, myQueryCollection, _ref;
 
+        MyQueryCollection = (function(_super) {
           __extends(MyQueryCollection, _super);
 
           function MyQueryCollection() {
-            return MyQueryCollection.__super__.constructor.apply(this, arguments);
+            _ref = MyQueryCollection.__super__.constructor.apply(this, arguments);
+            return _ref;
           }
 
           MyQueryCollection.prototype.collection = MyQueryCollection;
