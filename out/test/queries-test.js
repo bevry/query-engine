@@ -398,6 +398,14 @@
       },
       expected: ['jquery', 'history']
     },
+    '$hasAll': {
+      query: {
+        tags: {
+          $hasAll: ['jquery', 'history']
+        }
+      },
+      expected: ['history']
+    },
     '$in-null': {
       query: {
         positionNullable: {

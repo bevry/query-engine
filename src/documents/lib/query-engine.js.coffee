@@ -261,9 +261,9 @@ class Hash extends Array
 		pass = true
 
 		# Perform the check
-		for value in @
+		for value in options
 			empty = false
-			unless value in options
+			unless value in @
 				pass = false
 
 		# Fail if we are empty
@@ -271,6 +271,12 @@ class Hash extends Array
 
 		# Return whether we passed or not
 		return pass
+
+	# Has Exactly
+	# Check if all the options exist within us, and no other
+	hasExactly: (options) ->
+		hasAll = @hasAll(options)
+		return hasAll and util.toArray(options).length is @.length
 
 	# Is Same
 	# Check if our values are the same as the options
@@ -1299,7 +1305,7 @@ class Query
 		'$all':
 			test: (opts) ->
 				if opts.selectorValue? and opts.modelValueExists
-					if (new Hash opts.modelValue).hasAll(opts.selectorValue)
+					if (new Hash opts.modelValue).hasExactly(opts.selectorValue)
 						return true
 				return false
 
@@ -1334,7 +1340,7 @@ class Query
 		'$hasAll':
 			test: (opts) ->
 				if opts.modelValueExists
-					if (new Hash opts.modelValue).hasIn(opts.selectorValue)
+					if (new Hash opts.modelValue).hasAll(opts.selectorValue)
 						return true
 				return false
 
