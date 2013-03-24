@@ -268,10 +268,10 @@
       options = util.toArray(options);
       empty = true;
       pass = true;
-      for (_i = 0, _len = this.length; _i < _len; _i++) {
-        value = this[_i];
+      for (_i = 0, _len = options.length; _i < _len; _i++) {
+        value = options[_i];
         empty = false;
-        if (__indexOf.call(options, value) < 0) {
+        if (__indexOf.call(this, value) < 0) {
           pass = false;
         }
       }
@@ -279,6 +279,13 @@
         pass = false;
       }
       return pass;
+    };
+
+    Hash.prototype.hasExactly = function(options) {
+      var hasAll;
+
+      hasAll = this.hasAll(options);
+      return hasAll && util.toArray(options).length === this.length;
     };
 
     Hash.prototype.isSame = function(options) {
@@ -1291,7 +1298,7 @@
       '$all': {
         test: function(opts) {
           if ((opts.selectorValue != null) && opts.modelValueExists) {
-            if ((new Hash(opts.modelValue)).hasAll(opts.selectorValue)) {
+            if ((new Hash(opts.modelValue)).hasExactly(opts.selectorValue)) {
               return true;
             }
           }
@@ -1331,7 +1338,7 @@
       '$hasAll': {
         test: function(opts) {
           if (opts.modelValueExists) {
-            if ((new Hash(opts.modelValue)).hasIn(opts.selectorValue)) {
+            if ((new Hash(opts.modelValue)).hasAll(opts.selectorValue)) {
               return true;
             }
           }
