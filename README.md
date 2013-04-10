@@ -1,4 +1,8 @@
-# QueryEngine [![Build Status](https://secure.travis-ci.org/bevry/query-engine.png?branch=master)](http://travis-ci.org/bevry/query-engine)
+# QueryEngine
+
+[![Build Status](https://secure.travis-ci.org/bevry/query-engine.png?branch=master)](http://travis-ci.org/bevry/query-engine)
+[![NPM version](https://badge.fury.io/js/query-engine.png)](https://npmjs.org/package/query-engine)
+[![Flattr this project](https://raw.github.com/balupton/flattr-buttons/master/badge-89x18.gif)](http://flattr.com/thing/344188/balupton-on-Flattr)
 
 QueryEngine provides extensive Querying, Filtering, and Searching abilities for [Backbone.js Collections](http://documentcloud.github.com/backbone/#Collection) as well as JavaScript arrays and objects. The Backbone.js and Underscore dependencies are optional.
 
