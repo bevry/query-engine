@@ -77,8 +77,8 @@ test = (opts,next) ->
 	(next = opts; opts = {})  unless next?
 	args = []
 	args.push("--debug-brk")  if opts.debug
-	args.push("#{OUT}/test/everything-test.js")
 	args.push("--joe-reporter=list")
+	args.push("#{OUT}/test/everything-test.js")
 	spawn(NODE, args, {stdio:'inherit',cwd:APP}, next)
 
 finish = (err) ->

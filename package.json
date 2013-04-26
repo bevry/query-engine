@@ -19,10 +19,10 @@
 	],
 	"author": "Bevry Pty Ltd <us@bevry.me> (http://bevry.me)",
 	"maintainers": [
-		"Benjamin Lupton <b@lupton.cc> (http://balupton.com)"
+		"Benjamin Lupton <b@lupton.cc> (https://github.com/balupton)"
 	],
 	"contributors": [
-		"Benjamin Lupton <b@lupton.cc> (http://balupton.com)",
+		"Benjamin Lupton <b@lupton.cc> (https://github.com/balupton)",
 		"Farid Neshat <FaridN_SOAD@yahoo.com> (https://github.com/alFReD-NSH)",
 		"Nicholas Firth-McCoy (https://github.com/nfm)",
 		"Khalid Jebbari <https://github.com/DjebbZ> (https://github.com/DjebbZ)",
@@ -40,13 +40,14 @@
 		"backbone": "*"
 	},
 	"devDependencies": {
+		"backbone": "~1.0.0",
 		"coffee-script": "~1.6.2",
-		"bal-util": "~1.16.12",
+		"bal-util": "~2.0.5",
 		"docpad": ">=6.21.5 <7",
 		"docpad-plugin-coffeescript": "2.x",
-		"backbone": "~1.0.0",
 		"underscore": "~1.4.4",
-		"joe": "~1.1.1",
+		"joe": "~1.2.0",
+		"joe-reporter-list": "~1.2.1",
 		"benchmark": "~1.0.0"
 	},
 	"directories": {

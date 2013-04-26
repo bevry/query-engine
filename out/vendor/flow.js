@@ -319,17 +319,17 @@
 
   /*
   Usage:
-      # Add tasks to a queue then fire them in parallel (asynchronously)
-      tasks = new Group (err) -> next err
-      tasks.push (complete) -> someAsyncFunction(arg1, arg2, complete)
-      tasks.push (complete) -> anotherAsyncFunction(arg1, arg2, complete)
-      tasks.run()
+  	# Add tasks to a queue then fire them in parallel (asynchronously)
+  	tasks = new Group (err) -> next err
+  	tasks.push (complete) -> someAsyncFunction(arg1, arg2, complete)
+  	tasks.push (complete) -> anotherAsyncFunction(arg1, arg2, complete)
+  	tasks.run()
 
-      # Add tasks to a queue then fire them in serial (synchronously)
-      tasks = new Group (err) -> next err
-      tasks.push (complete) -> someAsyncFunction(arg1, arg2, complete)
-      tasks.push (complete) -> anotherAsyncFunction(arg1, arg2, complete)
-      tasks.run('serial')
+  	# Add tasks to a queue then fire them in serial (synchronously)
+  	tasks = new Group (err) -> next err
+  	tasks.push (complete) -> someAsyncFunction(arg1, arg2, complete)
+  	tasks.push (complete) -> anotherAsyncFunction(arg1, arg2, complete)
+  	tasks.run('serial')
   */
 
 

@@ -2750,7 +2750,7 @@ NameGuesser.prototype = {
     },
 
     createXMLHTTPObject: function() {
-        // Try XHR methods in order and store XHR factory
+	    // Try XHR methods in order and store XHR factory
         var xmlhttp, XMLHttpFactories = [
             function() {
                 return new XMLHttpRequest();
@@ -16613,107 +16613,107 @@ define("text/deps/requirejs/dist/main.css", [], "@font-face {" +
   "*/" +
   "" +
   ".hbox {" +
-  "    display: -webkit-box;" +
-  "    -webkit-box-orient: horizontal;" +
-  "    -webkit-box-align: stretch;" +
+  "	display: -webkit-box;" +
+  "	-webkit-box-orient: horizontal;" +
+  "	-webkit-box-align: stretch;" +
   "" +
-  "    display: -moz-box;" +
-  "    -moz-box-orient: horizontal;" +
-  "    -moz-box-align: stretch;" +
+  "	display: -moz-box;" +
+  "	-moz-box-orient: horizontal;" +
+  "	-moz-box-align: stretch;" +
   "" +
-  "    display: box;" +
-  "    box-orient: horizontal;" +
-  "    box-align: stretch;" +
+  "	display: box;" +
+  "	box-orient: horizontal;" +
+  "	box-align: stretch;" +
   "" +
-  "    width: 100%;" +
+  "	width: 100%;" +
   "}" +
   "" +
   ".hbox > * {" +
-  "    -webkit-box-flex: 0;" +
-  "    -moz-box-flex: 0;" +
-  "    box-flex: 0;" +
-  "    display: block;" +
+  "	-webkit-box-flex: 0;" +
+  "	-moz-box-flex: 0;" +
+  "	box-flex: 0;" +
+  "	display: block;" +
   "}" +
   "" +
   ".vbox {" +
-  "    display: -webkit-box;" +
-  "    -webkit-box-orient: vertical;" +
-  "    -webkit-box-align: stretch;" +
+  "	display: -webkit-box;" +
+  "	-webkit-box-orient: vertical;" +
+  "	-webkit-box-align: stretch;" +
   "" +
-  "    display: -moz-box;" +
-  "    -moz-box-orient: vertical;" +
-  "    -moz-box-align: stretch;" +
+  "	display: -moz-box;" +
+  "	-moz-box-orient: vertical;" +
+  "	-moz-box-align: stretch;" +
   "" +
-  "    display: box;" +
-  "    box-orient: vertical;" +
-  "    box-align: stretch;" +
+  "	display: box;" +
+  "	box-orient: vertical;" +
+  "	box-align: stretch;" +
   "}" +
   "" +
   ".vbox > * {" +
-  "    -webkit-box-flex: 0;" +
-  "    -moz-box-flex: 0;" +
-  "    box-flex: 0;" +
-  "    display: block;" +
+  "	-webkit-box-flex: 0;" +
+  "	-moz-box-flex: 0;" +
+  "	box-flex: 0;" +
+  "	display: block;" +
   "}" +
   "" +
   ".spacer {" +
-  "    -webkit-box-flex: 1;" +
-  "    -moz-box-flex: 1;" +
-  "    box-flex: 1;" +
+  "	-webkit-box-flex: 1;" +
+  "	-moz-box-flex: 1;" +
+  "	box-flex: 1;" +
   "}" +
   "" +
   ".reverse {" +
-  "    -webkit-box-direction: reverse;" +
-  "    -moz-box-direction: reverse;" +
-  "    box-direction: reverse;" +
+  "	-webkit-box-direction: reverse;" +
+  "	-moz-box-direction: reverse;" +
+  "	box-direction: reverse;" +
   "}" +
   "" +
   ".boxFlex0 {" +
-  "    -webkit-box-flex: 0;" +
-  "    -moz-box-flex: 0;" +
-  "    box-flex: 0;" +
+  "	-webkit-box-flex: 0;" +
+  "	-moz-box-flex: 0;" +
+  "	box-flex: 0;" +
   "}" +
   "" +
   ".boxFlex1, .boxFlex {" +
-  "    -webkit-box-flex: 1;" +
-  "    -moz-box-flex: 1;" +
-  "    box-flex: 1;" +
+  "	-webkit-box-flex: 1;" +
+  "	-moz-box-flex: 1;" +
+  "	box-flex: 1;" +
   "}" +
   "" +
   ".boxFlex2 {" +
-  "    -webkit-box-flex: 2;" +
-  "    -moz-box-flex: 2;" +
-  "    box-flex: 2;" +
+  "	-webkit-box-flex: 2;" +
+  "	-moz-box-flex: 2;" +
+  "	box-flex: 2;" +
   "}" +
   "" +
   ".boxGroup1 {" +
-  "    -webkit-box-flex-group: 1;" +
-  "    -moz-box-flex-group: 1;" +
-  "    box-flex-group: 1;" +
+  "	-webkit-box-flex-group: 1;" +
+  "	-moz-box-flex-group: 1;" +
+  "	box-flex-group: 1;" +
   "}" +
   "" +
   ".boxGroup2 {" +
-  "    -webkit-box-flex-group: 2;" +
-  "    -moz-box-flex-group: 2;" +
-  "    box-flex-group: 2;" +
+  "	-webkit-box-flex-group: 2;" +
+  "	-moz-box-flex-group: 2;" +
+  "	box-flex-group: 2;" +
   "}" +
   "" +
   ".start {" +
-  "    -webkit-box-pack: start;" +
-  "    -moz-box-pack: start;" +
-  "    box-pack: start;" +
+  "	-webkit-box-pack: start;" +
+  "	-moz-box-pack: start;" +
+  "	box-pack: start;" +
   "}" +
   "" +
   ".end {" +
-  "    -webkit-box-pack: end;" +
-  "    -moz-box-pack: end;" +
-  "    box-pack: end;" +
+  "	-webkit-box-pack: end;" +
+  "	-moz-box-pack: end;" +
+  "	box-pack: end;" +
   "}" +
   "" +
   ".center {" +
-  "    -webkit-box-pack: center;" +
-  "    -moz-box-pack: center;" +
-  "    box-pack: center;" +
+  "	-webkit-box-pack: center;" +
+  "	-moz-box-pack: center;" +
+  "	box-pack: center;" +
   "}" +
   "" +
   "/*" +
@@ -16721,20 +16721,20 @@ define("text/deps/requirejs/dist/main.css", [], "@font-face {" +
   "*/" +
   "" +
   ".clearfix:after {" +
-  "    content: \".\";" +
-  "    display: block;" +
-  "    clear: both;" +
-  "    visibility: hidden;" +
-  "    line-height: 0;" +
-  "    height: 0;" +
+  "	content: \".\";" +
+  "	display: block;" +
+  "	clear: both;" +
+  "	visibility: hidden;" +
+  "	line-height: 0;" +
+  "	height: 0;" +
   "}" +
   "" +
   "html[xmlns] .clearfix {" +
-  "    display: block;" +
+  "	display: block;" +
   "}" +
   "" +
   "* html .clearfix {" +
-  "    height: 1%;" +
+  "	height: 1%;" +
   "}");
 
 define("text/lib/ace/css/editor.css", [], ".ace_editor {" +

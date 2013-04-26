@@ -764,7 +764,7 @@ class Criteria
 		@options.filters ?= {}
 		@options.queries ?= {}
 		@options.pills ?= {}
-		@options.paging  ?= {}
+		@options.paging ?= null
 		@options.searchString ?= null
 		@options.comparator ?= null
 
@@ -793,13 +793,16 @@ class Criteria
 	# Set Paging
 	setPaging: (paging) ->
 		# Prepare
-		paging = util.extend(@getPaging(), paging or {})
+		paging = util.extend(@getPaging() or {}, paging or {})
 		paging.page or= null
 		paging.limit or= null
 		paging.offset or= null
 
 		# Apply paging
-		@options.paging = paging
+		if paging.page or paging.limit or paging.offset
+			@options.paging = paging
+		else
+			@options.paging = null
 
 		# Chain
 		@
@@ -1005,13 +1008,13 @@ class Criteria
 			passed.sort(comparator)
 
 		# Page our models
-		if paging
+		if paging?
 			start = paging.offset or 0
 			if paging.limit? and paging.limit > 0
 				start = start + paging.limit * ((paging.page or 1) - 1)
 				finish = start + paging.limit
 				passed = passed[start...finish]
-			else
+			else if start
 				passed = passed[start..]
 
 		# Return

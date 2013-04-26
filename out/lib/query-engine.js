@@ -732,7 +732,7 @@
         _base2.pills = {};
       }
       if ((_ref6 = (_base3 = this.options).paging) == null) {
-        _base3.paging = {};
+        _base3.paging = null;
       }
       if ((_ref7 = (_base4 = this.options).searchString) == null) {
         _base4.searchString = null;
@@ -769,11 +769,15 @@
     };
 
     Criteria.prototype.setPaging = function(paging) {
-      paging = util.extend(this.getPaging(), paging || {});
+      paging = util.extend(this.getPaging() || {}, paging || {});
       paging.page || (paging.page = null);
       paging.limit || (paging.limit = null);
       paging.offset || (paging.offset = null);
-      this.options.paging = paging;
+      if (paging.page || paging.limit || paging.offset) {
+        this.options.paging = paging;
+      } else {
+        this.options.paging = null;
+      }
       return this;
     };
 
@@ -956,13 +960,13 @@
       if (comparator) {
         passed.sort(comparator);
       }
-      if (paging) {
+      if (paging != null) {
         start = paging.offset || 0;
         if ((paging.limit != null) && paging.limit > 0) {
           start = start + paging.limit * ((paging.page || 1) - 1);
           finish = start + paging.limit;
           passed = passed.slice(start, finish);
-        } else {
+        } else if (start) {
           passed = passed.slice(start);
         }
       }
