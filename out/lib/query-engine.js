@@ -635,9 +635,6 @@
       QueryCollection.prototype.onChange = function(model) {
         var pass;
 
-        if (this.getPaging()) {
-          return this.query();
-        }
         pass = this.test(model);
         if (!pass) {
           this.safeRemove(model);
@@ -681,6 +678,9 @@
       };
 
       QueryCollection.prototype.onParentReset = function(model) {
+        if (this.getPaging()) {
+          return this.query();
+        }
         this.reset(this.getParentCollection().models);
         return this;
       };

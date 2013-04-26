@@ -680,7 +680,6 @@ class QueryCollection extends Backbone.Collection
 	# and if it doesn't then we should remove the model
 	# We should perform a resort
 	onChange: (model) =>
-		return @query()  if @getPaging()
 		pass = @test(model)
 		unless pass
 			@safeRemove(model)
@@ -719,6 +718,7 @@ class QueryCollection extends Backbone.Collection
 	# We should reset our own collection when this happens with the parent collection's models
 	# For each model, it will trigger _prepareModel which will check if the model passes our tests
 	onParentReset: (model) =>
+		return @query()  if @getPaging()
 		@reset(@getParentCollection().models)
 		@
 
