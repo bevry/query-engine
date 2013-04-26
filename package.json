@@ -54,7 +54,7 @@
 		"lib": "./out/lib"
 	},
 	"scripts": {
-		"test": "./node_modules/.bin/cake test"
+		"test": "node ./out/test/everything-test.js --joe-reporter=list"
 	},
 	"main": "./out/lib/query-engine.js"
 }
