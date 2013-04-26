@@ -679,6 +679,7 @@ class QueryCollection extends Backbone.Collection
 	# and if it doesn't then we should remove the model
 	# We should perform a resort
 	onChange: (model) =>
+		return @query()  if @getPaging()
 		pass = @test(model)
 		unless pass
 			@safeRemove(model)
@@ -690,6 +691,7 @@ class QueryCollection extends Backbone.Collection
 	# We should check if the model now passes our own tests, and if so add it to our own
 	# and if it doesn't then we should remove the model from our own
 	onParentChange: (model) =>
+		return @query()  if @getPaging()
 		pass = @test(model) and @getParentCollection().hasModel(model)
 		if pass
 			@safeAdd(model)
@@ -700,6 +702,7 @@ class QueryCollection extends Backbone.Collection
 	# Fired when a model in our parent collection is removed
 	# We should remove it straight away from our own model
 	onParentRemove: (model) =>
+		return @query()  if @getPaging()
 		@safeRemove(model)
 		@
 
@@ -707,6 +710,7 @@ class QueryCollection extends Backbone.Collection
 	# We should try and add it to our own collection
 	# Try as in, it will call _prepareModel and the tests happen there
 	onParentAdd: (model) =>
+		return @query()  if @getPaging()
 		@safeAdd(model)
 		@
 

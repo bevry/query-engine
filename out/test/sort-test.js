@@ -246,6 +246,38 @@
           return assert.deepEqual(actual.toJSON(), expected.toJSON());
         });
       });
+      describe('findAllLive', function(describe, it) {
+        it('findAllLive', function() {
+          var actual, expected, parent;
+
+          actual = (parent = queryEngine.createCollection()).findAllLive({
+            tags: {
+              $has: 'jquery'
+            }
+          }, {
+            position: -1
+          });
+          parent.add(docs.models);
+          expected = queryEngine.createCollection([docs.get('history'), docs.get('jquery')]);
+          return assert.deepEqual(actual.toJSON(), expected.toJSON());
+        });
+        return it('findAllLive-paging', function() {
+          var actual, expected, parent;
+
+          actual = (parent = queryEngine.createCollection()).findAllLive({
+            tags: {
+              $has: 'jquery'
+            }
+          }, {
+            position: -1
+          }, {
+            limit: 1
+          });
+          parent.add(docs.models);
+          expected = queryEngine.createCollection([docs.get('history')]);
+          return assert.deepEqual(actual.toJSON(), expected.toJSON());
+        });
+      });
       return describe('comparator', function(describe, it) {
         it('live-onadd', function() {
           var actual, expected;

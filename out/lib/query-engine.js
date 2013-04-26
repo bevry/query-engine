@@ -635,6 +635,9 @@
       QueryCollection.prototype.onChange = function(model) {
         var pass;
 
+        if (this.getPaging()) {
+          return this.query();
+        }
         pass = this.test(model);
         if (!pass) {
           this.safeRemove(model);
@@ -649,6 +652,9 @@
       QueryCollection.prototype.onParentChange = function(model) {
         var pass;
 
+        if (this.getPaging()) {
+          return this.query();
+        }
         pass = this.test(model) && this.getParentCollection().hasModel(model);
         if (pass) {
           this.safeAdd(model);
@@ -659,11 +665,17 @@
       };
 
       QueryCollection.prototype.onParentRemove = function(model) {
+        if (this.getPaging()) {
+          return this.query();
+        }
         this.safeRemove(model);
         return this;
       };
 
       QueryCollection.prototype.onParentAdd = function(model) {
+        if (this.getPaging()) {
+          return this.query();
+        }
         this.safeAdd(model);
         return this;
       };

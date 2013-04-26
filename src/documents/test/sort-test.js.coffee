@@ -171,6 +171,21 @@ generateTestSuite = (describe, it, collectionName, docs) ->
 				expected = queryEngine.createCollection [docs.get('history')]
 				assert.deepEqual(actual.toJSON(), expected.toJSON())
 
+		describe 'findAllLive', (describe,it) ->
+			it 'findAllLive', ->
+				actual = (parent = queryEngine.createCollection())
+					.findAllLive({tags:$has:'jquery'},{position:-1})
+				parent.add(docs.models)
+				expected = queryEngine.createCollection [docs.get('history'),docs.get('jquery')]
+				assert.deepEqual(actual.toJSON(), expected.toJSON())
+
+			it 'findAllLive-paging', ->
+				actual = (parent = queryEngine.createCollection())
+					.findAllLive({tags:$has:'jquery'},{position:-1},{limit:1})
+				parent.add(docs.models)
+				expected = queryEngine.createCollection [docs.get('history')]
+				assert.deepEqual(actual.toJSON(), expected.toJSON())
+
 		describe 'comparator', (describe,it) ->
 			it 'live-onadd', ->
 				actual = queryEngine.createLiveCollection()
