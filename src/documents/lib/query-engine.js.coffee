@@ -193,7 +193,7 @@ util =
 		# Creates a function for a comparator
 		generateFunction = (comparator) ->
 			unless comparator
-				throw new Error('Cannot sort without a comparator')
+				return null
 			else if util.isFunction(comparator)
 				return comparator
 			else if util.isArray(comparator)
@@ -227,6 +227,7 @@ util =
 					return comparison
 			else
 				throw new Error('Unknown comparator type')
+
 		# Return the generated function for our comparator
 		return generateFunction(input)
 
@@ -981,26 +982,29 @@ class Criteria
 
 	# Test Model
 	test: (args...) -> return @testModel(args...)
-	testModel: (model,criteriaOptions) ->
+	testModel: (model,criteriaOptions={}) ->
 		# Test
-		passed = @testQueries(model,criteriaOptions?.queries) and @testFilters(model,criteriaOptions?.filters) and @testPills(model,criteriaOptions?.pills)
+		passed = @testQueries(model,criteriaOptions.queries) and @testFilters(model,criteriaOptions.filters) and @testPills(model,criteriaOptions.pills)
 
 		# Return
 		return passed
 
 	# Test Models
-	testModels: (models,criteriaOptions) ->
+	testModels: (models,criteriaOptions={}) ->
 		# Prepare
 		me = @
 		passed = []
+		{paging,comparator} = criteriaOptions
 
 		# Extract
-		paging = criteriaOptions?.paging ? @getPaging()
-		comparator =
-			if criteriaOptions?.comparator?
-				util.generateComparator(criteriaOptions?.comparator)
-			else
-				@getComparator()
+		paging ?= @getPaging()
+
+		# Comparator
+		if comparator?
+			if comparator
+				comparator = util.generateComparator(comparator)
+		else
+			comparator = @getComparator()
 
 		# Cycle through the parent collection finding passing models
 		for model in models
@@ -1012,7 +1016,7 @@ class Criteria
 			passed.sort(comparator)
 
 		# Page our models
-		if paging?
+		if paging
 			start = paging.offset or 0
 			if paging.limit? and paging.limit > 0
 				start = start + paging.limit * ((paging.page or 1) - 1)
@@ -1034,6 +1038,7 @@ class Criteria
 		queries ?= @getQueries()
 
 		# Cycle
+		if queries then \
 		for own queryName,query of queries
 			unless query instanceof Query
 				query = new Query(query)
@@ -1056,6 +1061,7 @@ class Criteria
 		filters ?= @getFilters()
 
 		# Cycle
+		if filters then \
 		for own filterName,filter of filters
 			if filter(model,cleanedSearchString) is false
 				passed = false
@@ -1075,7 +1081,7 @@ class Criteria
 		pills ?= @getPills()
 
 		# Cycle
-		if searchString?
+		if searchString? and pills
 			for own pillName,pill of pills
 				unless pill instanceof Pill
 					pill = new Pill(query)

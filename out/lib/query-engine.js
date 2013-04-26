@@ -185,7 +185,7 @@
 
       generateFunction = function(comparator) {
         if (!comparator) {
-          throw new Error('Cannot sort without a comparator');
+          return null;
         } else if (util.isFunction(comparator)) {
           return comparator;
         } else if (util.isArray(comparator)) {
@@ -951,17 +951,32 @@
     Criteria.prototype.testModel = function(model, criteriaOptions) {
       var passed;
 
-      passed = this.testQueries(model, criteriaOptions != null ? criteriaOptions.queries : void 0) && this.testFilters(model, criteriaOptions != null ? criteriaOptions.filters : void 0) && this.testPills(model, criteriaOptions != null ? criteriaOptions.pills : void 0);
+      if (criteriaOptions == null) {
+        criteriaOptions = {};
+      }
+      passed = this.testQueries(model, criteriaOptions.queries) && this.testFilters(model, criteriaOptions.filters) && this.testPills(model, criteriaOptions.pills);
       return passed;
     };
 
     Criteria.prototype.testModels = function(models, criteriaOptions) {
-      var comparator, finish, me, model, paging, pass, passed, start, _i, _len, _ref2;
+      var comparator, finish, me, model, paging, pass, passed, start, _i, _len;
 
+      if (criteriaOptions == null) {
+        criteriaOptions = {};
+      }
       me = this;
       passed = [];
-      paging = (_ref2 = criteriaOptions != null ? criteriaOptions.paging : void 0) != null ? _ref2 : this.getPaging();
-      comparator = (criteriaOptions != null ? criteriaOptions.comparator : void 0) != null ? util.generateComparator(criteriaOptions != null ? criteriaOptions.comparator : void 0) : this.getComparator();
+      paging = criteriaOptions.paging, comparator = criteriaOptions.comparator;
+      if (paging == null) {
+        paging = this.getPaging();
+      }
+      if (comparator != null) {
+        if (comparator) {
+          comparator = util.generateComparator(comparator);
+        }
+      } else {
+        comparator = this.getComparator();
+      }
       for (_i = 0, _len = models.length; _i < _len; _i++) {
         model = models[_i];
         pass = me.testModel(model, criteriaOptions);
@@ -972,7 +987,7 @@
       if (comparator) {
         passed.sort(comparator);
       }
-      if (paging != null) {
+      if (paging) {
         start = paging.offset || 0;
         if ((paging.limit != null) && paging.limit > 0) {
           start = start + paging.limit * ((paging.page || 1) - 1);
@@ -992,16 +1007,18 @@
       if (queries == null) {
         queries = this.getQueries();
       }
-      for (queryName in queries) {
-        if (!__hasProp.call(queries, queryName)) continue;
-        query = queries[queryName];
-        if (!(query instanceof Query)) {
-          query = new Query(query);
-          queries[queryName] = query;
-        }
-        if (query.test(model) === false) {
-          passed = false;
-          return false;
+      if (queries) {
+        for (queryName in queries) {
+          if (!__hasProp.call(queries, queryName)) continue;
+          query = queries[queryName];
+          if (!(query instanceof Query)) {
+            query = new Query(query);
+            queries[queryName] = query;
+          }
+          if (query.test(model) === false) {
+            passed = false;
+            return false;
+          }
         }
       }
       return passed;
@@ -1015,12 +1032,14 @@
       if (filters == null) {
         filters = this.getFilters();
       }
-      for (filterName in filters) {
-        if (!__hasProp.call(filters, filterName)) continue;
-        filter = filters[filterName];
-        if (filter(model, cleanedSearchString) === false) {
-          passed = false;
-          return false;
+      if (filters) {
+        for (filterName in filters) {
+          if (!__hasProp.call(filters, filterName)) continue;
+          filter = filters[filterName];
+          if (filter(model, cleanedSearchString) === false) {
+            passed = false;
+            return false;
+          }
         }
       }
       return passed;
@@ -1034,7 +1053,7 @@
       if (pills == null) {
         pills = this.getPills();
       }
-      if (searchString != null) {
+      if ((searchString != null) && pills) {
         for (pillName in pills) {
           if (!__hasProp.call(pills, pillName)) continue;
           pill = pills[pillName];
