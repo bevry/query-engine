@@ -76,6 +76,11 @@ QueryEngine provides extensive Querying, Filtering, and Searching abilities for 
 Tested and working against Backbone versions 0.9.2, 0.9.9, and 1.0.0
 
 
+## Backers
+
+Check out the [Backers.md](https://github.com/bevry/query-engine/blob/master/Backers.md#files) file to discover all the amazing people who financially supported the development of this project.
+
+
 ## License
 
 Licensed under the incredibly [permissive](http://en.wikipedia.org/wiki/Permissive_free_software_licence) [MIT License](http://creativecommons.org/licenses/MIT/)
