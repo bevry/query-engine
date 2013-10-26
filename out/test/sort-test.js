@@ -104,7 +104,6 @@
       describe('sortArray', function(describe, it) {
         it('string-object', function() {
           var actual, expected;
-
           actual = queryEngine.createCollection(docs.models).sortArray({
             title: 1
           });
@@ -113,7 +112,6 @@
         });
         it('numeric-function', function() {
           var actual, expected;
-
           actual = queryEngine.createCollection(docs.models).sortArray(function(a, b) {
             return b.position - a.position;
           });
@@ -122,7 +120,6 @@
         });
         it('numeric-object', function() {
           var actual, expected;
-
           actual = queryEngine.createCollection(docs.models).sortArray({
             position: -1
           });
@@ -131,7 +128,6 @@
         });
         it('date-function', function() {
           var actual, expected;
-
           actual = queryEngine.createCollection(docs.models).sortArray(function(a, b) {
             return b.date - a.date;
           });
@@ -140,7 +136,6 @@
         });
         return it('date-object', function() {
           var actual, expected;
-
           actual = queryEngine.createCollection(docs.models).sortArray({
             date: -1
           });
@@ -151,7 +146,6 @@
       describe('sortCollection', function(describe, it) {
         it('numeric-function', function() {
           var actual, expected;
-
           actual = queryEngine.createCollection(docs.models).sortCollection(function(a, b) {
             return b.get('position') - a.get('position');
           });
@@ -160,7 +154,6 @@
         });
         it('numeric-object', function() {
           var actual, expected;
-
           actual = queryEngine.createCollection(docs.models).sortCollection({
             position: -1
           });
@@ -169,7 +162,6 @@
         });
         it('date-function', function() {
           var actual, expected;
-
           actual = queryEngine.createCollection(docs.models).sortCollection(function(a, b) {
             return b.get('date') - a.get('date');
           });
@@ -178,7 +170,6 @@
         });
         return it('date-object', function() {
           var actual, expected;
-
           actual = queryEngine.createCollection(docs.models).sortCollection({
             date: -1
           });
@@ -189,7 +180,6 @@
       describe('queryArray', function(describe, it) {
         it('queryArray', function() {
           var actual, expected;
-
           actual = queryEngine.createCollection(docs.models).queryArray({
             tags: {
               $has: 'jquery'
@@ -202,7 +192,6 @@
         });
         return it('queryArray-paging', function() {
           var actual, expected;
-
           actual = queryEngine.createCollection(docs.models).queryArray({
             tags: {
               $has: 'jquery'
@@ -219,7 +208,6 @@
       describe('findAll', function(describe, it) {
         it('findAll', function() {
           var actual, expected;
-
           actual = queryEngine.createCollection(docs.models).findAll({
             tags: {
               $has: 'jquery'
@@ -232,7 +220,6 @@
         });
         return it('findAll-paging', function() {
           var actual, expected;
-
           actual = queryEngine.createCollection(docs.models).findAll({
             tags: {
               $has: 'jquery'
@@ -249,7 +236,6 @@
       describe('findAllLive', function(describe, it) {
         it('findAllLive', function() {
           var actual, expected, parent;
-
           actual = (parent = queryEngine.createCollection()).findAllLive({
             tags: {
               $has: 'jquery'
@@ -263,7 +249,6 @@
         });
         return it('findAllLive-paging', function() {
           var actual, expected, parent;
-
           actual = (parent = queryEngine.createCollection()).findAllLive({
             tags: {
               $has: 'jquery'
@@ -281,7 +266,6 @@
       return describe('comparator', function(describe, it) {
         it('live-onadd', function() {
           var actual, expected;
-
           actual = queryEngine.createLiveCollection().setComparator({
             position: -1
           }).add(docs.models);
@@ -290,7 +274,6 @@
         });
         return it('live-onchange', function() {
           var actual, expected;
-
           actual = queryEngine.createLiveCollection().setComparator({
             position: -1
           }).add(docs.models);
@@ -306,7 +289,6 @@
 
   describe('sort', function(describe, it) {
     var collectionName, docs, _results;
-
     _results = [];
     for (collectionName in store) {
       if (!__hasProp.call(store, collectionName)) continue;

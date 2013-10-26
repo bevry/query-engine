@@ -17,7 +17,6 @@
     return describe('collection property', function(describe, it) {
       return it('when specificied, should create child collections of the property type', function() {
         var MyQueryCollection, myChildCollection, myQueryCollection, _ref;
-
         MyQueryCollection = (function(_super) {
           __extends(MyQueryCollection, _super);
 

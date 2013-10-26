@@ -68,7 +68,6 @@
     },
     isObjectEmpty: function(object) {
       var empty, key, value;
-
       empty = true;
       for (key in object) {
         if (!__hasProp.call(object, key)) continue;
@@ -86,19 +85,16 @@
     },
     clone: function() {
       var args;
-
       args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       return util.shallowExtendPlainObjects.apply(util, [{}].concat(__slice.call(args)));
     },
     extend: function() {
       var args;
-
       args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       return util.shallowExtendPlainObjects.apply(util, args);
     },
     shallowExtendPlainObjects: function() {
       var key, obj, objs, target, value, _i, _len;
-
       target = arguments[0], objs = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
       for (_i = 0, _len = objs.length; _i < _len; _i++) {
         obj = objs[_i];
@@ -113,7 +109,6 @@
     },
     get: function(obj, key) {
       var result;
-
       if (obj.get != null) {
         result = obj.get(key);
       } else {
@@ -140,7 +135,6 @@
     },
     toArray: function(value) {
       var item, key, result, valueExists;
-
       result = [];
       valueExists = typeof value !== 'undefined';
       if (valueExists) {
@@ -160,7 +154,6 @@
     },
     toArrayGroup: function(value) {
       var item, key, obj, result, valueExists;
-
       result = [];
       valueExists = typeof value !== 'undefined';
       if (valueExists) {
@@ -182,7 +175,6 @@
     },
     generateComparator: function(input) {
       var generateFunction;
-
       generateFunction = function(comparator) {
         if (!comparator) {
           return null;
@@ -191,7 +183,6 @@
         } else if (util.isArray(comparator)) {
           return function(a, b) {
             var comparison, key, value, _i, _len;
-
             comparison = 0;
             for (key = _i = 0, _len = comparator.length; _i < _len; key = ++_i) {
               value = comparator[key];
@@ -205,7 +196,6 @@
         } else if (util.isObject(comparator)) {
           return function(a, b) {
             var aValue, bValue, comparison, key, value;
-
             comparison = 0;
             for (key in comparator) {
               if (!__hasProp.call(comparator, key)) continue;
@@ -241,7 +231,6 @@
 
     function Hash(value) {
       var item, key, _i, _len;
-
       value = util.toArray(value);
       for (key = _i = 0, _len = value.length; _i < _len; key = ++_i) {
         item = value[key];
@@ -251,7 +240,6 @@
 
     Hash.prototype.hasIn = function(options) {
       var value, _i, _len;
-
       options = util.toArray(options);
       for (_i = 0, _len = this.length; _i < _len; _i++) {
         value = this[_i];
@@ -264,7 +252,6 @@
 
     Hash.prototype.hasAll = function(options) {
       var empty, pass, value, _i, _len;
-
       options = util.toArray(options);
       empty = true;
       pass = true;
@@ -283,7 +270,6 @@
 
     Hash.prototype.isSame = function(options) {
       var pass;
-
       options = util.toArray(options);
       pass = this.sort().join() === options.sort().join();
       return pass;
@@ -304,24 +290,24 @@
         this.onParentAdd = __bind(this.onParentAdd, this);
         this.onParentRemove = __bind(this.onParentRemove, this);
         this.onParentChange = __bind(this.onParentChange, this);
-        this.onChange = __bind(this.onChange, this);        _ref1 = QueryCollection.__super__.constructor.apply(this, arguments);
+        this.onChange = __bind(this.onChange, this);
+        _ref1 = QueryCollection.__super__.constructor.apply(this, arguments);
         return _ref1;
       }
 
       QueryCollection.prototype.model = Backbone.Model;
 
       QueryCollection.prototype.initialize = function(models, options) {
-        var key, me, value, _ref2, _ref3, _ref4;
-
+        var key, me, value, _ref2;
         me = this;
-        if ((_ref2 = this.options) == null) {
+        if (this.options == null) {
           this.options = {};
         }
-        _ref3 = Criteria.prototype;
-        for (key in _ref3) {
-          if (!__hasProp.call(_ref3, key)) continue;
-          value = _ref3[key];
-          if ((_ref4 = this[key]) == null) {
+        _ref2 = Criteria.prototype;
+        for (key in _ref2) {
+          if (!__hasProp.call(_ref2, key)) continue;
+          value = _ref2[key];
+          if (this[key] == null) {
             this[key] = value;
           }
         }
@@ -352,14 +338,13 @@
       };
 
       QueryCollection.prototype.createChildCollection = function(models, options) {
-        var collection, _ref2, _ref3;
-
+        var collection;
         options || (options = {});
         options.parentCollection = this;
-        if ((_ref2 = options.collection) == null) {
+        if (options.collection == null) {
           options.collection = this.collection || QueryCollection;
         }
-        if ((_ref3 = options.comparator) == null) {
+        if (options.comparator == null) {
           options.comparator = options.collection.prototype.comparator || this.comparator;
         }
         collection = new options.collection(models, options);
@@ -368,7 +353,6 @@
 
       QueryCollection.prototype.createLiveChildCollection = function(models, options) {
         var collection;
-
         options || (options = {});
         options.live = true;
         collection = this.createChildCollection(models, options);
@@ -394,7 +378,6 @@
 
       QueryCollection.prototype.hasModel = function(model) {
         var exists, _ref2, _ref3;
-
         model || (model = {});
         if ((model.id != null) && this.get(model.id)) {
           exists = true;
@@ -408,7 +391,6 @@
 
       QueryCollection.prototype.safeRemove = function(model) {
         var exists;
-
         exists = this.hasModel(model);
         if (exists) {
           this.remove(model);
@@ -418,7 +400,6 @@
 
       QueryCollection.prototype.safeAdd = function(model) {
         var exists;
-
         exists = this.hasModel(model);
         if (!exists) {
           this.add(model);
@@ -443,7 +424,6 @@
 
       QueryCollection.prototype.sortArray = function(comparator) {
         var arr;
-
         arr = this.toJSON();
         if (comparator) {
           comparator = util.generateComparator(comparator);
@@ -461,7 +441,6 @@
 
       QueryCollection.prototype.findAll = function() {
         var args, collection, comparator, criteriaOptions, paging, query;
-
         args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
         if (args.length) {
           if (args.length === 1 && args[0] instanceof Criteria) {
@@ -485,7 +464,6 @@
 
       QueryCollection.prototype.findAllLive = function() {
         var args, collection, comparator, criteriaOptions, paging, query;
-
         args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
         if (args.length) {
           if (args.length === 1 && args[0] instanceof Criteria) {
@@ -509,7 +487,6 @@
 
       QueryCollection.prototype.findOne = function() {
         var args, comparator, criteriaOptions, paging, passed, query;
-
         args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
         if (args.length) {
           if (args.length === 1 && args[0] instanceof Criteria) {
@@ -537,7 +514,6 @@
 
       QueryCollection.prototype.query = function() {
         var args, criteria, passed;
-
         args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
         if (args.length === 1) {
           if (args[0] instanceof Criteria) {
@@ -555,7 +531,6 @@
 
       QueryCollection.prototype.queryModels = function() {
         var args, collection, criteriaOptions, models, passed;
-
         args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
         criteriaOptions = this.extractCriteriaOptions.apply(this, args);
         collection = this.getParentCollection() || this;
@@ -566,7 +541,6 @@
 
       QueryCollection.prototype.queryArray = function() {
         var args, model, passed, result, _i, _len;
-
         args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
         result = [];
         passed = this.queryModels.apply(this, args);
@@ -579,7 +553,6 @@
 
       QueryCollection.prototype.live = function(enabled) {
         var parentCollection;
-
         if (enabled == null) {
           enabled = this.options.live;
         }
@@ -608,7 +581,6 @@
 
       QueryCollection.prototype.add = function(models, options) {
         var model, passedModels, _i, _len;
-
         options = options ? util.clone(options) : {};
         models = util.isArray(models) ? models.slice() : [models];
         passedModels = [];
@@ -634,7 +606,6 @@
 
       QueryCollection.prototype.onChange = function(model) {
         var pass;
-
         if (this.getPaging()) {
           return this.query();
         }
@@ -651,7 +622,6 @@
 
       QueryCollection.prototype.onParentChange = function(model) {
         var pass;
-
         if (this.getPaging()) {
           return this.query();
         }
@@ -693,7 +663,6 @@
   Criteria = (function() {
     function Criteria() {
       var args;
-
       args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       this.applyCriteriaOptions = __bind(this.applyCriteriaOptions, this);
       this.applyCriteriaOptions.apply(this, args);
@@ -702,7 +671,6 @@
 
     Criteria.prototype.extractCriteriaOptions = function() {
       var args, comparator, criteriaOptions, paging, query;
-
       args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       if (args.length === 1) {
         if (args[0] instanceof Criteria) {
@@ -728,28 +696,27 @@
     };
 
     Criteria.prototype.applyCriteriaOptions = function() {
-      var args, criteriaOptions, _base, _base1, _base2, _base3, _base4, _base5, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8;
-
+      var args, criteriaOptions, _base, _base1, _base2, _base3, _base4, _base5;
       args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      if ((_ref2 = this.options) == null) {
+      if (this.options == null) {
         this.options = {};
       }
-      if ((_ref3 = (_base = this.options).filters) == null) {
+      if ((_base = this.options).filters == null) {
         _base.filters = {};
       }
-      if ((_ref4 = (_base1 = this.options).queries) == null) {
+      if ((_base1 = this.options).queries == null) {
         _base1.queries = {};
       }
-      if ((_ref5 = (_base2 = this.options).pills) == null) {
+      if ((_base2 = this.options).pills == null) {
         _base2.pills = {};
       }
-      if ((_ref6 = (_base3 = this.options).paging) == null) {
+      if ((_base3 = this.options).paging == null) {
         _base3.paging = null;
       }
-      if ((_ref7 = (_base4 = this.options).searchString) == null) {
+      if ((_base4 = this.options).searchString == null) {
         _base4.searchString = null;
       }
-      if ((_ref8 = (_base5 = this.options).comparator) == null) {
+      if ((_base5 = this.options).comparator == null) {
         _base5.comparator = null;
       }
       criteriaOptions = this.extractCriteriaOptions.apply(this, args);
@@ -813,7 +780,6 @@
 
     Criteria.prototype.setFilters = function(filters) {
       var key, value;
-
       filters || (filters = {});
       for (key in filters) {
         if (!__hasProp.call(filters, key)) continue;
@@ -825,7 +791,6 @@
 
     Criteria.prototype.setFilter = function(name, value) {
       var filters;
-
       if (typeof value === 'undefined') {
         throw new Error('QueryCollection::setFilter was called without both arguments');
       }
@@ -848,7 +813,6 @@
 
     Criteria.prototype.setQueries = function(queries) {
       var key, value;
-
       queries || (queries = {});
       for (key in queries) {
         if (!__hasProp.call(queries, key)) continue;
@@ -860,7 +824,6 @@
 
     Criteria.prototype.setQuery = function(name, value) {
       var queries;
-
       if (typeof value === 'undefined') {
         throw new Error('QueryCollection::setQuery was called without both arguments');
       }
@@ -886,7 +849,6 @@
 
     Criteria.prototype.setPills = function(pills) {
       var key, value;
-
       pills || (pills = {});
       for (key in pills) {
         if (!__hasProp.call(pills, key)) continue;
@@ -898,7 +860,6 @@
 
     Criteria.prototype.setPill = function(name, value) {
       var pills, searchString;
-
       if (typeof value === 'undefined') {
         throw new Error('QueryCollection::setPill was called without both arguments');
       }
@@ -928,7 +889,6 @@
 
     Criteria.prototype.setSearchString = function(searchString) {
       var cleanedSearchString, pill, pillName, pills;
-
       pills = this.options.pills;
       cleanedSearchString = searchString;
       for (pillName in pills) {
@@ -943,14 +903,12 @@
 
     Criteria.prototype.test = function() {
       var args;
-
       args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
       return this.testModel.apply(this, args);
     };
 
     Criteria.prototype.testModel = function(model, criteriaOptions) {
       var passed;
-
       if (criteriaOptions == null) {
         criteriaOptions = {};
       }
@@ -960,7 +918,6 @@
 
     Criteria.prototype.testModels = function(models, criteriaOptions) {
       var comparator, finish, me, model, paging, pass, passed, start, _i, _len;
-
       if (criteriaOptions == null) {
         criteriaOptions = {};
       }
@@ -1002,7 +959,6 @@
 
     Criteria.prototype.testQueries = function(model, queries) {
       var passed, query, queryName;
-
       passed = true;
       if (queries == null) {
         queries = this.getQueries();
@@ -1026,7 +982,6 @@
 
     Criteria.prototype.testFilters = function(model, filters) {
       var cleanedSearchString, filter, filterName, passed;
-
       passed = true;
       cleanedSearchString = this.getCleanedSearchString();
       if (filters == null) {
@@ -1047,7 +1002,6 @@
 
     Criteria.prototype.testPills = function(model, pills) {
       var passed, pill, pillName, searchString;
-
       passed = true;
       searchString = this.getSearchString();
       if (pills == null) {
@@ -1090,7 +1044,6 @@
 
     function Pill(pill) {
       var prefix, regexString, safePrefixes, safePrefixesStr, _i, _len, _ref2;
-
       pill || (pill = {});
       this.callback = pill.callback;
       this.prefixes = pill.prefixes;
@@ -1111,7 +1064,6 @@
 
     Pill.prototype.setSearchString = function(searchString) {
       var cleanedSearchString, match, value, values;
-
       cleanedSearchString = searchString;
       values = [];
       while (match = this.regex.exec(searchString)) {
@@ -1139,7 +1091,6 @@
 
     Pill.prototype.test = function(model) {
       var pass, value, _i, _j, _len, _len1, _ref2, _ref3, _ref4;
-
       if ((_ref2 = this.values) != null ? _ref2.length : void 0) {
         if (this.logicalOperator === 'OR') {
           pass = false;
@@ -1183,7 +1134,6 @@
       '$or': {
         compile: function(opts) {
           var queries, query, queryGroup, querySource, _i, _len;
-
           queries = [];
           queryGroup = util.toArrayGroup(opts.selectorValue);
           if (!queryGroup.length) {
@@ -1200,7 +1150,6 @@
         },
         test: function(opts) {
           var query, _i, _len, _ref2;
-
           _ref2 = opts.queries;
           for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
             query = _ref2[_i];
@@ -1225,7 +1174,6 @@
         },
         test: function(opts) {
           var query, _i, _len, _ref2;
-
           _ref2 = opts.queries;
           for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
             query = _ref2[_i];
@@ -1282,7 +1230,6 @@
       '$beginsWith': {
         test: function(opts) {
           var beginsWithParts, beginsWithValue, _i, _len;
-
           if (opts.selectorValue && opts.modelValueExists && util.isString(opts.modelValue)) {
             beginsWithParts = util.toArray(opts.selectorValue);
             for (_i = 0, _len = beginsWithParts.length; _i < _len; _i++) {
@@ -1304,7 +1251,6 @@
       '$endsWith': {
         test: function(opts) {
           var endsWithParts, endsWithValue, _i, _len;
-
           if (opts.selectorValue && opts.modelValueExists && util.isString(opts.modelValue)) {
             endsWithParts = util.toArray(opts.selectorValue);
             for (_i = 0, _len = endsWithParts.length; _i < _len; _i++) {
@@ -1423,7 +1369,6 @@
       '$mod': {
         test: function(opts) {
           var $mod;
-
           if (opts.modelValueExists) {
             $mod = opts.selectorValue;
             if (!util.isArray($mod)) {
@@ -1520,7 +1465,6 @@
 
     Query.prototype.compileSelector = function(selectorName, selectorOpts) {
       var compileOpts, compiledSelector, key, opts, query, selector, selectors, value;
-
       if (selectorOpts == null) {
         selectorOpts = {};
       }
@@ -1561,7 +1505,6 @@
 
     Query.prototype.testCompiledSelector = function(compiledSelector, model) {
       var match, opts, test;
-
       opts = compiledSelector.opts;
       test = compiledSelector.test;
       opts.model = model;
@@ -1577,7 +1520,6 @@
 
     Query.prototype.compileQuery = function() {
       var advancedSelectorName, advancedSelectorValue, compiledSelector, compiledSelectors, fieldName, query, selectorValue, _ref2;
-
       query = this;
       compiledSelectors = [];
       _ref2 = this.source;
@@ -1650,7 +1592,6 @@
 
     Query.prototype.test = function(model) {
       var compiledSelector, match, _i, _len, _ref2;
-
       match = true;
       _ref2 = this.compiledSelectors;
       for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
@@ -1690,7 +1631,6 @@
     },
     testModels: function() {
       var args, criteria, models, result;
-
       models = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
       models = util.toArray(models);
       criteria = (function(func, args, ctor) {
@@ -1703,14 +1643,12 @@
     },
     createCollection: function(models, options) {
       var collection;
-
       models = util.toArray(models);
       collection = new QueryCollection(models, options);
       return collection;
     },
     createLiveCollection: function(models, options) {
       var collection;
-
       models = util.toArray(models);
       collection = new QueryCollection(models, options).live(true);
       return collection;

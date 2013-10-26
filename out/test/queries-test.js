@@ -453,7 +453,6 @@
           return _.each(queryTests, function(queryTest, queryTestName) {
             return it(queryTestName, function() {
               var actual, criteriaOptions, expected, expectedModelId, _i, _len, _ref;
-
               if (queryTest.debug) {
                 debugger;
               }
@@ -484,7 +483,6 @@
           return _.each(queryTests, function(queryTest, queryTestName) {
             return it(queryTestName, function() {
               var actual, expected, expectedModelId, expectedModels, _i, _len, _ref;
-
               if (queryTest.debug) {
                 debugger;
               }
@@ -509,14 +507,12 @@
         describe('special', function(describe, it) {
           it('all', function() {
             var actual, expected;
-
             actual = store;
             expected = store;
             return assert.deepEqual(actual.toJSON(), expected.toJSON());
           });
           return it('findOne', function() {
             var actual, expected;
-
             actual = store.findOne({
               tags: {
                 $has: 'jquery'
@@ -528,7 +524,6 @@
         return describe('paging', function(describe, it) {
           it('limit', function() {
             var actual, expected;
-
             actual = store.createChildCollection().query({
               limit: 1
             });
@@ -539,7 +534,6 @@
           });
           it('limit+page', function() {
             var actual, expected;
-
             actual = store.createChildCollection().query({
               limit: 1,
               page: 2
@@ -551,7 +545,6 @@
           });
           it('limit+offset', function() {
             var actual, expected;
-
             actual = store.createChildCollection().query({
               limit: 1,
               offset: 1
@@ -563,7 +556,6 @@
           });
           it('limit+offset+page', function() {
             var actual, expected;
-
             actual = store.createChildCollection().query({
               limit: 1,
               offset: 1,
@@ -577,7 +569,6 @@
           it('limit+offset+page (via findAll)', function() {
             debugger;
             var actual, expected;
-
             actual = store.findAll({
               id: {
                 $exists: true
@@ -594,7 +585,6 @@
           });
           return it('offset', function() {
             var actual, expected;
-
             actual = store.createChildCollection().query({
               offset: 1
             });
@@ -611,7 +601,6 @@
 
   describe('queries', function(describe, it) {
     var store, storeName, _results;
-
     _results = [];
     for (storeName in stores) {
       if (!__hasProp.call(stores, storeName)) continue;

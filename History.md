@@ -1,5 +1,8 @@
 ## History
 
+- v1.5.3 October 27, 2013
+	- Re-packaged
+
 - v1.5.2 March 21, 2013
 	- Backbone peerDependency now supports any version
 	- Tested again Backbone.js v1.0.0

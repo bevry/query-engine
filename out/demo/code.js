@@ -15,7 +15,6 @@
 
   $(window).resize(function() {
     var padHeight, padWidth;
-
     padWidth = $(window).width() / 2 - 20;
     padHeight = $(window).height() - $('.header:first').height() - 80;
     return $('.pad,.editor').width(padWidth).height(padHeight);
@@ -36,7 +35,6 @@
 
   performQuery = function() {
     var code, err, errMessage, inCollection, resultCoffee, resultCollection;
-
     try {
       code = CoffeeScript.compile(editors.code.getSession().getValue());
       inCollection = eval(code);
