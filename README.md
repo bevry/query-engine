@@ -24,29 +24,6 @@ Query-Engine is a NoSQL and MongoDb compliant query engine. It can run on the se
 <!-- /DESCRIPTION -->
 
 
-<!-- INSTALL/ -->
-
-## Install
-
-### [Node](http://nodejs.org/), [Browserify](http://browserify.org/)
-- Use: `require('query-engine')`
-- Install: `npm install --save query-engine`
-
-### [Ender](http://ender.jit.su/)
-- Use: `require('query-engine')`
-- Install: `ender add query-engine`
-
-### [Component](http://github.com/component/component)
-- Use: `require('query-engine')`
-- Install: `component install bevry/query-engine`
-
-### [Bower](http://bower.io/)
-- Use: `require('query-engine')`
-- Install: `bower install query-engine`
-
-<!-- /INSTALL -->
-
-
 QueryEngine provides extensive Querying, Filtering, and Searching abilities for [Backbone.js Collections](http://documentcloud.github.com/backbone/#Collection) as well as JavaScript arrays and objects. The Backbone.js and Underscore dependencies are optional.
 
 
@@ -76,6 +53,29 @@ Tested and working against Backbone versions:
 ## Using
 
 [You can find all the information you desire about using QueryEngine on its Using QueryEngine Wiki Page](https://github.com/bevry/query-engine/wiki/Using)
+
+
+<!-- INSTALL/ -->
+
+## Install
+
+### [Node](http://nodejs.org/), [Browserify](http://browserify.org/)
+- Use: `require('query-engine')`
+- Install: `npm install --save query-engine`
+
+### [Ender](http://ender.jit.su/)
+- Use: `require('query-engine')`
+- Install: `ender add query-engine`
+
+### [Component](http://github.com/component/component)
+- Use: `require('query-engine')`
+- Install: `component install bevry/query-engine`
+
+### [Bower](http://bower.io/)
+- Use: `require('query-engine')`
+- Install: `bower install query-engine`
+
+<!-- /INSTALL -->
 
 
 <!-- HISTORY/ -->
