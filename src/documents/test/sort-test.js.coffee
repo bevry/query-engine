@@ -1,7 +1,7 @@
 # Requires
 queryEngine = require?(__dirname+'/../lib/query-engine') or @queryEngine
 assert = require?('assert') or @assert
-Backbone = require?('backbone') or @Backbone
+Backbone = require?('exoskeleton') or @Backbone
 joe = require?('joe') or @joe
 {describe} = joe
 

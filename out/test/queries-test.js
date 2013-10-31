@@ -1,14 +1,12 @@
 (function() {
-  var Backbone, assert, describe, generateTestSuite, joe, modelsObject, queryEngine, queryTests, stores, today, tomorrow, yesterday, _,
+  var Backbone, assert, describe, generateTestSuite, joe, key, modelsObject, queryEngine, queryTests, stores, today, tomorrow, value, yesterday,
     __hasProp = {}.hasOwnProperty;
 
   queryEngine = (typeof require === "function" ? require(__dirname + '/../lib/query-engine') : void 0) || this.queryEngine;
 
   assert = (typeof require === "function" ? require('assert') : void 0) || this.assert;
 
-  Backbone = (typeof require === "function" ? require('backbone') : void 0) || this.Backbone;
-
-  _ = (typeof require === "function" ? require('underscore') : void 0) || this._;
+  Backbone = (typeof require === "function" ? require('exoskeleton') : void 0) || this.Backbone;
 
   joe = (typeof require === "function" ? require('joe') : void 0) || this.joe;
 
@@ -71,7 +69,16 @@
 
   stores = {
     modelsAsObject: modelsObject,
-    modelsAsArray: _.values(modelsObject),
+    modelsAsArray: (function() {
+      var _results;
+      _results = [];
+      for (key in modelsObject) {
+        if (!__hasProp.call(modelsObject, key)) continue;
+        value = modelsObject[key];
+        _results.push(value);
+      }
+      return _results;
+    })(),
     modelsAsParsedObject: queryEngine.createCollection(modelsObject),
     modelsAsCollection: queryEngine.createCollection({
       'index': new Backbone.Model(modelsObject.index),
@@ -450,8 +457,12 @@
     return describe(storeName, function(describe, it) {
       if (!(store instanceof queryEngine.QueryCollection)) {
         return describe('queries', function(describe, it) {
-          return _.each(queryTests, function(queryTest, queryTestName) {
-            return it(queryTestName, function() {
+          var queryTest, queryTestName, _results;
+          _results = [];
+          for (queryTestName in queryTests) {
+            if (!__hasProp.call(queryTests, queryTestName)) continue;
+            queryTest = queryTests[queryTestName];
+            _results.push(it(queryTestName, function() {
               var actual, criteriaOptions, expected, expectedModelId, _i, _len, _ref;
               if (queryTest.debug) {
                 debugger;
@@ -475,13 +486,18 @@
                 });
               }
               return assert.deepEqual(actual, expected);
-            });
-          });
+            }));
+          }
+          return _results;
         });
       } else {
         describe('queries', function(describe, it) {
-          return _.each(queryTests, function(queryTest, queryTestName) {
-            return it(queryTestName, function() {
+          var queryTest, queryTestName, _results;
+          _results = [];
+          for (queryTestName in queryTests) {
+            if (!__hasProp.call(queryTests, queryTestName)) continue;
+            queryTest = queryTests[queryTestName];
+            _results.push(it(queryTestName, function() {
               var actual, expected, expectedModelId, expectedModels, _i, _len, _ref;
               if (queryTest.debug) {
                 debugger;
@@ -501,8 +517,9 @@
                 });
               }
               return assert.deepEqual(actual.toJSON(), expected.toJSON());
-            });
-          });
+            }));
+          }
+          return _results;
         });
         describe('special', function(describe, it) {
           it('all', function() {

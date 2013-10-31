@@ -7,7 +7,7 @@
 
   assert = (typeof require === "function" ? require('assert') : void 0) || this.assert;
 
-  Backbone = (typeof require === "function" ? require('backbone') : void 0) || this.Backbone;
+  Backbone = (typeof require === "function" ? require('exoskeleton') : void 0) || this.Backbone;
 
   joe = (typeof require === "function" ? require('joe') : void 0) || this.joe;
 

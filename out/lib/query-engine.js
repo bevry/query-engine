@@ -1,5 +1,5 @@
 (function() {
-  var Backbone, Criteria, Hash, Pill, Query, QueryCollection, err, queryEngine, util, _ref, _ref1,
+  var Backbone, Criteria, Hash, Pill, Query, QueryCollection, err, queryEngine, util, _ref,
     __hasProp = {}.hasOwnProperty,
     __slice = [].slice,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -7,7 +7,7 @@
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   try {
-    Backbone = (_ref = (typeof module !== "undefined" && module !== null ? require('backbone') : this.Backbone)) != null ? _ref : null;
+    Backbone = (typeof require === "function" ? require('exoskeleton') : void 0) || this.Backbone;
   } catch (_error) {
     err = _error;
     Backbone = null;
@@ -291,22 +291,22 @@
         this.onParentRemove = __bind(this.onParentRemove, this);
         this.onParentChange = __bind(this.onParentChange, this);
         this.onChange = __bind(this.onChange, this);
-        _ref1 = QueryCollection.__super__.constructor.apply(this, arguments);
-        return _ref1;
+        _ref = QueryCollection.__super__.constructor.apply(this, arguments);
+        return _ref;
       }
 
       QueryCollection.prototype.model = Backbone.Model;
 
       QueryCollection.prototype.initialize = function(models, options) {
-        var key, me, value, _ref2;
+        var key, me, value, _ref1;
         me = this;
         if (this.options == null) {
           this.options = {};
         }
-        _ref2 = Criteria.prototype;
-        for (key in _ref2) {
-          if (!__hasProp.call(_ref2, key)) continue;
-          value = _ref2[key];
+        _ref1 = Criteria.prototype;
+        for (key in _ref1) {
+          if (!__hasProp.call(_ref1, key)) continue;
+          value = _ref1[key];
           if (this[key] == null) {
             this[key] = value;
           }
@@ -377,11 +377,11 @@
       };
 
       QueryCollection.prototype.hasModel = function(model) {
-        var exists, _ref2, _ref3;
+        var exists, _ref1, _ref2;
         model || (model = {});
         if ((model.id != null) && this.get(model.id)) {
           exists = true;
-        } else if ((model.cid != null) && ((_ref2 = (_ref3 = this._byCid) != null ? _ref3[model.cid] : void 0) != null ? _ref2 : this.get(model.cid))) {
+        } else if ((model.cid != null) && ((_ref1 = (_ref2 = this._byCid) != null ? _ref2[model.cid] : void 0) != null ? _ref1 : this.get(model.cid))) {
           exists = true;
         } else {
           exists = false;
@@ -1043,7 +1043,7 @@
     Pill.prototype.logicalOperator = 'OR';
 
     function Pill(pill) {
-      var prefix, regexString, safePrefixes, safePrefixesStr, _i, _len, _ref2;
+      var prefix, regexString, safePrefixes, safePrefixesStr, _i, _len, _ref1;
       pill || (pill = {});
       this.callback = pill.callback;
       this.prefixes = pill.prefixes;
@@ -1051,9 +1051,9 @@
         this.logicalOperator = pill.logicalOperator;
       }
       safePrefixes = [];
-      _ref2 = this.prefixes;
-      for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-        prefix = _ref2[_i];
+      _ref1 = this.prefixes;
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        prefix = _ref1[_i];
         safePrefixes.push(util.safeRegex(prefix));
       }
       safePrefixesStr = safePrefixes.join('|');
@@ -1090,13 +1090,13 @@
     };
 
     Pill.prototype.test = function(model) {
-      var pass, value, _i, _j, _len, _len1, _ref2, _ref3, _ref4;
-      if ((_ref2 = this.values) != null ? _ref2.length : void 0) {
+      var pass, value, _i, _j, _len, _len1, _ref1, _ref2, _ref3;
+      if ((_ref1 = this.values) != null ? _ref1.length : void 0) {
         if (this.logicalOperator === 'OR') {
           pass = false;
-          _ref3 = this.values;
-          for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
-            value = _ref3[_i];
+          _ref2 = this.values;
+          for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+            value = _ref2[_i];
             pass = this.callback(model, value);
             if (pass) {
               break;
@@ -1104,9 +1104,9 @@
           }
         } else if (this.logicalOperator === 'AND') {
           pass = false;
-          _ref4 = this.values;
-          for (_j = 0, _len1 = _ref4.length; _j < _len1; _j++) {
-            value = _ref4[_j];
+          _ref3 = this.values;
+          for (_j = 0, _len1 = _ref3.length; _j < _len1; _j++) {
+            value = _ref3[_j];
             pass = this.callback(model, value);
             if (!pass) {
               break;
@@ -1149,10 +1149,10 @@
           };
         },
         test: function(opts) {
-          var query, _i, _len, _ref2;
-          _ref2 = opts.queries;
-          for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-            query = _ref2[_i];
+          var query, _i, _len, _ref1;
+          _ref1 = opts.queries;
+          for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+            query = _ref1[_i];
             if (query.test(opts.model)) {
               return true;
             }
@@ -1173,10 +1173,10 @@
           return opts.selector('$or', opts);
         },
         test: function(opts) {
-          var query, _i, _len, _ref2;
-          _ref2 = opts.queries;
-          for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-            query = _ref2[_i];
+          var query, _i, _len, _ref1;
+          _ref1 = opts.queries;
+          for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+            query = _ref1[_i];
             if (query.test(opts.model) === false) {
               return false;
             }
@@ -1519,13 +1519,13 @@
     };
 
     Query.prototype.compileQuery = function() {
-      var advancedSelectorName, advancedSelectorValue, compiledSelector, compiledSelectors, fieldName, query, selectorValue, _ref2;
+      var advancedSelectorName, advancedSelectorValue, compiledSelector, compiledSelectors, fieldName, query, selectorValue, _ref1;
       query = this;
       compiledSelectors = [];
-      _ref2 = this.source;
-      for (fieldName in _ref2) {
-        if (!__hasProp.call(_ref2, fieldName)) continue;
-        selectorValue = _ref2[fieldName];
+      _ref1 = this.source;
+      for (fieldName in _ref1) {
+        if (!__hasProp.call(_ref1, fieldName)) continue;
+        selectorValue = _ref1[fieldName];
         if (fieldName === '$or' || fieldName === '$nor' || fieldName === '$and' || fieldName === '$not') {
           compiledSelector = this.compileSelector(fieldName, {
             fieldName: fieldName,
@@ -1591,11 +1591,11 @@
     };
 
     Query.prototype.test = function(model) {
-      var compiledSelector, match, _i, _len, _ref2;
+      var compiledSelector, match, _i, _len, _ref1;
       match = true;
-      _ref2 = this.compiledSelectors;
-      for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-        compiledSelector = _ref2[_i];
+      _ref1 = this.compiledSelectors;
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        compiledSelector = _ref1[_i];
         match = this.testCompiledSelector(compiledSelector, model);
         if (match === false) {
           break;

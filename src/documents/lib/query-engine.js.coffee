@@ -1,6 +1,6 @@
 # Requires
 try
-	Backbone = (if module? then require('backbone') else @Backbone) ? null
+	Backbone = require?('exoskeleton') or @Backbone
 catch err
 	Backbone = null
 

@@ -1,8 +1,7 @@
 # Requires
 queryEngine = require?(__dirname+'/../lib/query-engine') or @queryEngine
 assert = require?('assert') or @assert
-Backbone = require?('backbone') or @Backbone
-_ = require?('underscore') or @_
+Backbone = require?('exoskeleton') or @Backbone
 joe = require?('joe') or @joe
 {describe} = joe
 
@@ -61,7 +60,7 @@ modelsObject =
 
 stores =
 	modelsAsObject: modelsObject
-	modelsAsArray: _.values(modelsObject)
+	modelsAsArray: (value  for own key,value of modelsObject)
 	modelsAsParsedObject: queryEngine.createCollection(modelsObject)
 	modelsAsCollection: queryEngine.createCollection(
 		'index': new Backbone.Model(modelsObject.index)
@@ -260,7 +259,7 @@ generateTestSuite = (describe, it, storeName, store) ->
 		# Vanilla
 		unless store instanceof queryEngine.QueryCollection
 			describe 'queries', (describe,it) ->
-				_.each queryTests, (queryTest,queryTestName) ->
+				for own queryTestName, queryTest of queryTests  # tests are serial, so this is okay
 					it queryTestName, ->
 						debugger  if queryTest.debug
 						criteriaOptions = {queries:find:queryTest.query}
@@ -274,7 +273,7 @@ generateTestSuite = (describe, it, storeName, store) ->
 		# Backbone
 		else
 			describe 'queries', (describe,it) ->
-				_.each queryTests, (queryTest,queryTestName) ->
+				for own queryTestName, queryTest of queryTests  # tests are serial, so this is okay
 					it queryTestName, ->
 						debugger  if queryTest.debug
 						actual = store.findAll(queryTest.query)
