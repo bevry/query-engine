@@ -68,6 +68,7 @@ Tested and working against:
 
 <!-- /INSTALL -->
 
+
 ### Direct
 - Use: `window.queryEngine` or `window.QueryEngine` whichever you prefer
 - Install: http://bevry.github.io/query-engine/out/lib/query-engine.js
