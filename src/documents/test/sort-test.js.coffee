@@ -1,8 +1,8 @@
 # Requires
-queryEngine = require?(__dirname+'/../lib/query-engine') or @queryEngine
-assert = require?('assert') or @assert
-Backbone = require?('exoskeleton') or @Backbone
-joe = require?('joe') or @joe
+queryEngine = @queryEngine or require(__dirname+'/../lib/query-engine')
+assert = @assert or require('assert')
+Backbone = @Backbone or (try require?('backbone')) or (try require?('exoskeleton')) or (throw 'Need Backbone or Exoskeleton')
+joe = @joe or require('joe')
 {describe} = joe
 
 

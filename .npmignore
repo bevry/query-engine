@@ -1,10 +1,35 @@
+# v1.3.3 October 26, 2013
+# https://github.com/bevry/base
+# WITH CUSTOM MODIFICATIONS
+
+# Temp Files
+**/*.log
+
+# Build Files
+build/
+components/
+bower_components/
+node_modules/
+
+# Development Files
 .travis*
 Cakefile
 Makefile
-History.md
-docpad.coffee
+BACKERS.md
+CONTRIBUTING.md
+HISTORY.md
+**/src/
+**/test/
 
-src/
+# Other Package Definitions
+template.js
+component.json
+bower.json
+
+# =====================================
+# CUSTOM MODIFICATIONS
+
+# Development Files
 out/demo/
 out/test/
 out/vendor/

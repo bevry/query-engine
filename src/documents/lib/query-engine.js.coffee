@@ -1,8 +1,5 @@
 # Requires
-try
-	Backbone = require?('exoskeleton') or @Backbone
-catch err
-	Backbone = null
+Backbone = @Backbone or (try require?('backbone')) or (try require?('exoskeleton')) or null
 
 # Util
 # Contains our utility functions
@@ -1657,4 +1654,4 @@ queryEngine =
 		return collection
 
 # Export for node.js and the browser
-if module? then (module.exports = queryEngine) else (@queryEngine = queryEngine)
+if module? then (module.exports = queryEngine) else (@QueryEngine = @queryEngine = queryEngine)

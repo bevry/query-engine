@@ -1,7 +1,7 @@
 
 <!-- TITLE/ -->
 
-# QueryEngine
+# Query-Engine
 
 <!-- /TITLE -->
 
@@ -9,10 +9,10 @@
 <!-- BADGES/ -->
 
 [![Build Status](http://img.shields.io/travis-ci/bevry/query-engine.png?branch=master)](http://travis-ci.org/bevry/query-engine "Check this project's build status on TravisCI")
-[![NPM version](https://badge.fury.io/js/query-engine.png)](https://npmjs.org/package/query-engine "View this project on NPM")
+[![NPM version](http://badge.fury.io/js/query-engine.png)](https://npmjs.org/package/query-engine "View this project on NPM")
 [![Gittip donate button](http://img.shields.io/gittip/bevry.png)](https://www.gittip.com/bevry/ "Donate weekly to this project using Gittip")
-[![Flattr donate button](https://raw.github.com/balupton/flattr-buttons/master/badge-89x18.gif)](http://flattr.com/thing/344188/balupton-on-Flattr "Donate monthly to this project using Flattr")
-[![PayPayl donate button](https://www.paypalobjects.com/en_AU/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=QB8GQPZAH84N6 "Donate once-off to this project using Paypal")
+[![Flattr donate button](http://img.shields.io/flattr/donate.png?color=yellow)](http://flattr.com/thing/344188/balupton-on-Flattr "Donate monthly to this project using Flattr")
+[![PayPayl donate button](http://img.shields.io/paypal/donate.png?color=yellow)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=QB8GQPZAH84N6 "Donate once-off to this project using Paypal")
 
 <!-- /BADGES -->
 
@@ -42,12 +42,11 @@ QueryEngine provides extensive Querying, Filtering, and Searching abilities for 
 
 ## Compatability
 
-Tested and working against Backbone versions:
+Tested and working against:
 
-- 0.9.2
-- 0.9.9
-- 1.0.0
-- 1.1.0
+- No library
+- [Backbone](http://backbonejs.org) v0.9.2, v0.9.9, v1.0.0, v1.1.0
+- [Exoskeleton](http://exosjs.com/) v0.5.1
 
 
 ## Using
@@ -67,15 +66,11 @@ Tested and working against Backbone versions:
 - Use: `require('query-engine')`
 - Install: `ender add query-engine`
 
-### [Component](http://github.com/component/component)
-- Use: `require('query-engine')`
-- Install: `component install bevry/query-engine`
-
-### [Bower](http://bower.io/)
-- Use: `require('query-engine')`
-- Install: `bower install query-engine`
-
 <!-- /INSTALL -->
+
+### Direct
+- Use: `window.queryEngine` or `window.QueryEngine` whichever you prefer
+- Install: http://bevry.github.io/query-engine/out/lib/query-engine.js
 
 
 <!-- HISTORY/ -->
@@ -114,8 +109,8 @@ These amazing people have contributed finances to this project:
 Become a sponsor!
 
 [![Gittip donate button](http://img.shields.io/gittip/bevry.png)](https://www.gittip.com/bevry/ "Donate weekly to this project using Gittip")
-[![Flattr donate button](https://raw.github.com/balupton/flattr-buttons/master/badge-89x18.gif)](http://flattr.com/thing/344188/balupton-on-Flattr "Donate monthly to this project using Flattr")
-[![PayPayl donate button](https://www.paypalobjects.com/en_AU/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=QB8GQPZAH84N6 "Donate once-off to this project using Paypal")
+[![Flattr donate button](http://img.shields.io/flattr/donate.png?color=yellow)](http://flattr.com/thing/344188/balupton-on-Flattr "Donate monthly to this project using Flattr")
+[![PayPayl donate button](http://img.shields.io/paypal/donate.png?color=yellow)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=QB8GQPZAH84N6 "Donate once-off to this project using Paypal")
 
 ### Contributors
 

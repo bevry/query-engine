@@ -1,4 +1,9 @@
-## History
+# History
+
+- v1.5.4 November 8, 2013
+	- Added support for [Exoskeleton](http://exosjs.com/)
+	- Added `window.QueryEngine` alias when using direct install method
+	- Dropped component.io and bower support, just use ender or browserify
 
 - v1.5.3 October 27, 2013
 	- Re-packaged

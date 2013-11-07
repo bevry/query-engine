@@ -1,7 +1,7 @@
 {
-  "title": "QueryEngine",
+  "title": "Query-Engine",
   "name": "query-engine",
-  "version": "1.5.3",
+  "version": "1.5.4",
   "description": "Query-Engine is a NoSQL and MongoDb compliant query engine. It can run on the server-side with Node.js, or on the client-side within web browsers",
   "homepage": "https://github.com/bevry/query-engine",
   "license": {
@@ -49,22 +49,19 @@
     "type": "git",
     "url": "http://github.com/bevry/query-engine.git"
   },
-  "dependencies": {
-    "docpad": "~6.54.2"
-  },
-  "peerDependencies": {
-    "backbone": "*"
-  },
+  "dependencies": {},
+  "peerDependencies": {},
   "devDependencies": {
+    "exoskeleton": "~0.5.1",
     "backbone": "~1.1.0",
     "underscore": "~1.5.2",
     "coffee-script": "~1.6.2",
-    "docpad": ">=6.21.5 <7",
-    "docpad-plugin-coffeescript": "~2.2.2",
-    "joe": "~1.3.0",
+    "docpad": "~6.54.5",
+    "docpad-plugin-coffeescript": "~2.2.3",
+    "joe": "~1.3.2",
     "joe-reporter-console": "~1.2.1",
     "benchmark": "~1.0.0",
-    "projectz": "~0.2.3"
+    "projectz": "~0.2.6"
   },
   "directories": {
     "lib": "./out/lib"
