@@ -50,7 +50,6 @@
     "url": "http://github.com/bevry/query-engine.git"
   },
   "dependencies": {
-    "docpad-plugin-cleanurls": "~2.5.1"
   },
   "peerDependencies": {},
   "devDependencies": {
@@ -59,6 +58,7 @@
     "underscore": "~1.5.2",
     "coffee-script": "~1.6.2",
     "docpad": "~6.54.5",
+    "docpad-plugin-cleanurls": "~2.5.1",
     "docpad-plugin-ghpages": "~2.4.0",
     "docpad-plugin-eco": "~2.0.2",
     "docpad-plugin-coffeescript": "~2.2.3",

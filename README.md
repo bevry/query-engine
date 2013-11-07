@@ -71,7 +71,7 @@ Tested and working against:
 
 ### Direct
 - Use: `window.queryEngine` or `window.QueryEngine` whichever you prefer
-- Install: http://bevry.github.io/query-engine/out/lib/query-engine.js
+- Install: http://bevry.github.io/query-engine/lib/query-engine.js
 
 
 <!-- HISTORY/ -->
