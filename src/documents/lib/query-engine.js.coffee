@@ -1276,6 +1276,12 @@ class Query
 		'null':
 			test: (opts) ->
 				return opts.modelValue is opts.selectorValue
+		'model':
+			test: (opts) ->
+				return (opts.modelValue?.cid or opts.modelValue) is (opts.selectorValue?.cid or opts.selectorValue)
+		'collection':
+			test: (opts) ->
+				return opts.modelValue is opts.selectorValue
 
 		# The $beginsWith operator checks if the value begins with a particular value or values if an array was passed
 		'$beginsWith':
@@ -1570,6 +1576,16 @@ class Query
 			# Null
 			else if util.isNull(selectorValue)
 				compiledSelector = @compileSelector('null',{fieldName,selectorValue})
+				compiledSelectors.push(compiledSelector)
+
+			# Model
+			else if selectorValue instanceof Backbone.Model
+				compiledSelector = @compileSelector('model',{fieldName,selectorValue})
+				compiledSelectors.push(compiledSelector)
+
+			# Collection
+			else if selectorValue instanceof Backbone.Collection
+				compiledSelector = @compileSelector('collection',{fieldName,selectorValue})
 				compiledSelectors.push(compiledSelector)
 
 			# Advanced Selectors
