@@ -1230,6 +1230,7 @@ class Query
 					if query.test(opts.model)
 						return true
 				return false
+
 		# The $nor operator is the opposite of $or (pass if they all don't match the query)
 		'$nor':
 			compile: (opts) ->
