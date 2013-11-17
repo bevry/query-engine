@@ -1,5 +1,8 @@
 # History
 
+- v1.5.5 November 17, 2013
+	- Added support for querying nested models and collections
+
 - v1.5.4 November 8, 2013
 	- Added support for [Exoskeleton](http://exosjs.com/)
 	- Added `window.QueryEngine` alias when using direct install method
