@@ -1,5 +1,8 @@
 # History
 
+- v1.5.6 November 29, 2013
+	- Fixed browserify support
+
 - v1.5.5 November 17, 2013
 	- Added support for querying nested models and collections
 
