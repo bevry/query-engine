@@ -1,7 +1,7 @@
 {
   "title": "Query-Engine",
   "name": "query-engine",
-  "version": "1.5.5",
+  "version": "1.5.6",
   "description": "Query-Engine is a NoSQL and MongoDb compliant query engine. It can run on the server-side with Node.js, or on the client-side within web browsers",
   "homepage": "https://github.com/bevry/query-engine",
   "license": {
@@ -49,8 +49,7 @@
     "type": "git",
     "url": "http://github.com/bevry/query-engine.git"
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "peerDependencies": {},
   "devDependencies": {
     "exoskeleton": "~0.5.1",

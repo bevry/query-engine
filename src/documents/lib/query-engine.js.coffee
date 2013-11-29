@@ -1,5 +1,5 @@
 # Requires
-Backbone = @Backbone or (try require?('backbone')) or (try require?('exoskeleton')) or null
+Backbone = @Backbone or window?.Backbone or (try require?('backbone')) or (try require?('exoskeleton')) or null
 
 # Util
 # Contains our utility functions
