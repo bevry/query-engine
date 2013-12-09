@@ -50,7 +50,7 @@ Tested and working against:
 
 ## Using
 
-[You can find all the information you desire about using QueryEngine on its Using QueryEngine Wiki Page](https://github.com/bevry/query-engine/wiki/Using)
+[View the Complete Query Engine Documentation on the Bevry Website](http://bevry.me/queryengine/guide)
 
 
 <!-- INSTALL/ -->
