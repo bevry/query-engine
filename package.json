@@ -28,6 +28,7 @@
     "filtering",
     "collections"
   ],
+  "browsers": true,
   "author": "2012+ Bevry Pty Ltd <us@bevry.me> (http://bevry.me), 2011 Benjamin Lupton <b@lupton.cc> (http://balupton.com)",
   "sponsors": [
     "BugHerd <support@bugherd.com> (http://bugherd.com/)"
