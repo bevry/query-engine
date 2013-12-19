@@ -57,13 +57,9 @@ Tested and working against:
 
 ## Install
 
-### [Node](http://nodejs.org/), [Browserify](http://browserify.org/)
+### [Node](http://nodejs.org/)
 - Use: `require('query-engine')`
 - Install: `npm install --save query-engine`
-
-### [Ender](http://ender.jit.su/)
-- Use: `require('query-engine')`
-- Install: `ender add query-engine`
 
 <!-- /INSTALL -->
 
@@ -76,7 +72,7 @@ Tested and working against:
 <!-- HISTORY/ -->
 
 ## History
-[Discover the change history by heading on over to the `History.md` file.](https://github.com/bevry/query-engine/blob/master/History.md#files)
+[Discover the change history by heading on over to the `HISTORY.md` file.](https://github.com/bevry/query-engine/blob/master/HISTORY.md#files)
 
 <!-- /HISTORY -->
 
@@ -85,7 +81,7 @@ Tested and working against:
 
 ## Contribute
 
-[Discover how you can contribute by heading on over to the `Contributing.md` file.](https://github.com/bevry/query-engine/blob/master/Contributing.md#files)
+[Discover how you can contribute by heading on over to the `CONTRIBUTING.md` file.](https://github.com/bevry/query-engine/blob/master/CONTRIBUTING.md#files)
 
 <!-- /CONTRIBUTE -->
 
@@ -116,13 +112,13 @@ Become a sponsor!
 
 These amazing people have contributed code to this project:
 
-- Andrew Shults <andrewjshults@gmail.com> (https://github.com/andrewjshults) - [view contributions](https://github.com/bevry/query-engine/commits?author=andrewjshults)
-- Benjamin Lupton <b@lupton.cc> (https://github.com/balupton) - [view contributions](https://github.com/bevry/query-engine/commits?author=balupton)
-- Farid Neshat <FaridN_SOAD@yahoo.com> (https://github.com/alFReD-NSH) - [view contributions](https://github.com/bevry/query-engine/commits?author=alFReD-NSH)
-- Khalid Jebbari <https://github.com/DjebbZ> (https://github.com/DjebbZ) - [view contributions](https://github.com/bevry/query-engine/commits?author=DjebbZ)
-- Nicholas Firth-McCoy (https://github.com/nfm) - [view contributions](https://github.com/bevry/query-engine/commits?author=nfm)
+- [Andrew Shults](https://github.com/andrewjshults) <andrewjshults@gmail.com> — [view contributions](https://github.com/bevry/query-engine/commits?author=andrewjshults)
+- [Benjamin Lupton](https://github.com/balupton) <b@lupton.cc> — [view contributions](https://github.com/bevry/query-engine/commits?author=balupton)
+- [Farid Neshat](https://github.com/alFReD-NSH) <FaridN_SOAD@yahoo.com> — [view contributions](https://github.com/bevry/query-engine/commits?author=alFReD-NSH)
+- [Khalid Jebbari](https://github.com/DjebbZ) <https://github.com/DjebbZ> — [view contributions](https://github.com/bevry/query-engine/commits?author=DjebbZ)
+- [Nicholas Firth-McCoy](https://github.com/nfm) — [view contributions](https://github.com/bevry/query-engine/commits?author=nfm)
 
-[Become a contributor!](https://github.com/bevry/query-engine/blob/master/Contributing.md#files)
+[Become a contributor!](https://github.com/bevry/query-engine/blob/master/CONTRIBUTING.md#files)
 
 <!-- /BACKERS -->
 

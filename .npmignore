@@ -1,9 +1,9 @@
-# v1.3.3 October 26, 2013
+# v1.3.10 December 10, 2013
 # https://github.com/bevry/base
-# WITH CUSTOM MODIFICATIONS
 
 # Temp Files
 **/*.log
+**/.docpad.db
 
 # Build Files
 build/
@@ -29,7 +29,4 @@ bower.json
 # =====================================
 # CUSTOM MODIFICATIONS
 
-# Development Files
-out/demo/
-out/test/
-out/vendor/
+# None
