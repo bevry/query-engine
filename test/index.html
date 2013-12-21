@@ -1,0 +1,28 @@
+<html>
+<head>
+	<!-- Query Engine -->
+	<script src="http://bevry.github.io/query-engine/vendor/underscore.js"></script>
+	<script src="http://bevry.github.io/query-engine/vendor/backbone.js"></script>
+	<script src="http://bevry.github.io/query-engine/lib/query-engine.js"></script>
+
+	<!-- Joe -->
+	<script src="http://bevry.github.io/query-engine/vendor/chai.js"></script>
+	<script>this.assert = this.chai.assert</script>
+	<script src="http://bevry.github.io/query-engine/vendor/types.js"></script>
+	<script src="http://bevry.github.io/query-engine/vendor/flow.js"></script>
+	<script src="http://bevry.github.io/query-engine/vendor/joe/joe.js"></script>
+	<script src="http://bevry.github.io/query-engine/vendor/joe/reporters/console.js"></script>
+	<script src="http://bevry.github.io/query-engine/vendor/joe/reporters/list.js"></script>
+	<script>this.joe.setReporter(new this.joe.ListReporter());</script>
+
+	<!-- Tests -->
+	<script src="http://bevry.github.io/query-engine/test/live-test.js"></script>
+	<script src="http://bevry.github.io/query-engine/test/misc-test.js"></script>
+	<script src="http://bevry.github.io/query-engine/test/queries-test.js"></script>
+	<script src="http://bevry.github.io/query-engine/test/sort-test.js"></script>
+</head>
+<body>
+	<p>open your developer console</p>
+	<button onclick="javascript:joe.exit();">I'm done, give me the results</button>
+</body>
+</html>
