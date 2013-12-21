@@ -1,5 +1,8 @@
 # History
 
+- v1.5.7 December 21, 2013
+	- Fixed wzrd.in support
+
 - v1.5.6 November 29, 2013
 	- Fixed browserify support
 

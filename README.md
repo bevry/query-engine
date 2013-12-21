@@ -64,7 +64,7 @@ Tested and working against:
 ### [Browserify](http://browserify.org/)
 - Use: `require('query-engine')`
 - Install: `npm install --save query-engine`
-- CDN URL: `//wzrd.in/bundle/query-engine@1.5.6`
+- CDN URL: `//wzrd.in/bundle/query-engine@1.5.7`
 
 ### [Ender](http://ender.jit.su/)
 - Use: `require('query-engine')`
@@ -72,9 +72,10 @@ Tested and working against:
 
 <!-- /INSTALL -->
 
+
 ### Direct
 - Use: `window.queryEngine` or `window.QueryEngine` whichever you prefer
-- CDN URL: http://bevry.github.io/query-engine/lib/query-engine.js
+- CDN URL: `//bevry.github.io/query-engine/lib/query-engine.js`
 
 
 <!-- HISTORY/ -->
