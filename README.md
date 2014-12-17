@@ -7,11 +7,16 @@
 
 <!-- BADGES/ -->
 
-[![Build Status](http://img.shields.io/travis-ci/bevry/query-engine.png?branch=master)](http://travis-ci.org/bevry/query-engine "Check this project's build status on TravisCI")
-[![NPM version](http://badge.fury.io/js/query-engine.png)](https://npmjs.org/package/query-engine "View this project on NPM")
-[![Gittip donate button](http://img.shields.io/gittip/bevry.png)](https://www.gittip.com/bevry/ "Donate weekly to this project using Gittip")
-[![Flattr donate button](http://img.shields.io/flattr/donate.png?color=yellow)](http://flattr.com/thing/344188/balupton-on-Flattr "Donate monthly to this project using Flattr")
-[![PayPayl donate button](http://img.shields.io/paypal/donate.png?color=yellow)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=QB8GQPZAH84N6 "Donate once-off to this project using Paypal")
+[![Build Status](https://img.shields.io/travis/bevry/query-engine/master.svg)](http://travis-ci.org/bevry/query-engine "Check this project's build status on TravisCI")
+[![NPM version](https://img.shields.io/npm/v/query-engine.svg)](https://npmjs.org/package/query-engine "View this project on NPM")
+[![NPM downloads](https://img.shields.io/npm/dm/query-engine.svg)](https://npmjs.org/package/query-engine "View this project on NPM")
+[![Dependency Status](https://img.shields.io/david/bevry/query-engine.svg)](https://david-dm.org/bevry/query-engine)
+[![Dev Dependency Status](https://img.shields.io/david/dev/bevry/query-engine.svg)](https://david-dm.org/bevry/query-engine#info=devDependencies)<br/>
+[![Gratipay donate button](https://img.shields.io/gratipay/bevry.svg)](https://www.gratipay.com/bevry/ "Donate weekly to this project using Gratipay")
+[![Flattr donate button](https://img.shields.io/badge/flattr-donate-yellow.svg)](http://flattr.com/thing/344188/balupton-on-Flattr "Donate monthly to this project using Flattr")
+[![PayPayl donate button](https://img.shields.io/badge/paypal-donate-yellow.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=QB8GQPZAH84N6 "Donate once-off to this project using Paypal")
+[![BitCoin donate button](https://img.shields.io/badge/bitcoin-donate-yellow.svg)](https://coinbase.com/checkouts/9ef59f5479eec1d97d63382c9ebcb93a "Donate once-off to this project using BitCoin")
+[![Wishlist browse button](https://img.shields.io/badge/wishlist-donate-yellow.svg)](http://amzn.com/w/2F8TXKSNAFG4V "Buy an item on our wishlist for us")
 
 <!-- /BADGES -->
 
@@ -44,20 +49,20 @@ QueryEngine provides extensive Querying, Filtering, and Searching abilities for 
 Tested and working against:
 
 - No library
-- [Backbone](http://backbonejs.org) v0.9.2, v0.9.9, v1.0.0, v1.1.0
-- [Exoskeleton](http://exosjs.com/) v0.5.1
+- [Backbone](http://backbonejs.org) v0.9.2, v0.9.9, v1.0.0, v1.1.0, v1.1.2
+- [Exoskeleton](http://exosjs.com/) v0.5.1, v0.7.0
 
 
 ## Using
 
-[View the Complete Query Engine Documentation on the Bevry Website](http://bevry.me/queryengine/guide)
+[View the Complete Query Engine Documentation on the Bevry Website](https://learn.bevry.me/queryengine/guide)
 
 
 <!-- INSTALL/ -->
 
 ## Install
 
-### [Node](http://nodejs.org/)
+### [NPM](http://npmjs.org/)
 - Use: `require('query-engine')`
 - Install: `npm install --save query-engine`
 
@@ -113,9 +118,11 @@ These amazing people have contributed finances to this project:
 
 Become a sponsor!
 
-[![Gittip donate button](http://img.shields.io/gittip/bevry.png)](https://www.gittip.com/bevry/ "Donate weekly to this project using Gittip")
-[![Flattr donate button](http://img.shields.io/flattr/donate.png?color=yellow)](http://flattr.com/thing/344188/balupton-on-Flattr "Donate monthly to this project using Flattr")
-[![PayPayl donate button](http://img.shields.io/paypal/donate.png?color=yellow)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=QB8GQPZAH84N6 "Donate once-off to this project using Paypal")
+[![Gratipay donate button](https://img.shields.io/gratipay/bevry.svg)](https://www.gratipay.com/bevry/ "Donate weekly to this project using Gratipay")
+[![Flattr donate button](https://img.shields.io/badge/flattr-donate-yellow.svg)](http://flattr.com/thing/344188/balupton-on-Flattr "Donate monthly to this project using Flattr")
+[![PayPayl donate button](https://img.shields.io/badge/paypal-donate-yellow.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=QB8GQPZAH84N6 "Donate once-off to this project using Paypal")
+[![BitCoin donate button](https://img.shields.io/badge/bitcoin-donate-yellow.svg)](https://coinbase.com/checkouts/9ef59f5479eec1d97d63382c9ebcb93a "Donate once-off to this project using BitCoin")
+[![Wishlist browse button](https://img.shields.io/badge/wishlist-donate-yellow.svg)](http://amzn.com/w/2F8TXKSNAFG4V "Buy an item on our wishlist for us")
 
 ### Contributors
 
