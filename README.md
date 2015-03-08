@@ -33,7 +33,6 @@ QueryEngine provides extensive Querying, Filtering, and Searching abilities for 
 
 ## Features
 
-* includes a [live interactive demos](http://bevry.github.io/query-engine/) with several examples, [detailed documentation](https://learn.bevry.me/queryengine/guide)
 * runs on [node.js](http://nodejs.org/) and in the browser
 * supports [NoSQL](http://www.mongodb.org/display/DOCS/Advanced+Queries) queries (like [MongoDB](http://www.mongodb.org/))
 * supports filters (applying a filter function to a collection)
@@ -55,7 +54,8 @@ Tested and working against:
 
 ## Using
 
-[View the Complete Query Engine Documentation on the Bevry Website](https://learn.bevry.me/queryengine/guide)
+- [Interactive Demos](http://bevry.github.io/query-engine/)
+- [Complete Documentation](https://learn.bevry.me/queryengine/guide)
 
 
 <!-- INSTALL/ -->
