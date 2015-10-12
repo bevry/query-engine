@@ -55,10 +55,6 @@
     "url": "http://github.com/bevry/query-engine.git"
   },
   "browsers": true,
-  "browser": {
-    "backbone": false,
-    "exoskeleton": false
-  },
   "dependencies": {},
   "peerDependencies": {},
   "devDependencies": {
