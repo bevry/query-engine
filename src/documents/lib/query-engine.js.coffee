@@ -1351,9 +1351,9 @@ class Query
 		'$hasAll':
 			test: (opts) ->
 				if opts.modelValueExists
-					if (new Hash opts.modelValue).hasIn(opts.selectorValue)
-						return true
-				return false
+					unless (new Hash opts.modelValue).hasIn(opts.selectorValue)
+						return false
+				return true
 
 		# The $size operator matches any array with the specified number of elements. The following example would match the object {a:["foo"]}, since that array has just one element:
 		'$size':
