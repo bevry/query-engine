@@ -64,7 +64,7 @@
   "devDependencies": {
     "exoskeleton": "~0.7.0",
     "backbone": "~1.1.2",
-    "underscore": "~1.7.0",
+    "underscore": "~1.9.1",
     "docpad": "~6.69.1",
     "docpad-plugin-ghpages": "~2.4.3",
     "docpad-plugin-eco": "~2.1.0",
