@@ -72,7 +72,7 @@
     "joe": "~1.5.0",
     "joe-reporter-console": "~1.2.1",
     "benchmark": "~1.0.0",
-    "projectz": "~0.3.17"
+    "projectz": "~1.11.0"
   },
   "directories": {
     "lib": "./out/lib"
