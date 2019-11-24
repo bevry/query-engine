@@ -68,7 +68,7 @@
     "docpad": "~6.69.1",
     "docpad-plugin-ghpages": "~2.4.3",
     "docpad-plugin-eco": "~2.1.0",
-    "docpad-plugin-coffeescript": "~2.4.0",
+    "docpad-plugin-coffeescript": "~2.7.0",
     "joe": "~1.5.0",
     "joe-reporter-console": "~1.2.1",
     "benchmark": "~1.0.0",
