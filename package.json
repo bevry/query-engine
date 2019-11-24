@@ -63,7 +63,7 @@
   "peerDependencies": {},
   "devDependencies": {
     "exoskeleton": "~0.7.0",
-    "backbone": "~1.1.2",
+    "backbone": "~1.4.0",
     "underscore": "~1.7.0",
     "docpad": "~6.69.1",
     "docpad-plugin-ghpages": "~2.4.3",
