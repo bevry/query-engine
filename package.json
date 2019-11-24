@@ -71,7 +71,7 @@
     "docpad-plugin-coffeescript": "~2.4.0",
     "joe": "~1.5.0",
     "joe-reporter-console": "~1.2.1",
-    "benchmark": "~1.0.0",
+    "benchmark": "~2.1.4",
     "projectz": "~0.3.17"
   },
   "directories": {
