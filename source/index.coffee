@@ -237,6 +237,7 @@ util =
 class Hash extends Array
 	# Constructor
 	constructor: (value) ->
+		super()
 		value = util.toArray(value)
 		for item,key in value
 			@push(item)

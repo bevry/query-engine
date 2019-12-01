@@ -1,10 +1,8 @@
 # Requires
-queryEngine = @queryEngine or require(__dirname+'/../lib/query-engine')
+queryEngine = @queryEngine or require('../')
 assert = @assert or require('assert')
 Backbone = @Backbone or (try require?('backbone')) or (try require?('exoskeleton')) or (throw 'Need Backbone or Exoskeleton')
-joe = @joe or require('joe')
-{describe} = joe
-
+kava = @kava or require('kava')
 
 # =====================================
 # Configuration
@@ -96,105 +94,105 @@ store =
 # Tests
 
 # Generate Test Suite
-generateTestSuite = (describe, it, collectionName, docs) ->
-	describe collectionName, (describe,it) ->
-		describe 'sortArray', (describe,it) ->
-			it 'string-object', ->
+generateTestSuite = (suite, test, collectionName, docs) ->
+	suite collectionName, (suite, test) ->
+		suite 'sortArray', (suite, test) ->
+			test 'string-object', ->
 				actual = queryEngine.createCollection(docs.models).sortArray(title: 1)
 				expected = queryEngine.createCollection [docs.get('history'),docs.get('index'),docs.get('jquery')]
 				assert.deepEqual(actual, expected.toJSON())
 
-			it 'numeric-function', ->
+			test 'numeric-function', ->
 				actual = queryEngine.createCollection(docs.models).sortArray (a,b) -> return b.position - a.position
 				expected = queryEngine.createCollection [docs.get('history'),docs.get('jquery'),docs.get('index')]
 				assert.deepEqual(actual, expected.toJSON())
 
-			it 'numeric-object', ->
+			test 'numeric-object', ->
 				actual = queryEngine.createCollection(docs.models).sortArray(position: -1)
 				expected = queryEngine.createCollection [docs.get('history'),docs.get('jquery'),docs.get('index')]
 				assert.deepEqual(actual, expected.toJSON())
 
-			it 'date-function', ->
+			test 'date-function', ->
 				actual = queryEngine.createCollection(docs.models).sortArray (a,b) -> return b.date - a.date
 				expected = queryEngine.createCollection [docs.get('history'),docs.get('index'),docs.get('jquery')]
 				assert.deepEqual(actual, expected.toJSON())
 
-			it 'date-object', ->
+			test 'date-object', ->
 				actual = queryEngine.createCollection(docs.models).sortArray(date: -1)
 				expected = queryEngine.createCollection [docs.get('history'),docs.get('index'),docs.get('jquery')]
 				assert.deepEqual(actual, expected.toJSON())
 
-		describe 'sortCollection', (describe,it) ->
-			it 'numeric-function', ->
+		suite 'sortCollection', (suite, test) ->
+			test 'numeric-function', ->
 				actual = queryEngine.createCollection(docs.models).sortCollection (a,b) -> return b.get('position') - a.get('position')
 				expected = queryEngine.createCollection [docs.get('history'),docs.get('jquery'),docs.get('index')]
 				assert.deepEqual(actual.toJSON(), expected.toJSON())
 
-			it 'numeric-object', ->
+			test 'numeric-object', ->
 				actual = queryEngine.createCollection(docs.models).sortCollection(position: -1)
 				expected = queryEngine.createCollection [docs.get('history'),docs.get('jquery'),docs.get('index')]
 				assert.deepEqual(actual.toJSON(), expected.toJSON())
 
-			it 'date-function', ->
+			test 'date-function', ->
 				actual = queryEngine.createCollection(docs.models).sortCollection (a,b) -> return b.get('date') - a.get('date')
 				expected = queryEngine.createCollection [docs.get('history'),docs.get('index'),docs.get('jquery')]
 				assert.deepEqual(actual.toJSON(), expected.toJSON())
 
-			it 'date-object', ->
+			test 'date-object', ->
 				actual = queryEngine.createCollection(docs.models).sortCollection(date: -1)
 				expected = queryEngine.createCollection [docs.get('history'),docs.get('index'),docs.get('jquery')]
 				assert.deepEqual(actual.toJSON(), expected.toJSON())
 
-		describe 'queryArray', (describe,it) ->
-			it 'queryArray', ->
+		suite 'queryArray', (suite, test) ->
+			test 'queryArray', ->
 				actual = queryEngine.createCollection(docs.models)
 					.queryArray({tags:$has:'jquery'},{position:-1})
 				expected = queryEngine.createCollection([docs.get('history'),docs.get('jquery')]).toJSON()
 				assert.deepEqual(actual, expected)
 
-			it 'queryArray-paging', ->
+			test 'queryArray-paging', ->
 				actual = queryEngine.createCollection(docs.models)
 					.queryArray({tags:$has:'jquery'},{position:-1},{limit:1})
 				expected = queryEngine.createCollection([docs.get('history')]).toJSON()
 				assert.deepEqual(actual, expected)
 
-		describe 'findAll', (describe,it) ->
-			it 'findAll', ->
+		suite 'findAll', (suite, test) ->
+			test 'findAll', ->
 				actual = queryEngine.createCollection(docs.models)
 					.findAll({tags:$has:'jquery'},{position:-1})
 				expected = queryEngine.createCollection [docs.get('history'),docs.get('jquery')]
 				assert.deepEqual(actual.toJSON(), expected.toJSON())
 
-			it 'findAll-paging', ->
+			test 'findAll-paging', ->
 				actual = queryEngine.createCollection(docs.models)
 					.findAll({tags:$has:'jquery'},{position:-1},{limit:1})
 				expected = queryEngine.createCollection [docs.get('history')]
 				assert.deepEqual(actual.toJSON(), expected.toJSON())
 
-		describe 'findAllLive', (describe,it) ->
-			it 'findAllLive', ->
+		suite 'findAllLive', (suite, test) ->
+			test 'findAllLive', ->
 				actual = (parent = queryEngine.createCollection())
 					.findAllLive({tags:$has:'jquery'},{position:-1})
 				parent.add(docs.models)
 				expected = queryEngine.createCollection [docs.get('history'),docs.get('jquery')]
 				assert.deepEqual(actual.toJSON(), expected.toJSON())
 
-			it 'findAllLive-paging', ->
+			test 'findAllLive-paging', ->
 				actual = (parent = queryEngine.createCollection())
 					.findAllLive({tags:$has:'jquery'},{position:-1},{limit:1})
 				parent.add(docs.models)
 				expected = queryEngine.createCollection [docs.get('history')]
 				assert.deepEqual(actual.toJSON(), expected.toJSON())
 
-		describe 'comparator', (describe,it) ->
-			it 'live-onadd', ->
+		suite 'comparator', (suite, test) ->
+			test 'live-onadd', ->
 				actual = queryEngine.createLiveCollection()
 					.setComparator(position: -1)
 					.add(docs.models)
 				expected = queryEngine.createCollection [docs.get('history'),docs.get('jquery'),docs.get('index')]
 				assert.deepEqual(actual.toJSON(), expected.toJSON())
 
-			it 'live-onchange', ->
+			test 'live-onchange', ->
 				actual = queryEngine.createLiveCollection()
 					.setComparator(position:-1)
 					.add(docs.models)
@@ -203,9 +201,9 @@ generateTestSuite = (describe, it, collectionName, docs) ->
 				assert.deepEqual(actual.toJSON(), expected.toJSON())
 
 # Generate Suites
-describe 'sort', (describe,it) ->
+kava.suite 'sort', (suite,test) ->
 	for own collectionName, docs of store
-		generateTestSuite(describe,it,collectionName,docs)
+		generateTestSuite(suite,test,collectionName,docs)
 
 # Return
 null

@@ -1,19 +1,18 @@
 # Requires
-queryEngine = @queryEngine or require(__dirname+'/../lib/query-engine')
+queryEngine = @queryEngine or require('../')
 assert = @assert or require('assert')
 Backbone = @Backbone or (try require?('backbone')) or (try require?('exoskeleton')) or (throw 'Need Backbone or Exoskeleton')
-joe = @joe or require('joe')
-{describe} = joe
+kava = @kava or require('kava')
 
 
 # =====================================
 # Configuration
 
-describe 'misc', (describe,it) ->
+kava.suite 'misc', (suite,test) ->
 
-	describe 'collection property', (describe,it) ->
+	suite 'collection property', (suite,test) ->
 
-		it 'when specificied, should create child collections of the property type', ->
+		test 'when specificied, should create child collections of the property type', ->
 			# Define a custom collection
 			class MyQueryCollection extends queryEngine.QueryCollection
 				collection: MyQueryCollection

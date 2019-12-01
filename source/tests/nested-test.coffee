@@ -1,9 +1,8 @@
 # Requires
-queryEngine = @queryEngine or require(__dirname+'/../lib/query-engine')
+queryEngine = @queryEngine or require('../')
 assert = @assert or require('assert')
 Backbone = @Backbone or (try require?('backbone')) or (try require?('exoskeleton')) or (throw 'Need Backbone or Exoskeleton')
-joe = @joe or require('joe')
-{describe} = joe
+kava = @kava or require('kava')
 
 
 
@@ -41,19 +40,19 @@ store.collection.add([store.models.a, store.models.b, store.models.c])
 # Tests
 
 # Nested Test Suite
-describe 'nested', (describe,it) ->
-	describe 'models', (describe,it) ->
-		it 'a references b', ->
+kava.suite 'nested', (suite,test) ->
+	suite 'models', (suite,test) ->
+		test 'a references b', ->
 			actual = store.collection.findAll(friend: store.models.b)
 			expected = queryEngine.createCollection [store.models.a]
 			assert.deepEqual(actual.toJSON(), expected.toJSON())
 
-		it 'b references a', ->
+		test 'b references a', ->
 			actual = store.collection.findAll(friend: store.models.a)
 			expected = queryEngine.createCollection [store.models.b]
 			assert.deepEqual(actual.toJSON(), expected.toJSON())
 
-		it 'a and b reference collection', ->
+		test 'a and b reference collection', ->
 			actual = store.collection.findAll(parent: store.collection)
 			expected = queryEngine.createCollection [store.models.a, store.models.b]
 			assert.deepEqual(actual.toJSON(), expected.toJSON())

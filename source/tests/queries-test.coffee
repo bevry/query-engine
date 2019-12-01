@@ -1,9 +1,8 @@
 # Requires
-queryEngine = @queryEngine or require(__dirname+'/../lib/query-engine')
+queryEngine = @queryEngine or require('../')
 assert = @assert or require('assert')
 Backbone = @Backbone or (try require?('backbone')) or (try require?('exoskeleton')) or (throw 'Need Backbone or Exoskeleton')
-joe = @joe or require('joe')
-{describe} = joe
+kava = @kava or require('kava')
 
 
 # =====================================
@@ -253,14 +252,14 @@ queryTests =
 # Tests
 
 # Generate Test Suite
-generateTestSuite = (describe, it, storeName, store) ->
-	describe storeName, (describe,it) ->
+generateTestSuite = (suite, test, storeName, store) ->
+	suite storeName, (suite, test) ->
 
 		# Vanilla
 		unless store instanceof queryEngine.QueryCollection
-			describe 'queries', (describe,it) ->
+			suite 'queries', (suite, test) ->
 				for own queryTestName, queryTest of queryTests  # tests are serial, so this is okay
-					it queryTestName, ->
+					test queryTestName, ->
 						debugger  if queryTest.debug
 						criteriaOptions = {queries:find:queryTest.query}
 						actual = queryEngine.testModels(store, criteriaOptions)
@@ -272,9 +271,9 @@ generateTestSuite = (describe, it, storeName, store) ->
 
 		# Backbone
 		else
-			describe 'queries', (describe,it) ->
+			suite 'queries', (suite, test) ->
 				for own queryTestName, queryTest of queryTests  # tests are serial, so this is okay
-					it queryTestName, ->
+					test queryTestName, ->
 						debugger  if queryTest.debug
 						actual = store.findAll(queryTest.query)
 						expectedModels = {}
@@ -284,39 +283,39 @@ generateTestSuite = (describe, it, storeName, store) ->
 						console.log({actual,expected})  if queryTest.debug
 						assert.deepEqual(actual.toJSON(), expected.toJSON())
 
-			describe 'special', (describe,it) ->
-				it 'all', ->
+			suite 'special', (suite, test) ->
+				test 'all', ->
 					actual = store
 					expected = store
 					assert.deepEqual(actual.toJSON(), expected.toJSON())
 
-				it 'findOne', ->
+				test 'findOne', ->
 					actual = store.findOne(tags: $has: 'jquery')
 					expected = store.get('jquery')
 
-			describe 'paging', (describe,it) ->
+			suite 'paging', (suite, test) ->
 
-				it 'limit', ->
+				test 'limit', ->
 					actual = store.createChildCollection().query({limit:1})
 					expected = queryEngine.createCollection('index': store.get('index'))
 					assert.deepEqual(actual.toJSON(), expected.toJSON())
 
-				it 'limit+page', ->
+				test 'limit+page', ->
 					actual = store.createChildCollection().query({limit:1,page:2})
 					expected = queryEngine.createCollection('jquery': store.get('jquery'))
 					assert.deepEqual(actual.toJSON(), expected.toJSON())
 
-				it 'limit+offset', ->
+				test 'limit+offset', ->
 					actual = store.createChildCollection().query({limit:1,offset:1})
 					expected = queryEngine.createCollection('jquery': store.get('jquery'))
 					assert.deepEqual(actual.toJSON(), expected.toJSON())
 
-				it 'limit+offset+page', ->
+				test 'limit+offset+page', ->
 					actual = store.createChildCollection().query({limit:1,offset:1,page:2})
 					expected = queryEngine.createCollection('history': store.get('history'))
 					assert.deepEqual(actual.toJSON(), expected.toJSON())
 
-				it 'limit+offset+page (via findAll)', ->
+				test 'limit+offset+page (via findAll)', ->
 					debugger
 					actual = store.findAll(
 						# Query
@@ -329,15 +328,15 @@ generateTestSuite = (describe, it, storeName, store) ->
 					expected = queryEngine.createCollection('history': store.get('history'))
 					assert.deepEqual(actual.toJSON(), expected.toJSON())
 
-				it 'offset', ->
+				test 'offset', ->
 					actual = store.createChildCollection().query({offset:1})
 					expected = queryEngine.createCollection('jquery': store.get('jquery'), 'history': store.get('history'))
 					assert.deepEqual(actual.toJSON(), expected.toJSON())
 
 # Generate Suites
-describe 'queries', (describe,it) ->
+kava.suite 'queries', (suite,test) ->
 	for own storeName,store of stores
-		generateTestSuite(describe, it, storeName, store)
+		generateTestSuite(suite, test, storeName, store)
 
 # Return
 null

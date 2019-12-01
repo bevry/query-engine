@@ -1,21 +1,44 @@
-# v1.3.10 December 10, 2013
+# 2019 January 26
 # https://github.com/bevry/base
 
-# Temp Files
-**/*.log
-**/.docpad.db
+# System Files
+**/.DS_Store
 
-# Build Files
-build/
-components/
-bower_components/
-node_modules/
-out/
+# Temp Files
+**/.docpad.db
+**/*.log
+**/*.cpuprofile
+**/*.heapsnapshot
+
+# Editor Files
+.c9/
+.vscode/
 
 # Private Files
 .env
 .idea
+.cake_task_cache
 
+# Build Caches
+build/
+bower_components/
+node_modules/
+.next/
+.pnp/
+.pnp.js
+
+# Build Outputs
+**/out.*
+**/*.out.*
+**/out/
+**/output/
+edition*/
+coffeejs/
+coffee/
+es5/
+es2015/
+esnext/
+docs/
 
 # =====================================
 # CUSTOM MODIFICATIONS

@@ -1,4 +1,5 @@
-queryEngine = @queryEngine or require(__dirname+'/../lib/query-engine')
+# Requires
+queryEngine = @queryEngine or require('../')
 Benchmark = require('benchmark')
 
 console.log('Benchmarking...')
